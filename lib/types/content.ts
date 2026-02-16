@@ -32,6 +32,7 @@ export interface Book extends BaseContent {
 
 export interface Game extends BaseContent {
     type: 'game';
+    year?: string;
     developer?: string;
     platform?: string;
     description?: string;
