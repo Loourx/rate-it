@@ -1,28 +1,131 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useAuth } from '@/lib/hooks/useAuth';
+import React, { useMemo } from 'react';
+import { View, Text, ScrollView, RefreshControl, Image, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useRatings, Rating } from '@/lib/hooks/useRatings';
+import { ContentCard } from '@/components/content/ContentCard';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Button } from '@/components/ui/Button';
+import { ContentType, BaseContent } from '@/lib/types/content';
+import { COLORS } from '@/lib/utils/constants';
 
 export default function HomeScreen() {
-    const { signOut, user } = useAuth();
+    const router = useRouter();
+    const { data: ratings, isLoading, refetch } = useRatings();
+
+    const sections = useMemo(() => {
+        if (!ratings) return {};
+
+        const grouped: Record<string, Rating[]> = {};
+        ratings.forEach(r => {
+            if (!grouped[r.content_type]) {
+                grouped[r.content_type] = [];
+            }
+            grouped[r.content_type].push(r);
+        });
+        return grouped;
+    }, [ratings]);
+
+    const hasRatings = ratings && ratings.length > 0;
+
+    const handlePress = (content: BaseContent) => {
+        router.push(`/content/${content.type}/${content.id}`);
+    };
+
+    const categories = [
+        { type: 'movie' as const, label: 'Películas', emoji: '🎬' },
+        { type: 'series' as const, label: 'Series', emoji: '📺' },
+        { type: 'book' as const, label: 'Libros', emoji: '📚' },
+        { type: 'game' as const, label: 'Videojuegos', emoji: '🎮' },
+        { type: 'music' as const, label: 'Música', emoji: '🎵' },
+        { type: 'podcast' as const, label: 'Podcasts', emoji: '🎙️' },
+        { type: 'anything' as const, label: 'Anything', emoji: '📦' },
+    ];
+
+    if (isLoading) {
+        return (
+            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+                <View className="p-6 gap-6">
+                    <View className="gap-2">
+                        <Skeleton width={120} height={32} borderRadius={8} />
+                        <View className="flex-row gap-4">
+                            <Skeleton width={160} height={260} borderRadius={16} />
+                            <Skeleton width={160} height={260} borderRadius={16} />
+                        </View>
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (!hasRatings) {
+        return (
+            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+                <EmptyState
+                    icon="star-outline"
+                    title="¡Bienvenido a Rate-it!"
+                    description="Empieza a valorar contenido para ver tu colección aquí."
+                    actionLabel="Buscar contenido"
+                    onAction={() => router.push('/(tabs)/search')}
+                />
+            </SafeAreaView>
+        );
+    }
 
     return (
-        <View className="flex-1 items-center justify-center bg-gray-50 p-6">
-            <Text className="text-2xl font-bold text-gray-900 mb-4">
-                Bienvenido a Rate-it
-            </Text>
-
-            {user && (
-                <Text className="text-gray-600 mb-8">
-                    Logged in as: {user.email}
-                </Text>
-            )}
-
-            <TouchableOpacity
-                onPress={() => signOut()}
-                className="bg-red-500 rounded-full py-3 px-8"
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+            <ScrollView
+                className="flex-1"
+                refreshControl={
+                    <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={COLORS.textPrimary} />
+                }
+                contentContainerClassName="pb-24 pt-4"
             >
-                <Text className="text-white font-semibold">Cerrar Sesión</Text>
-            </TouchableOpacity>
-        </View>
+                <View className="px-6 mb-6">
+                    <Text className="text-3xl font-bold text-primary">Tu Biblioteca</Text>
+                </View>
+
+                {categories.map((cat) => {
+                    const catRatings = sections[cat.type];
+                    if (!catRatings || catRatings.length === 0) return null;
+
+                    return (
+                        <View key={cat.type} className="mb-8">
+                            <View className="flex-row items-center justify-between px-6 mb-4">
+                                <Text className="text-xl font-bold text-primary">
+                                    {cat.emoji} {cat.label}
+                                </Text>
+                            </View>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerClassName="px-6"
+                            >
+                                {catRatings.map((rating) => {
+                                    // Construct base content on the fly
+                                    const content: BaseContent = {
+                                        id: rating.content_id,
+                                        type: rating.content_type,
+                                        title: (rating as any).content_title || 'Unknown',
+                                        imageUrl: (rating as any).content_image_url
+                                    };
+
+                                    return (
+                                        <ContentCard
+                                            key={rating.id}
+                                            content={content}
+                                            rating={rating.rating}
+                                            onPress={handlePress}
+                                            orientation="vertical"
+                                        />
+                                    );
+                                })}
+                            </ScrollView>
+                        </View>
+                    );
+                })}
+            </ScrollView>
+        </SafeAreaView>
     );
 }

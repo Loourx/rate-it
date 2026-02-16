@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { View, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CategoryPicker } from '../../components/content/CategoryPicker';
 import { SearchBar } from '../../components/content/SearchBar';
 import { ContentList } from '../../components/content/ContentList';
@@ -18,9 +19,6 @@ export default function SearchScreen() {
     const [selectedCategory, setSelectedCategory] = useState<ContentType>('movie');
     const [query, setQuery] = useState('');
 
-    // We call all hooks but only pass the query to the active one.
-    // The hooks are implemented to be enabled only when query.length >= 3.
-    // Passing empty string or short string effectively disables the inactive ones.
     const movieQuery = useSearchMovies(selectedCategory === 'movie' ? query : '');
     const seriesQuery = useSearchSeries(selectedCategory === 'series' ? query : '');
     const bookQuery = useSearchBooks(selectedCategory === 'book' ? query : '');
@@ -46,7 +44,6 @@ export default function SearchScreen() {
 
     const handleSelectCategory = (category: ContentType) => {
         setSelectedCategory(category);
-        // Optional: Clear query or keep it? Keeping it is better UX usually.
     };
 
     const handleItemPress = (item: BaseContent) => {
@@ -58,7 +55,7 @@ export default function SearchScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-white dark:bg-black">
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
             <TouchableWithoutFeedback onPress={dismissKeyboard}>
                 <View className="flex-1">
                     <SearchBar
@@ -72,13 +69,13 @@ export default function SearchScreen() {
                         onSelectCategory={handleSelectCategory}
                     />
 
-                    <View className="flex-1 bg-gray-50 dark:bg-gray-900 mt-2">
+                    <View className="flex-1 bg-background mt-2">
                         <ContentList
                             data={data}
                             isLoading={isLoading && query.length >= 3}
                             isError={isError}
                             onItemPress={handleItemPress}
-                            emptyMessage={query.length < 3 ? 'Escribe al menos 3 caracteres para buscar' : 'No se encontraron resultados'}
+                            emptyMessage={query.length < 3 ? 'Escribe al menos 3 caracteres' : 'No se encontraron resultados'}
                         />
                     </View>
                 </View>

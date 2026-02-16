@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { TextInput, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '@/lib/utils/constants';
 
 interface SearchBarProps {
     value: string;
@@ -9,56 +10,52 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ value, onChangeText, placeholder = 'Buscar...' }: SearchBarProps) {
+    // We keep local state for the input to allow immediate feedback while debouncing the prop call if needed.
+    // However, the previous implementation had a delay which is good for API calls.
     const [localValue, setLocalValue] = useState(value);
 
+    // Sync from parent
+    useEffect(() => {
+        setLocalValue(value);
+    }, [value]);
+
+    // Debounce to parent
     useEffect(() => {
         const timer = setTimeout(() => {
             if (localValue !== value) {
                 onChangeText(localValue);
             }
-        }, 300);
-
+        }, 500); // 500ms debounce
         return () => clearTimeout(timer);
-    }, [localValue, onChangeText, value]);
-
-    // Sync internal state if external value changes (e.g. clear button)
-    useEffect(() => {
-        if (value !== localValue) {
-            // Only update if the difference is significant to avoid typing loop issues
-            // Actually, for a controlled input that debounces updates to the parent, 
-            // we might want to just let the parent control it if we want strict control.
-            // But here the parent `onChangeText` is the debounced one. 
-            // So we need to handle the display value separately.
-            // If parent value changes (e.g. empty string), we should update local.
-            if (value === '' && localValue !== '') {
-                setLocalValue('');
-            }
-        }
-    }, [value]);
+    }, [localValue]);
 
     return (
         <View className="px-4 py-2">
-            <View className="flex-row items-center bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
-                <Ionicons name="search" size={20} color="#9CA3AF" />
+            <View className="flex-row items-center bg-surface rounded-xl px-3 h-12 border border-divider">
+                <Ionicons name="search" size={20} color={COLORS.textTertiary} />
                 <TextInput
-                    className="flex-1 ml-2 text-base text-gray-900 dark:text-white"
+                    className="flex-1 ml-2 text-base text-primary font-medium"
                     value={localValue}
                     onChangeText={setLocalValue}
                     placeholder={placeholder}
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={COLORS.textTertiary}
                     autoCapitalize="none"
                     autoCorrect={false}
+                    selectionColor={COLORS.link}
                 />
                 {localValue.length > 0 && (
-                    <Ionicons
-                        name="close-circle"
-                        size={20}
-                        color="#9CA3AF"
+                    <Pressable
                         onPress={() => {
                             setLocalValue('');
                             onChangeText('');
                         }}
-                    />
+                    >
+                        <Ionicons
+                            name="close-circle"
+                            size={20}
+                            color={COLORS.textTertiary}
+                        />
+                    </Pressable>
                 )}
             </View>
         </View>

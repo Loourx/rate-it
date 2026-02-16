@@ -120,13 +120,13 @@ export default function ContentDetailsScreen() {
                             <Text className="text-4xl text-gray-400 font-bold">{item.title.substring(0, 1)}</Text>
                         </View>
                     )}
-                    <View className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
+                    <View className="absolute bottom-0 left-0 right-0 h-24 bg-black/60" />
                 </View>
 
                 {/* Content Info */}
                 <View className="px-6 -mt-10 pb-10">
                     {/* Title */}
-                    <Text className="text-3xl font-bold text-white mb-2 shadow-sm">{item.title}</Text>
+                    <Text className="text-3xl font-bold text-white mb-2">{item.title}</Text>
 
                     {/* Metadata Badges */}
                     {renderMetadata()}
