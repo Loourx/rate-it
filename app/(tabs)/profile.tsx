@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useProfile } from '@/lib/hooks/useProfile';
 import { useRatings } from '@/lib/hooks/useRatings';
 import { ContentCard } from '@/components/content/ContentCard';
 import { useRouter } from 'expo-router';
@@ -9,16 +10,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
 
 export default function ProfileScreen() {
-    const { user, signOut } = useAuth();
+    const { signOut } = useAuth();
+    const { data: profile } = useProfile();
     const { data: ratings } = useRatings();
     const router = useRouter();
 
-    const handlePress = (content: any) => {
+    const handlePress = (content: unknown & { type: string; id: string }) => {
         router.push(`/content/${content.type}/${content.id}`);
     };
 
     const ratingCount = ratings?.length || 0;
-    // Mock followers/following for now as we don't have hooks yet
     const followersCount = 0;
     const followingCount = 0;
 
@@ -28,22 +29,40 @@ export default function ProfileScreen() {
                 {/* Header */}
                 <View className="px-6 py-6 items-center">
                     <View className="w-24 h-24 bg-surface-elevated rounded-full mb-4 items-center justify-center overflow-hidden border-2 border-surface-elevated">
-                        {/* Placeholder Avatar */}
-                        <Ionicons name="person" size={48} color={COLORS.textTertiary} />
+                        {profile?.avatarUrl ? (
+                            <Image
+                                source={{ uri: profile.avatarUrl }}
+                                className="w-24 h-24"
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <Ionicons name="person" size={48} color={COLORS.textTertiary} />
+                        )}
                     </View>
                     <Text className="text-displaySmall font-bold text-primary text-center">
-                        {user?.email?.split('@')[0] || 'Usuario'}
+                        {profile?.displayName || profile?.username || 'Usuario'}
                     </Text>
-                    <Text className="text-bodyLarge text-secondary text-center mt-1">
-                        Amante del cine y los videojuegos 🎬 🎮
-                    </Text>
+                    {profile?.bio ? (
+                        <Text className="text-bodyLarge text-secondary text-center mt-1">
+                            {profile.bio}
+                        </Text>
+                    ) : null}
 
-                    <TouchableOpacity
-                        onPress={signOut}
-                        className="mt-4 px-4 py-2 bg-surface-elevated rounded-full"
-                    >
-                        <Text className="text-error font-medium">Cerrar Sesión</Text>
-                    </TouchableOpacity>
+                    <View className="flex-row gap-3 mt-4">
+                        <TouchableOpacity
+                            onPress={() => router.push('/profile/edit')}
+                            className="px-4 py-2 bg-surface-elevated rounded-full flex-row items-center gap-2"
+                        >
+                            <Ionicons name="pencil" size={16} color={COLORS.textPrimary} />
+                            <Text className="text-primary font-medium">Editar perfil</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={signOut}
+                            className="px-4 py-2 bg-surface-elevated rounded-full"
+                        >
+                            <Text className="text-error font-medium">Cerrar Sesión</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Stats */}
@@ -72,8 +91,8 @@ export default function ProfileScreen() {
                                     content={{
                                         id: rating.content_id,
                                         type: rating.content_type,
-                                        title: (rating as any).content_title,
-                                        imageUrl: (rating as any).content_image_url
+                                        title: (rating as unknown as Record<string, string>).content_title,
+                                        imageUrl: (rating as unknown as Record<string, string>).content_image_url,
                                     }}
                                     rating={rating.rating}
                                     onPress={handlePress}

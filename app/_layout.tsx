@@ -110,6 +110,7 @@ function RootLayoutNav() {
             >
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="profile/edit" options={{ headerShown: true, title: 'Editar perfil' }} />
                 <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="light" />
