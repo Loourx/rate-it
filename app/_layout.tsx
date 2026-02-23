@@ -40,11 +40,6 @@ function RootLayoutNav() {
     });
 
     useEffect(() => {
-        // ⚠️ DEV ONLY — Skip real auth check if bypass is enabled
-        if (process.env.EXPO_PUBLIC_DEV_BYPASS_AUTH === "true") {
-            setLoading(false);
-            return;
-        }
 
         // Check active session on mount
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -71,9 +66,6 @@ function RootLayoutNav() {
 
     useEffect(() => {
         if (isLoading || !fontsLoaded) return;
-
-        // Bypass auth check for navigation if bypass is enabled
-        if (process.env.EXPO_PUBLIC_DEV_BYPASS_AUTH === "true") return;
 
         const inAuthGroup = segments[0] === "(auth)";
 

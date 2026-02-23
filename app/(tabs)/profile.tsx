@@ -15,6 +15,15 @@ export default function ProfileScreen() {
     const { data: ratings } = useRatings();
     const router = useRouter();
 
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+            router.replace('/(auth)/login');
+        } catch {
+            // signOut already logs errors internally
+        }
+    };
+
     const handlePress = (content: unknown & { type: string; id: string }) => {
         router.push(`/content/${content.type}/${content.id}`);
     };
@@ -57,7 +66,7 @@ export default function ProfileScreen() {
                             <Text className="text-primary font-medium">Editar perfil</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={signOut}
+                            onPress={handleSignOut}
                             className="px-4 py-2 bg-surface-elevated rounded-full"
                         >
                             <Text className="text-error font-medium">Cerrar Sesión</Text>

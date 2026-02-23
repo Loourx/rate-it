@@ -1,11 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
-    const { signInWithGoogle, isLoading, isAuthenticated } = useAuth();
+    const { signInWithGoogle, signInWithEmail, isLoading, isAuthenticated } = useAuth();
     const router = useRouter();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [devLoading, setDevLoading] = useState(false);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -13,36 +16,92 @@ export default function LoginScreen() {
         }
     }, [isAuthenticated, router]);
 
-    const handleLogin = async () => {
+    const handleGoogleLogin = async () => {
         try {
             await signInWithGoogle();
         } catch (error) {
-            console.error("Login failed", error);
-            // In a real app, show a toast or alert here
+            Alert.alert('Error', 'No se pudo iniciar sesión con Google.');
+        }
+    };
+
+    const handleDevLogin = async () => {
+        if (!email.trim() || !password.trim()) {
+            Alert.alert('Error', 'Introduce email y contraseña.');
+            return;
+        }
+        setDevLoading(true);
+        try {
+            await signInWithEmail(email.trim(), password.trim());
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Error desconocido';
+            Alert.alert('Login failed', message);
+        } finally {
+            setDevLoading(false);
         }
     };
 
     return (
-        <View className="flex-1 items-center justify-center bg-white p-6">
+        <View className="flex-1 items-center justify-center bg-background p-6">
             <View className="items-center mb-12">
-                <Text className="text-4xl font-bold text-gray-900 mb-2">Rate-it</Text>
-                <Text className="text-lg text-gray-500 text-center">
+                <Text className="text-4xl font-bold text-primary mb-2">Rate-it</Text>
+                <Text className="text-lg text-secondary text-center">
                     Una app para todo. Comparte opiniones con amigos.
                 </Text>
             </View>
 
             {isLoading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color="#4ECDC4" />
             ) : (
-                <TouchableOpacity
-                    onPress={handleLogin}
-                    className="bg-blue-600 rounded-full py-3 px-8 w-full max-w-sm"
-                    activeOpacity={0.8}
-                >
-                    <Text className="text-white text-center font-semibold text-lg">
-                        Continuar con Google
-                    </Text>
-                </TouchableOpacity>
+                <View className="w-full max-w-sm gap-4">
+                    <TouchableOpacity
+                        onPress={handleGoogleLogin}
+                        className="bg-accent rounded-full py-3 px-8 w-full"
+                        activeOpacity={0.8}
+                    >
+                        <Text className="text-white text-center font-semibold text-lg">
+                            Continuar con Google
+                        </Text>
+                    </TouchableOpacity>
+
+                    {__DEV__ && (
+                        <View className="mt-6 border-t border-divider pt-6 gap-3">
+                            <Text className="text-secondary text-center text-sm font-medium mb-1">
+                                🛠 Dev Login (solo desarrollo)
+                            </Text>
+                            <TextInput
+                                className="bg-surface-elevated text-primary px-4 py-3 rounded-xl border border-divider"
+                                placeholder="Email"
+                                placeholderTextColor="#666"
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                                keyboardType="email-address"
+                            />
+                            <TextInput
+                                className="bg-surface-elevated text-primary px-4 py-3 rounded-xl border border-divider"
+                                placeholder="Password"
+                                placeholderTextColor="#666"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                            />
+                            <TouchableOpacity
+                                onPress={handleDevLogin}
+                                disabled={devLoading}
+                                className="bg-surface-elevated border border-accent rounded-full py-3 px-8"
+                                activeOpacity={0.8}
+                            >
+                                {devLoading ? (
+                                    <ActivityIndicator size="small" color="#4ECDC4" />
+                                ) : (
+                                    <Text className="text-accent text-center font-semibold">
+                                        Dev Login (Email)
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                </View>
             )}
         </View>
     );

@@ -1,6 +1,5 @@
 import { supabase } from '../supabase';
 import { useAuthStore } from '../stores/authStore';
-import * as Linking from 'expo-linking';
 import { makeRedirectUri } from 'expo-auth-session';
 
 export function useAuth() {
@@ -16,13 +15,12 @@ export function useAuth() {
                 provider: 'google',
                 options: {
                     redirectTo: redirectUrl,
-                    skipBrowserRedirect: false, // We want the browser to handle the redirect
+                    skipBrowserRedirect: false,
                 },
             });
 
             if (error) throw error;
 
-            // Note: actual session handling happens in _layout.tsx via onAuthStateChange
             return data;
         } catch (error) {
             console.error('Error signing in with Google:', error);
@@ -30,10 +28,22 @@ export function useAuth() {
         }
     };
 
+    const signInWithEmail = async (email: string, password: string) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) throw error;
+
+        return data;
+    };
+
     const signOut = async () => {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
+            useAuthStore.getState().setSession(null);
         } catch (error) {
             console.error('Error signing out:', error);
             throw error;
@@ -46,6 +56,7 @@ export function useAuth() {
         isLoading,
         isAuthenticated: !!session,
         signInWithGoogle,
+        signInWithEmail,
         signOut,
     };
 }
