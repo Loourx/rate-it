@@ -114,10 +114,10 @@ export function ContentCard({ content, onPress, rating, orientation = 'horizonta
 
                 {rating !== undefined ? (
                     <RatingSlider
-                        initialRating={rating}
-                        readOnly
-                        size="sm"
-                        color={categoryColor}
+                        value={rating}
+                        onValueChange={() => undefined}
+                        category={content.type}
+                        size="display"
                     />
                 ) : (
                     <View className="flex-row items-center">

@@ -1,140 +1,214 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AccessibilityInfo, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+    runOnJS,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
-    runOnJS,
     withTiming,
-    useDerivedValue,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { COLORS } from '@/lib/utils/constants';
+import { ContentType } from '@/lib/types/content';
+import { COLORS, FONT_SIZE } from '@/lib/utils/constants';
+
+const CATEGORY_COLORS: Record<ContentType, string> = {
+    movie: COLORS.categoryMovie,
+    series: COLORS.categorySeries,
+    book: COLORS.categoryBook,
+    game: COLORS.categoryGame,
+    music: COLORS.categoryMusic,
+    podcast: COLORS.categoryPodcast,
+    anything: COLORS.categoryAnything,
+};
+
+const MIN_RATING = 1;
+const MAX_RATING = 10;
+const BAR_HEIGHT_DISPLAY = 8;
+const BAR_HEIGHT_INTERACTIVE = 12;
+const TOUCH_TARGET_HEIGHT = 44;
 
 interface RatingSliderProps {
-    initialRating?: number;
-    onRatingChange?: (rating: number) => void;
-    onRatingComplete?: (rating: number) => void;
-    readOnly?: boolean;
-    color?: string; // Category color
-    size?: 'sm' | 'lg'; // sm for cards, lg for rating screen
+    value: number;
+    onValueChange: (value: number) => void;
+    category: ContentType;
+    disabled?: boolean;
+    size?: 'display' | 'interactive';
+}
+
+function clampAndSnap(raw: number): number {
+    'worklet';
+    const clamped = Math.max(MIN_RATING, Math.min(MAX_RATING, raw));
+    return Math.round(clamped * 10) / 10;
+}
+
+function ratingToProgress(rating: number): number {
+    'worklet';
+    return (rating - MIN_RATING) / (MAX_RATING - MIN_RATING);
 }
 
 export function RatingSlider({
-    initialRating = 0,
-    onRatingChange,
-    onRatingComplete,
-    readOnly = false,
-    color = COLORS.categoryMovie, // Default
-    size = 'lg',
+    value,
+    onValueChange,
+    category,
+    disabled = false,
+    size = 'interactive',
 }: RatingSliderProps) {
-    const [currentRating, setCurrentRating] = useState(initialRating);
+    const color = CATEGORY_COLORS[category];
+    const isDisplay = size === 'display';
 
-    // Display width based on container is tricky without onLayout, 
-    // but for 'lg' we assume full width minus padding, for 'sm' we assume fixed mini width.
-    // We'll use a ref-based approach or just simple percentage for display.
-    // For interactive, we need layout measurements.
+    const [layoutWidth, setLayoutWidth] = useState(0);
+    const [reduceMotion, setReduceMotion] = useState(false);
 
-    const [width, setWidth] = useState(0);
-    const progress = useSharedValue(initialRating / 10);
-    const isPressed = useSharedValue(false);
+    const fillProgress = useSharedValue(ratingToProgress(value));
+    const numberScale = useSharedValue(1);
+    const lastSnapped = useSharedValue(value);
 
     useEffect(() => {
-        progress.value = withSpring(initialRating / 10, { damping: 15 });
-        setCurrentRating(initialRating);
-    }, [initialRating]);
+        AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+        const sub = AccessibilityInfo.addEventListener(
+            'reduceMotionChanged',
+            setReduceMotion,
+        );
+        return () => sub.remove();
+    }, []);
 
-    // Haptics trigger
-    const triggerHaptic = () => {
-        Haptics.selectionAsync();
-    };
+    useEffect(() => {
+        const target = ratingToProgress(value);
+        fillProgress.value = reduceMotion
+            ? withTiming(target, { duration: 0 })
+            : withSpring(target, { damping: 15, stiffness: 120 });
+        lastSnapped.value = value;
+    }, [value, reduceMotion]);
+
+    const triggerHaptic = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, []);
+
+    const emitValue = useCallback(
+        (v: number) => {
+            onValueChange(v);
+        },
+        [onValueChange],
+    );
+
+    const bounceNumber = useCallback(() => {
+        if (reduceMotion) return;
+        numberScale.value = withSpring(1.15, { damping: 8, stiffness: 300 }, () => {
+            numberScale.value = withSpring(1, { damping: 10, stiffness: 200 });
+        });
+    }, [reduceMotion]);
 
     const pan = Gesture.Pan()
-        .enabled(!readOnly)
-        .onBegin((e) => {
-            isPressed.value = true;
-        })
+        .enabled(!isDisplay && !disabled)
         .onUpdate((e) => {
-            if (width === 0) return;
+            if (layoutWidth === 0) return;
+            const ratio = Math.max(0, Math.min(1, e.x / layoutWidth));
+            const raw = MIN_RATING + ratio * (MAX_RATING - MIN_RATING);
+            const snapped = clampAndSnap(raw);
 
-            // Calculate new progress based on x position
-            let newProgress = e.x / width;
-            // Clamp 0-1
-            newProgress = Math.max(0, Math.min(1, newProgress));
-            progress.value = newProgress;
+            fillProgress.value = ratingToProgress(snapped);
 
-            // Calculate rating 1-10 with decimal
-            const rawRating = newProgress * 10;
-            // Snap to 0.1
-            const snappedRating = Math.round(rawRating * 10) / 10;
-
-            if (snappedRating !== currentRating) {
-                runOnJS(setCurrentRating)(snappedRating);
+            if (snapped !== lastSnapped.value) {
+                lastSnapped.value = snapped;
                 runOnJS(triggerHaptic)();
-                if (onRatingChange) {
-                    runOnJS(onRatingChange)(snappedRating);
-                }
+                runOnJS(emitValue)(snapped);
             }
         })
-        .onFinalize(() => {
-            isPressed.value = false;
-            if (onRatingComplete) {
-                runOnJS(onRatingComplete)(currentRating);
-            }
+        .onEnd(() => {
+            runOnJS(bounceNumber)();
         });
 
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            width: `${progress.value * 100}%`,
-            backgroundColor: color,
-        };
-    });
+    const fillStyle = useAnimatedStyle(() => ({
+        width: `${fillProgress.value * 100}%`,
+    }));
 
-    const numberStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ scale: isPressed.value ? withSpring(1.2) : withSpring(1) }]
-        }
-    })
+    const scaleStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: numberScale.value }],
+    }));
 
-    // Mini read-only version
-    if (size === 'sm') {
+    const barHeight = isDisplay ? BAR_HEIGHT_DISPLAY : BAR_HEIGHT_INTERACTIVE;
+
+    if (isDisplay) {
         return (
-            <View className="flex-row items-center gap-2">
-                <View className="h-2 flex-1 bg-surface-elevated rounded-full overflow-hidden">
-                    <View
-                        className="h-full rounded-full"
-                        style={{ width: `${Math.min(100, Math.max(0, initialRating * 10))}%`, backgroundColor: color }}
+            <View style={styles.displayRow}>
+                <View style={[styles.track, { height: barHeight }]}>
+                    <Animated.View
+                        style={[styles.fill, { backgroundColor: color }, fillStyle]}
                     />
                 </View>
-                <Text className="text-white font-bold text-xs w-6 text-right">{initialRating.toFixed(1)}</Text>
+                <Text style={[styles.displayNumber, { color }]}>
+                    {value.toFixed(1)}
+                </Text>
             </View>
         );
     }
 
-    // Interactive Large version
     return (
-        <View className="w-full">
-            <View className="flex-row justify-between items-end mb-2">
-                <Text className="text-secondary font-medium">Desliza para puntuar</Text>
-                <Animated.Text style={[numberStyle, { color }]} className="text-4xl font-bold">
-                    {currentRating.toFixed(1)}
-                </Animated.Text>
-            </View>
-
+        <View style={styles.container}>
             <GestureDetector gesture={pan}>
-                <View
-                    className="h-12 bg-surface-elevated rounded-full overflow-hidden justify-center"
-                    onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-                >
-                    <Animated.View
+                <View style={styles.interactiveRow}>
+                    <View
+                        style={[styles.touchTarget, { height: TOUCH_TARGET_HEIGHT }]}
+                        onLayout={(e) => setLayoutWidth(e.nativeEvent.layout.width)}
+                    >
+                        <View style={[styles.track, { height: barHeight }]}>
+                            <Animated.View
+                                style={[styles.fill, { backgroundColor: color }, fillStyle]}
+                            />
+                        </View>
+                    </View>
+                    <Animated.Text
                         style={[
-                            animatedStyle,
-                            { height: '100%', borderRadius: 999 }
+                            styles.interactiveNumber,
+                            { color },
+                            scaleStyle,
                         ]}
-                    />
+                    >
+                        {value.toFixed(1)}
+                    </Animated.Text>
                 </View>
             </GestureDetector>
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: { width: '100%' },
+    displayRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    interactiveRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    touchTarget: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    track: {
+        width: '100%',
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: 999,
+        overflow: 'hidden',
+    },
+    fill: {
+        height: '100%',
+        borderRadius: 999,
+    },
+    displayNumber: {
+        fontSize: FONT_SIZE.bodySmall,
+        fontWeight: '700',
+        width: 28,
+        textAlign: 'right',
+    },
+    interactiveNumber: {
+        fontSize: FONT_SIZE.headlineLarge,
+        fontWeight: '700',
+        minWidth: 48,
+        textAlign: 'right',
+    },
+});

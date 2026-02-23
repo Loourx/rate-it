@@ -1,12 +1,13 @@
 import React from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useContentDetails } from '../../../lib/hooks/useContentDetails';
 import { ContentType, Movie, Series, Book, Game, Music, Podcast, Anything } from '../../../lib/types/content';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ContentDetailsScreen() {
     const { type, id } = useLocalSearchParams<{ type: ContentType; id: string }>();
+    const router = useRouter();
 
     // Ensure type is a valid ContentType, though routing should handle this if configured strictly
     const { data: item, isLoading, isError, error } = useContentDetails(type as ContentType, id);
@@ -133,7 +134,10 @@ export default function ContentDetailsScreen() {
 
                     {/* Action Buttons */}
                     <View className="flex-row gap-4 my-6">
-                        <TouchableOpacity className="flex-1 bg-blue-600 py-3 rounded-lg flex-row items-center justify-center">
+                        <TouchableOpacity
+                            className="flex-1 bg-blue-600 py-3 rounded-lg flex-row items-center justify-center"
+                            onPress={() => router.push(`/rate/${type}/${id}`)}
+                        >
                             <Ionicons name="star" size={20} color="white" className="mr-2" />
                             <Text className="text-white font-bold text-base ml-2">Valorar</Text>
                         </TouchableOpacity>
