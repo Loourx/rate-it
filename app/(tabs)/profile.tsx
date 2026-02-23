@@ -3,8 +3,8 @@ import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProfile } from '@/lib/hooks/useProfile';
-import { useRatings } from '@/lib/hooks/useRatings';
-import { ContentCard } from '@/components/content/ContentCard';
+import { ProfileStats } from '@/components/profile/ProfileStats';
+import { RatingHistory } from '@/components/profile/RatingHistory';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
@@ -12,7 +12,6 @@ import { COLORS } from '@/lib/utils/constants';
 export default function ProfileScreen() {
     const { signOut } = useAuth();
     const { data: profile } = useProfile();
-    const { data: ratings } = useRatings();
     const router = useRouter();
 
     const handleSignOut = async () => {
@@ -23,14 +22,6 @@ export default function ProfileScreen() {
             // signOut already logs errors internally
         }
     };
-
-    const handlePress = (content: unknown & { type: string; id: string }) => {
-        router.push(`/content/${content.type}/${content.id}`);
-    };
-
-    const ratingCount = ratings?.length || 0;
-    const followersCount = 0;
-    const followingCount = 0;
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -75,42 +66,10 @@ export default function ProfileScreen() {
                 </View>
 
                 {/* Stats */}
-                <View className="flex-row justify-around px-6 py-4 border-y border-divider bg-surface mb-6">
-                    <View className="items-center">
-                        <Text className="text-headlineMedium font-bold text-primary">{ratingCount}</Text>
-                        <Text className="text-bodySmall text-secondary">Ratings</Text>
-                    </View>
-                    <View className="items-center">
-                        <Text className="text-headlineMedium font-bold text-primary">{followersCount}</Text>
-                        <Text className="text-bodySmall text-secondary">Seguidores</Text>
-                    </View>
-                    <View className="items-center">
-                        <Text className="text-headlineMedium font-bold text-primary">{followingCount}</Text>
-                        <Text className="text-bodySmall text-secondary">Siguiendo</Text>
-                    </View>
-                </View>
+                <ProfileStats />
 
-                {/* Ratings Grid */}
-                <View className="px-6">
-                    <Text className="text-headlineSmall font-bold text-primary mb-4">Recientes</Text>
-                    <View className="flex-row flex-wrap gap-3">
-                        {ratings?.map((rating) => (
-                            <View key={rating.id} className="w-[48%]">
-                                <ContentCard
-                                    content={{
-                                        id: rating.content_id,
-                                        type: rating.content_type,
-                                        title: (rating as unknown as Record<string, string>).content_title,
-                                        imageUrl: (rating as unknown as Record<string, string>).content_image_url,
-                                    }}
-                                    rating={rating.rating}
-                                    onPress={handlePress}
-                                    orientation="vertical"
-                                />
-                            </View>
-                        ))}
-                    </View>
-                </View>
+                {/* Rating History */}
+                <RatingHistory />
             </ScrollView>
         </SafeAreaView>
     );

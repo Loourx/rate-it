@@ -114,9 +114,10 @@ export default function RateScreen() {
                 </View>
             </KeyboardAvoidingView>
             <Toast
-                message="Valoración guardada ✓"
-                visible={state.toastVisible}
-                onDismiss={() => actions.setToastVisible(false)}
+                message={state.toastConfig.message}
+                type={state.toastConfig.type}
+                visible={state.toastConfig.visible}
+                onDismiss={() => actions.setToastConfig((prev) => ({ ...prev, visible: false }))}
             />
         </>
     );

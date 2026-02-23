@@ -56,6 +56,8 @@ export function useCreateRating() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ratings'] });
             queryClient.invalidateQueries({ queryKey: ['feed'] });
+            queryClient.invalidateQueries({ queryKey: ['profile-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['rating-history'] });
         },
     });
 }
@@ -96,6 +98,8 @@ export function useDeleteRating() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ratings'] });
             queryClient.invalidateQueries({ queryKey: ['feed'] });
+            queryClient.invalidateQueries({ queryKey: ['profile-stats'] });
+            queryClient.invalidateQueries({ queryKey: ['rating-history'] });
         },
     });
 }

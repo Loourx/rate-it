@@ -25,7 +25,15 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
     const [hasSpoiler, setHasSpoiler] = useState(false);
     const [status, setStatus] = useState<ContentStatus | null>(null);
     const [prefilled, setPrefilled] = useState(false);
-    const [toastVisible, setToastVisible] = useState(false);
+    const [toastConfig, setToastConfig] = useState<{
+        visible: boolean;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        visible: false,
+        message: '',
+        type: 'success',
+    });
 
     useEffect(() => {
         if (prefilled) return;
@@ -63,10 +71,20 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 });
             }
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            setToastVisible(true);
+            setToastConfig({
+                visible: true,
+                message: 'Valoración guardada ✓',
+                type: 'success',
+            });
             setTimeout(() => router.back(), 1200);
-        } catch {
+        } catch (error) {
+            console.error('[Rate-it] Error saving rating:', error);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            setToastConfig({
+                visible: true,
+                message: 'No se pudo guardar la valoración. Inténtalo de nuevo.',
+                type: 'error',
+            });
         }
     }, [item, score, review, hasSpoiler, status, contentType, contentId]);
 
@@ -87,14 +105,14 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             isError,
             isSaving,
             isEditing,
-            toastVisible,
+            toastConfig,
         },
         actions: {
             setScore,
             setReview,
             setHasSpoiler,
             setStatus,
-            setToastVisible,
+            setToastConfig,
             handleSave,
             refetch,
         },
