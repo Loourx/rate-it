@@ -16,7 +16,7 @@ export interface Rating {
     contentId: string; // text
     contentTitle: string; // text
     contentImageUrl: string | null; // text
-    score: number; // numeric(3,1)
+    score: number; // numeric(3,1), range 0-10, step 0.5
     reviewText: string | null; // text
     hasSpoiler: boolean; // boolean
     createdAt: string; // timestamptz

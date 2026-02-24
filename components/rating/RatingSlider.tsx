@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AccessibilityInfo, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { ContentType } from '@/lib/types/content';
-import { COLORS, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS, FONT_SIZE, RATING, formatScore } from '@/lib/utils/constants';
 
 const CATEGORY_COLORS: Record<ContentType, string> = {
     movie: COLORS.categoryMovie,
@@ -22,11 +22,12 @@ const CATEGORY_COLORS: Record<ContentType, string> = {
     anything: COLORS.categoryAnything,
 };
 
-const MIN_RATING = 1;
-const MAX_RATING = 10;
 const BAR_HEIGHT_DISPLAY = 8;
 const BAR_HEIGHT_INTERACTIVE = 12;
 const TOUCH_TARGET_HEIGHT = 44;
+
+/** Color for score 0.0 (terrible) */
+const ZERO_COLOR = COLORS.error; // red
 
 interface RatingSliderProps {
     value: number;
@@ -38,13 +39,13 @@ interface RatingSliderProps {
 
 function clampAndSnap(raw: number): number {
     'worklet';
-    const clamped = Math.max(MIN_RATING, Math.min(MAX_RATING, raw));
-    return Math.round(clamped * 10) / 10;
+    const clamped = Math.max(RATING.MIN, Math.min(RATING.MAX, raw));
+    return Math.round(clamped * (1 / RATING.STEP)) * RATING.STEP;
 }
 
 function ratingToProgress(rating: number): number {
     'worklet';
-    return (rating - MIN_RATING) / (MAX_RATING - MIN_RATING);
+    return (rating - RATING.MIN) / (RATING.MAX - RATING.MIN);
 }
 
 export function RatingSlider({
@@ -54,7 +55,9 @@ export function RatingSlider({
     disabled = false,
     size = 'interactive',
 }: RatingSliderProps) {
-    const color = CATEGORY_COLORS[category];
+    const categoryColor = CATEGORY_COLORS[category];
+    /** Use red when score is exactly 0 */
+    const color = value === 0 ? ZERO_COLOR : categoryColor;
     const isDisplay = size === 'display';
 
     const [layoutWidth, setLayoutWidth] = useState(0);
@@ -104,7 +107,7 @@ export function RatingSlider({
         .onUpdate((e) => {
             if (layoutWidth === 0) return;
             const ratio = Math.max(0, Math.min(1, e.x / layoutWidth));
-            const raw = MIN_RATING + ratio * (MAX_RATING - MIN_RATING);
+            const raw = RATING.MIN + ratio * (RATING.MAX - RATING.MIN);
             const snapped = clampAndSnap(raw);
 
             fillProgress.value = ratingToProgress(snapped);
@@ -129,6 +132,29 @@ export function RatingSlider({
 
     const barHeight = isDisplay ? BAR_HEIGHT_DISPLAY : BAR_HEIGHT_INTERACTIVE;
 
+    /** Tick marks at whole numbers (0, 1, 2, … 10) for visual feedback */
+    const ticks = useMemo(() => {
+        if (isDisplay) return null;
+        const marks: React.ReactNode[] = [];
+        for (let i = RATING.MIN; i <= RATING.MAX; i += 1) {
+            const pct = ((i - RATING.MIN) / (RATING.MAX - RATING.MIN)) * 100;
+            marks.push(
+                <View
+                    key={i}
+                    style={[
+                        styles.tick,
+                        {
+                            left: `${pct}%`,
+                            backgroundColor:
+                                i <= value ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.10)',
+                        },
+                    ]}
+                />,
+            );
+        }
+        return <View style={styles.tickContainer}>{marks}</View>;
+    }, [isDisplay, value]);
+
     if (isDisplay) {
         return (
             <View style={styles.displayRow}>
@@ -138,7 +164,7 @@ export function RatingSlider({
                     />
                 </View>
                 <Text style={[styles.displayNumber, { color }]}>
-                    {value.toFixed(1)}
+                    {formatScore(value)}
                 </Text>
             </View>
         );
@@ -157,6 +183,7 @@ export function RatingSlider({
                                 style={[styles.fill, { backgroundColor: color }, fillStyle]}
                             />
                         </View>
+                        {ticks}
                     </View>
                     <Animated.Text
                         style={[
@@ -165,7 +192,7 @@ export function RatingSlider({
                             scaleStyle,
                         ]}
                     >
-                        {value.toFixed(1)}
+                        {formatScore(value)}
                     </Animated.Text>
                 </View>
             </GestureDetector>
@@ -198,6 +225,16 @@ const styles = StyleSheet.create({
     fill: {
         height: '100%',
         borderRadius: 999,
+    },
+    tickContainer: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'center',
+    },
+    tick: {
+        position: 'absolute',
+        width: 1,
+        height: 16,
+        borderRadius: 0.5,
     },
     displayNumber: {
         fontSize: FONT_SIZE.bodySmall,

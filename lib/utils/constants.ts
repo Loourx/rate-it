@@ -69,3 +69,25 @@ export const FONT_SIZE = {
     labelMedium: 12,
     labelSmall: 10,
 };
+
+// ── Rating System ────────────────────────────────────────
+export const RATING = {
+    MIN: 0,
+    MAX: 10,
+    STEP: 0.5,
+    DEFAULT: 5.0,
+    /** Total selectable values: (MAX - MIN) / STEP + 1 = 21 */
+    VALUES_COUNT: 21,
+} as const;
+
+/** Format a rating score for display. Snaps to nearest 0.5 first (for legacy ratings). Whole numbers show no decimal; halves show .5 */
+export function formatScore(score: number): string {
+    const snapped = Math.round(score * 2) / 2;
+    return snapped % 1 === 0 ? snapped.toFixed(0) : snapped.toFixed(1);
+}
+
+/** Snap a raw number to the nearest valid rating step */
+export function snapToStep(raw: number): number {
+    const clamped = Math.max(RATING.MIN, Math.min(RATING.MAX, raw));
+    return Math.round(clamped * (1 / RATING.STEP)) * RATING.STEP;
+}

@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import type { FeedItem } from '@/lib/types/social';
-import { COLORS } from '@/lib/utils/constants';
+import { COLORS, formatScore } from '@/lib/utils/constants';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
 import { useRatingLike } from '@/lib/hooks/useRatingLike';
 import { useRatingLikesCount } from '@/lib/hooks/useRatingLikesCount';
@@ -103,7 +103,7 @@ export default function FeedCard({ item, index }: FeedCardProps) {
                                 className="text-2xl font-bold mr-2"
                                 style={{ color: categoryColor }}
                             >
-                                {item.score.toFixed(1)}
+                                {formatScore(item.score)}
                             </Text>
                             <View className="flex-1 h-2 bg-surface-elevated rounded-full overflow-hidden">
                                 <View

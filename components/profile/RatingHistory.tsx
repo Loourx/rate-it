@@ -11,7 +11,7 @@ import { useRouter } from 'expo-router';
 import { useRatingHistory, type RatingHistoryItem } from '@/lib/hooks/useRatingHistory';
 import { RatingSlider } from '@/components/rating/RatingSlider';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, FONT_SIZE, SPACING, formatScore } from '@/lib/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import type { ContentType } from '@/lib/types/content';
 
@@ -75,7 +75,7 @@ function HistoryItem({ item, onPress }: { item: RatingHistoryItem; onPress: () =
             </View>
             <View style={styles.ratingNumberContainer}>
                 <Text style={[styles.ratingNumber, { color: meta.color }]}>
-                    {item.score.toFixed(1)}
+                    {formatScore(item.score)}
                 </Text>
             </View>
         </TouchableOpacity>

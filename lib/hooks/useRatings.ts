@@ -8,7 +8,7 @@ export interface Rating {
     user_id: string;
     content_type: ContentType;
     content_id: string;
-    rating: number; // 1-10
+    rating: number; // 0-10 (step 0.5)
     review?: string;
     created_at: string;
     // We would ideally join with content details, but for now we might just have the raw rating

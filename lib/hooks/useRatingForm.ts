@@ -5,6 +5,7 @@ import { ContentType, ContentStatus, AllContent } from '@/lib/types/content';
 import { useContentDetails } from '@/lib/hooks/useContentDetails';
 import { useCreateRating, useExistingRating } from '@/lib/hooks/useCreateRating';
 import { useExistingContentStatus, useUpsertContentStatus } from '@/lib/hooks/useContentStatus';
+import { RATING } from '@/lib/utils/constants';
 
 interface UseRatingFormProps {
     contentType: ContentType;
@@ -20,7 +21,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
     const createRating = useCreateRating();
     const upsertStatus = useUpsertContentStatus();
 
-    const [score, setScore] = useState(5.0);
+    const [score, setScore] = useState<number>(RATING.DEFAULT);
     const [review, setReview] = useState('');
     const [hasSpoiler, setHasSpoiler] = useState(false);
     const [status, setStatus] = useState<ContentStatus | null>(null);
