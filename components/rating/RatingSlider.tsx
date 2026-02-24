@@ -36,6 +36,7 @@ interface RatingSliderProps {
     disabled?: boolean;
     size?: 'display' | 'interactive';
     layout?: 'horizontal' | 'vertical'; // For display mode: horizontal = number beside bar, vertical = number above bar
+    exactScoreDisplay?: boolean;
 }
 
 function clampAndSnap(raw: number): number {
@@ -56,11 +57,14 @@ export function RatingSlider({
     disabled = false,
     size = 'interactive',
     layout = 'horizontal',
+    exactScoreDisplay = false,
 }: RatingSliderProps) {
     const categoryColor = CATEGORY_COLORS[category];
     /** Use red when score is exactly 0 */
     const color = value === 0 ? ZERO_COLOR : categoryColor;
     const isDisplay = size === 'display';
+
+    const displayedScore = exactScoreDisplay ? value.toFixed(1) : formatScore(value);
 
     const [layoutWidth, setLayoutWidth] = useState(0);
     const [reduceMotion, setReduceMotion] = useState(false);
@@ -163,7 +167,7 @@ export function RatingSlider({
             return (
                 <View style={styles.displayVertical}>
                     <Text style={[styles.displayNumberLarge, { color }]}>
-                        {formatScore(value)}
+                        {displayedScore}
                     </Text>
                     <View style={[styles.track, { height: barHeight }]}>
                         <Animated.View
@@ -182,7 +186,7 @@ export function RatingSlider({
                     />
                 </View>
                 <Text style={[styles.displayNumber, { color }]}>
-                    {formatScore(value)}
+                    {displayedScore}
                 </Text>
             </View>
         );
@@ -210,7 +214,7 @@ export function RatingSlider({
                             scaleStyle,
                         ]}
                     >
-                        {formatScore(value)}
+                        {displayedScore}
                     </Animated.Text>
                 </View>
             </GestureDetector>

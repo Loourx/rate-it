@@ -17,6 +17,7 @@ interface GoogleBooksVolumeInfo {
         thumbnail?: string;
     };
     publishedDate?: string;
+    categories?: string[];
 }
 
 interface GoogleBooksVolume {
@@ -72,9 +73,11 @@ export async function searchBooks(query: string): Promise<Book[]> {
         title: item.volumeInfo.title,
         imageUrl: sanitizeImageUrl(item.volumeInfo.imageLinks?.thumbnail),
         type: 'book',
-        author: item.volumeInfo.authors?.[0], // Taking the primary author
+        author: item.volumeInfo.authors?.[0],
         pages: item.volumeInfo.pageCount,
         description: item.volumeInfo.description,
+        categories: item.volumeInfo.categories,
+        year: getYear(item.volumeInfo.publishedDate),
     }));
 }
 
@@ -86,8 +89,10 @@ export async function getBookDetails(id: string): Promise<Book> {
         title: data.volumeInfo.title,
         imageUrl: sanitizeImageUrl(data.volumeInfo.imageLinks?.thumbnail),
         type: 'book',
-        author: data.volumeInfo.authors?.join(', '), // Join all authors for details
+        author: data.volumeInfo.authors?.join(', '),
         pages: data.volumeInfo.pageCount,
         description: data.volumeInfo.description,
+        categories: data.volumeInfo.categories,
+        year: getYear(data.volumeInfo.publishedDate),
     };
 }

@@ -32,10 +32,15 @@ interface TmdbMovieDetails extends TmdbMovieResult {
     credits?: {
         crew: Array<{ job: string; name: string }>;
     };
+    genres?: Array<{ id: number; name: string }>;
+    runtime?: number | null;
 }
 
 interface TmdbSeriesDetails extends TmdbSeriesResult {
     created_by: Array<{ name: string }>;
+    genres?: Array<{ id: number; name: string }>;
+    number_of_seasons?: number;
+    number_of_episodes?: number;
 }
 
 const getHeaders = () => {
@@ -114,6 +119,9 @@ export async function getMovieDetails(id: string): Promise<Movie> {
 
     const director = data.credits?.crew.find(c => c.job === 'Director')?.name;
 
+    const genres = data.genres?.map(g => g.name);
+    const runtime = data.runtime ?? undefined;
+
     return {
         id: data.id.toString(),
         title: data.title,
@@ -121,7 +129,9 @@ export async function getMovieDetails(id: string): Promise<Movie> {
         type: 'movie',
         year: getYear(data.release_date),
         overview: data.overview,
-        director
+        director,
+        genres,
+        runtime,
     };
 }
 
@@ -133,6 +143,10 @@ export async function getSeriesDetails(id: string): Promise<Series> {
         ? data.created_by.map(c => c.name).join(', ')
         : undefined;
 
+    const genres = data.genres?.map(g => g.name);
+    const seasons = data.number_of_seasons ?? undefined;
+    const episodes = data.number_of_episodes ?? undefined;
+
     return {
         id: data.id.toString(),
         title: data.name,
@@ -140,6 +154,9 @@ export async function getSeriesDetails(id: string): Promise<Series> {
         type: 'series',
         year: getYear(data.first_air_date),
         overview: data.overview,
-        creator
+        creator,
+        genres,
+        seasons,
+        episodes,
     };
 }

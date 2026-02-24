@@ -19,8 +19,17 @@ export interface Rating {
     score: number; // numeric(3,1), range 0-10, step 0.5
     reviewText: string | null; // text
     hasSpoiler: boolean; // boolean
+    contentSubtype: 'album' | 'track' | null; // text – only for music
+    trackRatings: TrackRatingEntry[] | null; // jsonb – per-track scores for album ratings
     createdAt: string; // timestamptz
     updatedAt: string; // timestamptz
+}
+
+export interface TrackRatingEntry {
+    trackId: string;
+    trackName: string;
+    trackNumber: number;
+    score: number;
 }
 
 export interface UserContentStatus {

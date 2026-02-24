@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { searchPodcasts } from '../api/podcastIndex';
+import { searchPodcasts } from '../api/podcasts';
 
 export function useSearchPodcasts(query: string) {
     return useQuery({

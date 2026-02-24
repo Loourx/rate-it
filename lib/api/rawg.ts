@@ -23,6 +23,7 @@ interface RawgGameDetails extends RawgGameResult {
     description_raw: string;
     developers: Array<{ name: string }>;
     platforms: Array<{ platform: { name: string } }>;
+    genres?: Array<{ id: number; name: string }>;
 }
 
 // Helper for year extraction
@@ -68,7 +69,8 @@ export async function getGameDetails(id: string): Promise<Game> {
     const data = await fetchRawg<RawgGameDetails>(`/games/${id}`);
 
     const developer = data.developers?.[0]?.name;
-    const platform = data.platforms?.[0]?.platform?.name;
+    const platforms = data.platforms?.map(p => p.platform.name);
+    const genres = data.genres?.map(g => g.name);
 
     return {
         id: data.id.toString(),
@@ -77,7 +79,8 @@ export async function getGameDetails(id: string): Promise<Game> {
         type: 'game',
         year: getYear(data.released),
         developer,
-        platform,
+        platforms,
+        genres,
         description: data.description_raw
     };
 }

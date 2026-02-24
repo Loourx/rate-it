@@ -1,4 +1,4 @@
 export * from './database';
 export * from './content';
 export * from './social';
-export * from './notifications';
+export { NotificationType, Notification as AppNotification } from './notifications';

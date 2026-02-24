@@ -91,3 +91,36 @@ export function snapToStep(raw: number): number {
     const clamped = Math.max(RATING.MIN, Math.min(RATING.MAX, raw));
     return Math.round(clamped * (1 / RATING.STEP)) * RATING.STEP;
 }
+
+// ── Category color helpers ───────────────────────────────
+import type { ContentType } from '../types/content';
+
+const CATEGORY_COLOR_MAP: Record<ContentType, string> = {
+    movie: COLORS.categoryMovie,
+    series: COLORS.categorySeries,
+    book: COLORS.categoryBook,
+    game: COLORS.categoryGame,
+    music: COLORS.categoryMusic,
+    podcast: COLORS.categoryPodcast,
+    anything: COLORS.categoryAnything,
+};
+
+const CATEGORY_FADED_MAP: Record<ContentType, string> = {
+    movie: COLORS.categoryMovieFaded,
+    series: COLORS.categorySeriesFaded,
+    book: COLORS.categoryBookFaded,
+    game: COLORS.categoryGameFaded,
+    music: COLORS.categoryMusicFaded,
+    podcast: COLORS.categoryPodcastFaded,
+    anything: COLORS.categoryAnythingFaded,
+};
+
+/** Get the primary accent color for a content type */
+export function getCategoryColor(type: ContentType): string {
+    return CATEGORY_COLOR_MAP[type] ?? COLORS.textPrimary;
+}
+
+/** Get the 20%-opacity faded color for a content type */
+export function getCategoryFadedColor(type: ContentType): string {
+    return CATEGORY_FADED_MAP[type] ?? COLORS.surfaceElevated;
+}

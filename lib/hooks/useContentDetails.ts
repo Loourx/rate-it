@@ -3,13 +3,13 @@ import { getMovieDetails, getSeriesDetails } from '../api/tmdb';
 import { getBookDetails } from '../api/googleBooks';
 import { getGameDetails } from '../api/rawg';
 import { getMusicDetails } from '../api/itunes';
-import { getPodcastDetails } from '../api/podcastIndex';
+import { getPodcastDetails } from '../api/podcasts';
 import { supabase } from '../supabase';
 import { ContentType, Movie, Series, Book, Game, Music, Podcast, Anything } from '../types/content';
 
-export function useContentDetails(type: ContentType, id: string) {
+export function useContentDetails(type: ContentType, id: string, isAlbum?: boolean) {
     return useQuery({
-        queryKey: ['content', type, id],
+        queryKey: ['content', type, id, isAlbum],
         queryFn: async () => {
             if (type === 'movie') {
                 return getMovieDetails(id);
@@ -20,7 +20,7 @@ export function useContentDetails(type: ContentType, id: string) {
             } else if (type === 'game') {
                 return getGameDetails(id);
             } else if (type === 'music') {
-                return getMusicDetails(id);
+                return getMusicDetails(id, isAlbum ?? true);
             } else if (type === 'podcast') {
                 return getPodcastDetails(id);
             } else if (type === 'anything') {

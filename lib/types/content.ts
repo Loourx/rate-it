@@ -14,6 +14,8 @@ export interface Movie extends BaseContent {
     year?: string;
     director?: string;
     overview?: string;
+    genres?: string[];
+    runtime?: number; // minutos
 }
 
 export interface Series extends BaseContent {
@@ -21,6 +23,9 @@ export interface Series extends BaseContent {
     year?: string;
     creator?: string;
     overview?: string;
+    genres?: string[];
+    seasons?: number;
+    episodes?: number;
 }
 
 export interface Book extends BaseContent {
@@ -28,26 +33,54 @@ export interface Book extends BaseContent {
     author?: string;
     pages?: number;
     description?: string;
+    categories?: string[];
+    year?: string;
 }
 
 export interface Game extends BaseContent {
     type: 'game';
     year?: string;
     developer?: string;
-    platform?: string;
+    platforms?: string[];
     description?: string;
+    genres?: string[];
 }
 
 export interface Music extends BaseContent {
     type: 'music';
     artist?: string;
     album?: string;
+    year?: string;
+    genre?: string;
+    trackCount?: number;
+    isAlbum?: boolean;
+    durationMs?: number;
+    tracks?: AlbumTrack[];
+}
+
+export interface AlbumTrack {
+    trackId: string;
+    trackName: string;
+    trackNumber: number;
+    durationMs: number;
+    discNumber?: number;
+    previewUrl?: string;
+    artistName?: string;
+}
+
+export interface TrackRating {
+    trackId: string;
+    trackName: string;
+    trackNumber: number;
+    score: number;
 }
 
 export interface Podcast extends BaseContent {
     type: 'podcast';
     publisher?: string;
     description?: string;
+    genre?: string;
+    episodeCount?: number;
 }
 
 export interface Anything extends BaseContent {
