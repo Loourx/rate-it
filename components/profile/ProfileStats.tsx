@@ -61,8 +61,8 @@ function CategoryRow({ stat, maxCount }: { stat: CategoryStat; maxCount: number 
     );
 }
 
-export function ProfileStats() {
-    const { data, isLoading, isError, refetch } = useProfileStats();
+export function ProfileStats({ userId }: { userId?: string }) {
+    const { data, isLoading, isError, refetch } = useProfileStats(userId);
 
     // Even when loading, we show counters with 0.
     const ratingCount = data?.totalRatings ?? 0;

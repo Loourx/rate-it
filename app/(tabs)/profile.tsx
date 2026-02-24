@@ -8,6 +8,8 @@ import { RatingHistory } from '@/components/profile/RatingHistory';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
+import { useAuthStore } from '@/lib/stores/authStore';
+import { useSocialFeed } from '@/lib/hooks/useSocialFeed';
 
 export default function ProfileScreen() {
     const { signOut } = useAuth();
@@ -22,7 +24,13 @@ export default function ProfileScreen() {
             // signOut already logs errors internally
         }
     };
+    const { data: feedData } = useSocialFeed();
+    const feedItems = feedData?.pages.flatMap(page => page) ?? [];
 
+    console.log('📰 Total items en feed:', feedItems.length);
+    console.log('📝 Items:', feedItems.map(item => `${item.username} - ${item.contentTitle}`));
+    const myUserId = useAuthStore((state) => state.user?.id);
+    console.log('🆔 MI UUID:', myUserId);
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
             <ScrollView contentContainerClassName="pb-24">

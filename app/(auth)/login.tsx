@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'expo-router';
 
@@ -41,6 +42,7 @@ export default function LoginScreen() {
     };
 
     return (
+        <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
         <View className="flex-1 items-center justify-center bg-background p-6">
             <View className="items-center mb-12">
                 <Text className="text-4xl font-bold text-primary mb-2">Rate-it</Text>
@@ -104,5 +106,6 @@ export default function LoginScreen() {
                 </View>
             )}
         </View>
+        </SafeAreaView>
     );
 }

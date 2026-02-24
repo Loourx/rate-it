@@ -82,12 +82,12 @@ function HistoryItem({ item, onPress }: { item: RatingHistoryItem; onPress: () =
     );
 }
 
-export function RatingHistory() {
+export function RatingHistory({ userId }: { userId?: string }) {
     const router = useRouter();
     const {
         data, isLoading, isError, refetch,
         fetchNextPage, hasNextPage, isFetchingNextPage,
-    } = useRatingHistory();
+    } = useRatingHistory(userId);
 
     const allItems = data?.pages.flatMap((p) => p.items) ?? [];
 
@@ -127,18 +127,25 @@ export function RatingHistory() {
     }
 
     if (allItems.length === 0) {
+        const isOwnProfile = !userId;
         return (
             <View style={styles.emptyContainer}>
                 <Ionicons name="star-outline" size={48} color={COLORS.textTertiary} />
-                <Text style={styles.emptyTitle}>Aún no has valorado nada</Text>
-                <Text style={styles.emptySubtitle}>¡Busca algo para empezar!</Text>
-                <TouchableOpacity
-                    onPress={() => router.push('/(tabs)/search')}
-                    style={styles.ctaButton}
-                >
-                    <Ionicons name="search" size={18} color={COLORS.textPrimary} />
-                    <Text style={styles.ctaText}>Ir a buscar</Text>
-                </TouchableOpacity>
+                <Text style={styles.emptyTitle}>
+                    {isOwnProfile ? 'Aún no has valorado nada' : 'Este usuario aún no ha valorado nada'}
+                </Text>
+                {isOwnProfile && (
+                    <>
+                        <Text style={styles.emptySubtitle}>¡Busca algo para empezar!</Text>
+                        <TouchableOpacity
+                            onPress={() => router.push('/(tabs)/search')}
+                            style={styles.ctaButton}
+                        >
+                            <Ionicons name="search" size={18} color={COLORS.textPrimary} />
+                            <Text style={styles.ctaText}>Ir a buscar</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
             </View>
         );
     }

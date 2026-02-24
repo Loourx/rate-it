@@ -27,7 +27,7 @@ export const MOCK_USER: User = {
     last_sign_in_at: '2026-02-16T12:00:00Z',
     app_metadata: { provider: 'google' },
     user_metadata: {
-        full_name: MOCK_PROFILE.displayName,
+        display_name: MOCK_PROFILE.displayName,
         avatar_url: MOCK_PROFILE.avatarUrl,
         username: MOCK_PROFILE.username,
     },

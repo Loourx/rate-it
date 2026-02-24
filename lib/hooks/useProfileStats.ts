@@ -20,9 +20,9 @@ export interface ProfileStats {
  * Fetches only content_type + score for the current user and aggregates
  * client-side. Lightweight for MVP — avoids needing an RPC migration.
  */
-export function useProfileStats() {
+export function useProfileStats(overrideUserId?: string) {
     const { session } = useAuthStore();
-    const userId = session?.user.id;
+    const userId = overrideUserId ?? session?.user.id;
 
     return useQuery<ProfileStats>({
         queryKey: ['profile-stats', userId],

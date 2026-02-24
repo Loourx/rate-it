@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function RateScreen() {
     return (
-        <SafeAreaView className="flex-1 bg-background">
+        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
             <EmptyState
                 icon="star-outline"
                 title="Valorar Contenido"

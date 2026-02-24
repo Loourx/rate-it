@@ -21,9 +21,9 @@ interface RatingHistoryPage {
     nextOffset: number | undefined;
 }
 
-export function useRatingHistory() {
+export function useRatingHistory(overrideUserId?: string) {
     const { session } = useAuthStore();
-    const userId = session?.user.id;
+    const userId = overrideUserId ?? session?.user.id;
 
     return useInfiniteQuery<RatingHistoryPage>({
         queryKey: ['rating-history', userId],
