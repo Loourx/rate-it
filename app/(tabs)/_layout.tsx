@@ -1,10 +1,13 @@
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, Pressable, Text, View } from 'react-native';
 import { COLORS } from '@/lib/utils/constants';
+import { useUnreadCount } from '@/lib/hooks/useUnreadCount';
 
 export default function TabLayout() {
+    const { data: unreadCount } = useUnreadCount();
+
     return (
         <Tabs
             screenOptions={{
@@ -72,8 +75,34 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: 'Perfil',
+                    tabBarBadge:
+                        unreadCount && unreadCount > 0 ? unreadCount : undefined,
                     tabBarIcon: ({ color, focused }) => (
                         <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+                    ),
+                    headerShown: true,
+                    headerStyle: { backgroundColor: COLORS.background },
+                    headerTintColor: COLORS.textPrimary,
+                    headerRight: () => (
+                        <Pressable
+                            onPress={() => router.push('/notifications')}
+                            className="mr-4"
+                        >
+                            <View>
+                                <Ionicons
+                                    name="notifications-outline"
+                                    size={24}
+                                    color={COLORS.textPrimary}
+                                />
+                                {!!unreadCount && unreadCount > 0 && (
+                                    <View className="absolute -top-1 -right-1 bg-error rounded-full w-4 h-4 items-center justify-center">
+                                        <Text className="text-white text-[10px] font-bold">
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        </Pressable>
                     ),
                 }}
             />

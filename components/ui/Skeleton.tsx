@@ -62,6 +62,51 @@ interface FeedSkeletonListProps {
     count?: number;
 }
 
+/* -------------------------------------------------- */
+/* Compound skeleton for Notification items            */
+/* -------------------------------------------------- */
+
+interface NotificationSkeletonListProps {
+    count?: number;
+}
+
+export function NotificationSkeletonList({ count = 8 }: NotificationSkeletonListProps) {
+    const opacity = useSharedValue(0.3);
+
+    useEffect(() => {
+        opacity.value = withRepeat(
+            withSequence(
+                withTiming(0.7, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+                withTiming(0.3, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+            ),
+            -1,
+            true
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        opacity: opacity.value,
+    }));
+
+    return (
+        <View className="px-4 pt-4">
+            {Array.from({ length: count }).map((_, i) => (
+                <Animated.View
+                    key={i}
+                    style={animatedStyle}
+                    className="flex-row items-center py-3 mb-2"
+                >
+                    <View className="w-12 h-12 rounded-full bg-surface-elevated" />
+                    <View className="flex-1 ml-3">
+                        <View className="h-4 bg-surface-elevated rounded w-4/5 mb-2" />
+                        <View className="h-3 bg-surface-elevated rounded w-1/3" />
+                    </View>
+                </Animated.View>
+            ))}
+        </View>
+    );
+}
+
 export function FeedSkeletonList({ count = 5 }: FeedSkeletonListProps) {
     const opacity = useSharedValue(0.3);
 

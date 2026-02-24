@@ -1,21 +1,44 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+    FadeInDown,
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+} from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import type { FeedItem } from '@/lib/types/social';
 import { COLORS } from '@/lib/utils/constants';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
+import { useRatingLike } from '@/lib/hooks/useRatingLike';
+import { useRatingLikesCount } from '@/lib/hooks/useRatingLikesCount';
 
 interface FeedCardProps {
     item: FeedItem;
-    index: number; // Para staggered animation
+    index: number;
 }
 
 export default function FeedCard({ item, index }: FeedCardProps) {
     const categoryColor = getCategoryColor(item.contentType);
-
-    // Staggered animation: cada card entra con 50ms de delay (primeras 8)
     const animationDelay = index < 8 ? index * 50 : 0;
+
+    const { isLiked, toggle, isMutating } = useRatingLike(item.id);
+    const { data: likesCount } = useRatingLikesCount(item.id);
+
+    const heartScale = useSharedValue(1);
+    const heartAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: heartScale.value }],
+    }));
+
+    const handleLikePress = useCallback(() => {
+        if (isMutating) return;
+        heartScale.value = withSpring(1.3, { damping: 15 }, () => {
+            heartScale.value = withSpring(1, { damping: 15 });
+        });
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        toggle();
+    }, [isMutating, toggle, heartScale]);
 
     const navigateToProfile = () => {
         router.push(`/profile/${item.userId}`);
@@ -82,7 +105,6 @@ export default function FeedCard({ item, index }: FeedCardProps) {
                             >
                                 {item.score.toFixed(1)}
                             </Text>
-                            {/* Slider visual */}
                             <View className="flex-1 h-2 bg-surface-elevated rounded-full overflow-hidden">
                                 <View
                                     className="h-full rounded-full"
@@ -115,12 +137,21 @@ export default function FeedCard({ item, index }: FeedCardProps) {
                     </View>
                 )}
 
-                {/* Footer: Like button placeholder */}
+                {/* Footer: Like button */}
                 <View className="flex-row items-center pt-2 border-t border-divider">
-                    <Pressable className="flex-row items-center">
-                        <Text className="text-tertiary text-2xl mr-1">♡</Text>
+                    <Pressable
+                        className="flex-row items-center active:opacity-70"
+                        onPress={handleLikePress}
+                        disabled={isMutating}
+                    >
+                        <Animated.Text
+                            className="text-2xl mr-1"
+                            style={heartAnimatedStyle}
+                        >
+                            {isLiked ? '❤️' : '♡'}
+                        </Animated.Text>
                         <Text className="text-tertiary text-sm">
-                            {item.likesCount} likes
+                            {likesCount ?? item.likesCount} likes
                         </Text>
                     </Pressable>
                 </View>

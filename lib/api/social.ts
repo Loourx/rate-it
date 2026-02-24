@@ -57,6 +57,21 @@ export async function getSocialFeed(
 
     if (error) throw error;
 
+    // Paso 3: obtener conteos de likes para estos ratings
+    const ratingIds = (data as RatingWithProfile[]).map((r) => r.id);
+    const { data: likesData, error: likesError } = await supabase
+        .from('review_likes')
+        .select('rating_id')
+        .in('rating_id', ratingIds);
+
+    if (likesError) throw likesError;
+
+    const likesMap = new Map<string, number>();
+    for (const like of likesData ?? []) {
+        const rid = like.rating_id as string;
+        likesMap.set(rid, (likesMap.get(rid) ?? 0) + 1);
+    }
+
     return (data as RatingWithProfile[]).map((rating) => ({
         id: rating.id,
         userId: rating.user_id,
@@ -71,7 +86,7 @@ export async function getSocialFeed(
         reviewText: rating.review_text,
         hasSpoiler: rating.has_spoiler,
         createdAt: rating.created_at,
-        likesCount: 0,
+        likesCount: likesMap.get(rating.id) ?? 0,
     }));
 }
 
@@ -137,6 +152,57 @@ export async function getFollowing(userId: string): Promise<FollowingProfile[]> 
     if (error) throw error;
 
     return (data ?? []).map((row) => mapToProfile(row.profiles));
+}
+
+// ── Rating Likes ─────────────────────────────────────────
+
+export async function getRatingLikesCount(ratingId: string): Promise<number> {
+    const { count, error } = await supabase
+        .from('review_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('rating_id', ratingId);
+
+    if (error) throw error;
+    return count ?? 0;
+}
+
+export async function checkIfLiked(
+    userId: string,
+    ratingId: string,
+): Promise<boolean> {
+    const { data, error } = await supabase
+        .from('review_likes')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('rating_id', ratingId)
+        .maybeSingle();
+
+    if (error) throw error;
+    return data !== null;
+}
+
+export async function likeRating(
+    userId: string,
+    ratingId: string,
+): Promise<void> {
+    const { error } = await supabase
+        .from('review_likes')
+        .insert({ user_id: userId, rating_id: ratingId });
+
+    if (error) throw error;
+}
+
+export async function unlikeRating(ratingId: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No autenticado');
+
+    const { error } = await supabase
+        .from('review_likes')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('rating_id', ratingId);
+
+    if (error) throw error;
 }
 
 export async function checkIfFollowing(
