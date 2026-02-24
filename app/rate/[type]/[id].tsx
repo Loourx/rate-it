@@ -20,6 +20,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { Toast } from '@/components/ui/Toast';
 import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
 import { useRatingForm } from '@/lib/hooks/useRatingForm';
+import { AlbumTrackRatingSection } from '@/components/rating/AlbumTrackRatingSection';
 
 const CATEGORY_COLORS: Record<ContentType, string> = {
     movie: COLORS.categoryMovie,
@@ -34,7 +35,7 @@ const CATEGORY_COLORS: Record<ContentType, string> = {
 const MAX_REVIEW_LENGTH = 2000;
 
 export default function RateScreen() {
-    const { type, id } = useLocalSearchParams<{ type: string; id: string }>();
+    const { type, id, isAlbum: _isAlbum } = useLocalSearchParams<{ type: string; id: string; isAlbum?: string }>();
     const contentType = type as ContentType;
     const categoryColor = CATEGORY_COLORS[contentType] ?? COLORS.textPrimary;
 
@@ -60,7 +61,7 @@ export default function RateScreen() {
                 <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
                     <RatingHeader content={content} />
                     <View style={styles.section}>
-                        <Text style={styles.sectionLabel}>Desliza para puntuar</Text>
+                        <Text style={styles.sectionLabel}>{state.isAlbumContent ? 'Nota del álbum' : 'Desliza para puntuar'}</Text>
                         <RatingSlider
                             value={formData.score}
                             onValueChange={actions.setScore}
@@ -68,6 +69,23 @@ export default function RateScreen() {
                             size="interactive"
                         />
                     </View>
+                    {state.isAlbumContent && (
+                        <AlbumTrackRatingSection
+                            collectionId={id}
+                            trackRatings={formData.trackRatings}
+                            onTrackScoreChange={actions.setTrackScore}
+                            trackAverage={formData.trackAverage}
+                            expanded={formData.showTrackRatings}
+                            onToggleExpanded={actions.setShowTrackRatings}
+                            initializeTrackRatings={actions.initializeTrackRatings}
+                            categoryColor={categoryColor}
+                        />
+                    )}
+                    {state.isAlbumContent && formData.trackAverage !== null && (
+                        <Text style={[styles.trackAverageLabel, { color: categoryColor }]}>
+                            Media canciones: {formData.trackAverage.toFixed(1)}
+                        </Text>
+                    )}
                     <View style={styles.section}>
                         <Text style={styles.sectionLabel}>Reseña (opcional)</Text>
                         <TextInput
@@ -176,4 +194,5 @@ const styles = StyleSheet.create({
     },
     saveButton: { paddingVertical: SPACING.base, borderRadius: RADIUS.full, alignItems: 'center' },
     saveText: { color: COLORS.background, fontSize: FONT_SIZE.headlineSmall, fontWeight: '700' },
+    trackAverageLabel: { fontSize: FONT_SIZE.bodyMedium, fontFamily: 'SpaceGrotesk_600SemiBold', textAlign: 'center', paddingVertical: SPACING.sm },
 });

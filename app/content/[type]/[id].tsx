@@ -10,7 +10,9 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { useIsBookmarked, useToggleBookmark } from '@/lib/hooks/useBookmark';
 import { useContentDetails } from '@/lib/hooks/useContentDetails';
-import { ContentType, Movie, Series, Anything } from '@/lib/types/content';
+import { ContentType, Movie, Series, Anything, Music } from '@/lib/types/content';
+import { AlbumTrackList } from '@/components/content/AlbumTrackList';
+import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
 import { COLORS, SPACING, RADIUS, getCategoryColor, getCategoryFadedColor } from '@/lib/utils/constants';
 import { ContentDetailHeader } from '@/components/content/ContentDetailHeader';
 import { ContentMetadataBadges } from '@/components/content/ContentMetadataBadges';
@@ -31,7 +33,7 @@ const TYPE_LABELS: Record<ContentType, string> = {
 };
 
 export default function ContentDetailsScreen() {
-    const { type, id } = useLocalSearchParams<{ type: ContentType; id: string }>();
+    const { type, id, isAlbum } = useLocalSearchParams<{ type: ContentType; id: string; isAlbum?: string }>();
     const router = useRouter();
     const [showReportModal, setShowReportModal] = useState(false);
 
@@ -41,6 +43,14 @@ export default function ContentDetailsScreen() {
     const contentType = type as ContentType;
     const color = getCategoryColor(contentType);
     const fadedColor = getCategoryFadedColor(contentType);
+    const isAlbumContent = contentType === 'music' && (isAlbum === 'true' || (item as Music)?.isAlbum === true);
+
+    // Album tracks (only fetched when isAlbumContent is true)
+    const { data: albumTracks } = useAlbumTracks(isAlbumContent ? id : '');
+
+    const handleTrackPress = useCallback((trackId: string) => {
+        router.push(`/content/music/${trackId}?isAlbum=false`);
+    }, [router]);
 
     // Bookmark
     const { data: isBookmarked } = useIsBookmarked(contentType, id);
@@ -106,13 +116,21 @@ export default function ContentDetailsScreen() {
                         categoryFadedColor={fadedColor}
                     />
 
+                    {isAlbumContent && albumTracks && albumTracks.length > 0 && (
+                        <AlbumTrackList
+                            tracks={albumTracks}
+                            onTrackPress={handleTrackPress}
+                            categoryColor={color}
+                        />
+                    )}
+
                     <CommunityScore contentId={id} contentType={contentType} />
 
                     <Animated.View entering={FadeInDown.duration(350).delay(250)} style={S.rateRow}>
                         <TouchableOpacity
                             activeOpacity={0.85}
                             style={[S.rateBtn, { backgroundColor: color }]}
-                            onPress={() => router.push(`/rate/${type}/${id}`)}
+                            onPress={() => router.push(isAlbumContent ? `/rate/${type}/${id}?isAlbum=true` : `/rate/${type}/${id}`)}
                         >
                             <Ionicons name="star" size={20} color="#FFFFFF" />
                             <Text style={S.rateTxt}>Valorar</Text>

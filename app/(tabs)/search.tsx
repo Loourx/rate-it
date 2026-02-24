@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CategoryPicker } from '../../components/content/CategoryPicker';
 import { SearchBar } from '../../components/content/SearchBar';
 import { ContentList } from '../../components/content/ContentList';
-import { ContentType, BaseContent } from '../../lib/types/content';
+import { ContentType, BaseContent, Music } from '../../lib/types/content';
 import { useSearchMovies } from '../../lib/hooks/useSearchMovies';
 import { useSearchSeries } from '../../lib/hooks/useSearchSeries';
 import { useSearchBooks } from '../../lib/hooks/useSearchBooks';
@@ -51,7 +51,12 @@ export default function SearchScreen() {
     };
 
     const handleItemPress = (item: BaseContent) => {
-        router.push(`/content/${item.type}/${item.id}`);
+        if (item.type === 'music' && 'isAlbum' in item) {
+            const isAlbum = (item as Music).isAlbum;
+            router.push(`/content/${item.type}/${item.id}?isAlbum=${isAlbum}`);
+        } else {
+            router.push(`/content/${item.type}/${item.id}`);
+        }
     };
 
     const handleCreateAnything = () => {

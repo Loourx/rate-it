@@ -100,7 +100,21 @@ function getMetadata(item: AllContent): { badges: BadgeInfo[]; genres: string[] 
             if (mu.artist) badges.push({ icon: 'person-outline', label: mu.artist });
             if (mu.year) badges.push({ icon: 'calendar-outline', label: mu.year });
             if (mu.genre) badges.push({ icon: 'musical-notes-outline', label: mu.genre });
-            if (mu.isAlbum && mu.trackCount) badges.push({ icon: 'list-outline', label: `${mu.trackCount} tracks` });
+            if (mu.isAlbum) {
+                // Album badges
+                if (mu.trackCount) badges.push({ icon: 'list-outline', label: `${mu.trackCount} tracks` });
+            } else {
+                // Track badges
+                if (mu.album && mu.album !== mu.title) {
+                    badges.push({ icon: 'disc-outline', label: mu.album });
+                }
+                if (mu.durationMs) {
+                    const totalSecs = Math.floor(mu.durationMs / 1000);
+                    const mins = Math.floor(totalSecs / 60);
+                    const secs = totalSecs % 60;
+                    badges.push({ icon: 'time-outline', label: `${mins}:${secs.toString().padStart(2, '0')}` });
+                }
+            }
             return { badges, genres: [] };
         }
         case 'podcast': {
