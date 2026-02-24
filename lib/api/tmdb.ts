@@ -14,6 +14,7 @@ interface TmdbMovieResult {
     poster_path: string | null;
     release_date: string;
     overview: string;
+    popularity?: number;
 }
 
 interface TmdbSeriesResult {
@@ -22,6 +23,7 @@ interface TmdbSeriesResult {
     poster_path: string | null;
     first_air_date: string;
     overview: string;
+    popularity?: number;
 }
 
 interface TmdbSearchResponse<T> {
@@ -86,15 +88,23 @@ export async function searchMovies(query: string): Promise<Movie[]> {
 
     const data = await fetchTmdb<TmdbSearchResponse<TmdbMovieResult>>('/search/movie', { query });
 
-    return data.results.map(item => ({
+    const results = data.results.map(item => ({
         id: item.id.toString(),
         title: item.title,
         imageUrl: getImageUrl(item.poster_path),
-        type: 'movie',
+        type: 'movie' as const,
         year: getYear(item.release_date),
         overview: item.overview,
+        popularity: item.popularity,
         // Director not available in simple search
     }));
+
+    // Sort by TMDB popularity (higher = more popular)
+    results.sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
+
+    // Optionally filter by minimum popularity threshold to exclude low-quality results
+    const filtered = results.filter(r => (r.popularity ?? 0) >= 1.0);
+    return filtered.length > 0 ? filtered : results;
 }
 
 export async function searchSeries(query: string): Promise<Series[]> {
@@ -102,15 +112,23 @@ export async function searchSeries(query: string): Promise<Series[]> {
 
     const data = await fetchTmdb<TmdbSearchResponse<TmdbSeriesResult>>('/search/tv', { query });
 
-    return data.results.map(item => ({
+    const results = data.results.map(item => ({
         id: item.id.toString(),
         title: item.name,
         imageUrl: getImageUrl(item.poster_path),
-        type: 'series',
+        type: 'series' as const,
         year: getYear(item.first_air_date),
         overview: item.overview,
+        popularity: item.popularity,
         // Creator not available in simple search
     }));
+
+    // Sort by TMDB popularity (higher = more popular)
+    results.sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
+
+    // Optionally filter by minimum popularity threshold to exclude low-quality results
+    const filtered = results.filter(r => (r.popularity ?? 0) >= 1.0);
+    return filtered.length > 0 ? filtered : results;
 }
 
 export async function getMovieDetails(id: string): Promise<Movie> {

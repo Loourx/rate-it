@@ -64,7 +64,12 @@ async function fetchGoogleBooks<T>(endpoint: string, params: Record<string, stri
 export async function searchBooks(query: string): Promise<Book[]> {
     if (!query) return [];
 
-    const data = await fetchGoogleBooks<GoogleBooksSearchResponse>('', { q: query, maxResults: '20' });
+    const data = await fetchGoogleBooks<GoogleBooksSearchResponse>('', {
+        q: query,
+        maxResults: '20',
+        orderBy: 'relevance',
+        printType: 'books'
+    });
 
     if (!data.items) return [];
 

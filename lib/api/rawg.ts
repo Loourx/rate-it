@@ -13,6 +13,8 @@ interface RawgGameResult {
     name: string;
     background_image: string | null;
     released: string;
+    rating?: number;
+    added?: number;
 }
 
 interface RawgSearchResponse {
@@ -54,7 +56,11 @@ async function fetchRawg<T>(endpoint: string, params: Record<string, string> = {
 export async function searchGames(query: string): Promise<Game[]> {
     if (!query) return [];
 
-    const data = await fetchRawg<RawgSearchResponse>('/games', { search: query, page_size: '20' });
+    const data = await fetchRawg<RawgSearchResponse>('/games', {
+        search: query,
+        page_size: '20',
+        ordering: '-relevance'
+    });
 
     return data.results.map(item => ({
         id: item.id.toString(),
