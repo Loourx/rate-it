@@ -1,182 +1,161 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
-import { useContentDetails } from '../../../lib/hooks/useContentDetails';
-import { ContentType, Movie, Series, Book, Game, Music, Podcast, Anything } from '../../../lib/types/content';
+import Animated, {
+    FadeInDown,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '@/lib/utils/constants';
+import { useIsBookmarked, useToggleBookmark } from '@/lib/hooks/useBookmark';
+import { useContentDetails } from '@/lib/hooks/useContentDetails';
+import { ContentType, Movie, Series, Anything } from '@/lib/types/content';
+import { COLORS, SPACING, RADIUS, getCategoryColor, getCategoryFadedColor } from '@/lib/utils/constants';
+import { ContentDetailHeader } from '@/components/content/ContentDetailHeader';
+import { ContentMetadataBadges } from '@/components/content/ContentMetadataBadges';
+import { ContentDetailSkeleton } from '@/components/content/ContentDetailSkeleton';
+import { CommunityScore } from '@/components/content/CommunityScore';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { ReportModal } from '@/components/anything/ReportModal';
 import { useHasReported } from '@/lib/hooks/useReportAnything';
+
+const TYPE_LABELS: Record<ContentType, string> = {
+    movie: '🎬 Película',
+    series: '📺 Serie',
+    book: '📚 Libro',
+    game: '🎮 Videojuego',
+    music: '🎵 Música',
+    podcast: '🎙️ Podcast',
+    anything: '✨ Anything',
+};
 
 export default function ContentDetailsScreen() {
     const { type, id } = useLocalSearchParams<{ type: ContentType; id: string }>();
     const router = useRouter();
     const [showReportModal, setShowReportModal] = useState(false);
 
-    // Ensure type is a valid ContentType, though routing should handle this if configured strictly
-    const { data: item, isLoading, isError, error } = useContentDetails(type as ContentType, id);
+    const { data: item, isLoading, isError, refetch } = useContentDetails(type as ContentType, id);
     const { data: hasReported } = useHasReported(type === 'anything' ? id : '');
+
+    const contentType = type as ContentType;
+    const color = getCategoryColor(contentType);
+    const fadedColor = getCategoryFadedColor(contentType);
+
+    // Bookmark
+    const { data: isBookmarked } = useIsBookmarked(contentType, id);
+    const toggleBookmark = useToggleBookmark();
+    const bookmarkScale = useSharedValue(1);
+
+    const bookmarkAnimStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: bookmarkScale.value }],
+    }));
+
+    const handleToggleBookmark = useCallback(() => {
+        bookmarkScale.value = withSpring(1.2, { damping: 6, stiffness: 200 }, () => {
+            bookmarkScale.value = withSpring(1);
+        });
+        toggleBookmark.mutate({
+            contentType,
+            contentId: id,
+            contentTitle: item?.title ?? '',
+            contentImageUrl: item?.imageUrl ?? null,
+        });
+    }, [contentType, id, item, toggleBookmark, bookmarkScale]);
 
     if (isLoading) {
         return (
-            <View className="flex-1 items-center justify-center bg-background">
-                <ActivityIndicator size="large" color={COLORS.link} />
-            </View>
+            <>
+                <Stack.Screen options={{ title: '', headerTransparent: true }} />
+                <ContentDetailSkeleton />
+            </>
         );
     }
 
     if (isError || !item) {
         return (
-            <View className="flex-1 items-center justify-center bg-background px-6">
-                <Ionicons name="alert-circle-outline" size={48} color={COLORS.error} />
-                <Text className="text-error text-lg font-bold mt-4 text-center">Error al cargar contenido</Text>
-                <Text className="text-secondary text-center mt-2">{error?.message || 'No se encontró el contenido especificado.'}</Text>
-            </View>
+            <>
+                <Stack.Screen options={{ title: 'Error', headerBackTitle: 'Atrás' }} />
+                <ErrorState
+                    message="No pudimos cargar este contenido. ¿Intentamos de nuevo?"
+                    onRetry={() => refetch()}
+                />
+            </>
         );
     }
 
-    const renderMetadata = () => {
-        switch (item.type) {
-            case 'movie':
-                const movie = item as Movie;
-                return (
-                    <View className="flex-row flex-wrap gap-4 mb-4">
-                        {movie.year && <Badge text={movie.year} icon="calendar" />}
-                        {movie.director && <Badge text={movie.director} icon="videocam" />}
-                    </View>
-                );
-            case 'series':
-                const series = item as Series;
-                return (
-                    <View className="flex-row flex-wrap gap-4 mb-4">
-                        {series.year && <Badge text={series.year} icon="calendar" />}
-                        {series.creator && <Badge text={series.creator} icon="person" />}
-                    </View>
-                );
-            case 'book':
-                const book = item as Book;
-                return (
-                    <View className="flex-row flex-wrap gap-4 mb-4">
-                        {book.author && <Badge text={book.author} icon="person" />}
-                        {book.pages && <Badge text={`${book.pages} págs`} icon="book" />}
-                    </View>
-                );
-            case 'game':
-                const game = item as Game;
-                return (
-                    <View className="flex-row flex-wrap gap-4 mb-4">
-                        {game.year && <Badge text={game.year} icon="calendar" />}
-                        {game.developer && <Badge text={game.developer} icon="code" />}
-                        {game.platform && <Badge text={game.platform} icon="hardware-chip" />}
-                    </View>
-                );
-            case 'music':
-                const music = item as Music;
-                return (
-                    <View className="flex-row flex-wrap gap-4 mb-4">
-                        {music.artist && <Badge text={music.artist} icon="person" />}
-                        {music.album && <Badge text={music.album} icon="disc" />}
-                    </View>
-                );
-            case 'podcast':
-                const podcast = item as Podcast;
-                return (
-                    <View className="flex-row flex-wrap gap-4 mb-4">
-                        {podcast.publisher && <Badge text={podcast.publisher} icon="mic" />}
-                    </View>
-                );
-            case 'anything':
-                const anything = item as Anything;
-                return (
-                    <View className="flex-row flex-wrap gap-4 mb-4">
-                        {anything.categoryTag && <Badge text={anything.categoryTag} icon="pricetag" />}
-                    </View>
-                );
-            default:
-                return null;
-        }
-    };
-
-    const getDescription = () => {
-        switch (item.type) {
-            case 'movie': return (item as Movie).overview;
-            case 'series': return (item as Series).overview;
-            case 'book': return (item as Book).description;
-            case 'game': return (item as Game).description;
-            case 'anything': return (item as Anything).description;
-            case 'podcast': return (item as Podcast).description;
-            default: return null;
-        }
-    }
+    const description = getDescription(item);
 
     return (
         <>
-            <Stack.Screen options={{ title: 'Detalles', headerBackTitle: 'Atrás' }} />
-            <ScrollView className="flex-1 bg-background">
-                {/* Header Image */}
-                <View className="w-full h-80 bg-surface-elevated relative">
-                    {item.imageUrl ? (
-                        <Image
-                            source={{ uri: item.imageUrl }}
-                            className="w-full h-full"
-                            resizeMode="cover"
-                        />
-                    ) : (
-                        <View className="w-full h-full items-center justify-center">
-                            <Text className="text-4xl text-tertiary font-bold">{item.title.substring(0, 1)}</Text>
-                        </View>
-                    )}
-                    <View className="absolute bottom-0 left-0 right-0 h-24 bg-black/60" />
-                </View>
+            <Stack.Screen options={{ title: '', headerTransparent: true, headerBackTitle: 'Atrás' }} />
 
-                {/* Content Info */}
-                <View className="px-6 -mt-10 pb-10">
-                    {/* Title */}
-                    <Text className="text-3xl font-bold text-primary mb-2">{item.title}</Text>
+            <ScrollView style={S.screen} contentContainerStyle={S.scroll}>
+                <ContentDetailHeader
+                    title={item.title}
+                    imageUrl={item.imageUrl}
+                    categoryColor={color}
+                    categoryFadedColor={fadedColor}
+                    typeLabel={TYPE_LABELS[contentType]}
+                />
 
-                    {/* Metadata Badges */}
-                    {renderMetadata()}
+                <View style={S.body}>
+                    <ContentMetadataBadges
+                        item={item}
+                        categoryColor={color}
+                        categoryFadedColor={fadedColor}
+                    />
 
-                    {/* Action Buttons */}
-                    <View className="flex-row gap-4 my-6">
+                    <CommunityScore contentId={id} contentType={contentType} />
+
+                    <Animated.View entering={FadeInDown.duration(350).delay(250)} style={S.rateRow}>
                         <TouchableOpacity
-                            className="flex-1 bg-link py-3 rounded-lg flex-row items-center justify-center"
+                            activeOpacity={0.85}
+                            style={[S.rateBtn, { backgroundColor: color }]}
                             onPress={() => router.push(`/rate/${type}/${id}`)}
                         >
-                            <Ionicons name="star" size={20} color="white" className="mr-2" />
-                            <Text className="text-primary font-bold text-base ml-2">Valorar</Text>
+                            <Ionicons name="star" size={20} color="#FFFFFF" />
+                            <Text style={S.rateTxt}>Valorar</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity className="w-12 h-12 bg-surface rounded-lg items-center justify-center border border-divider">
-                            <Ionicons name="bookmark-outline" size={24} color={COLORS.textSecondary} />
-                        </TouchableOpacity>
-                        <TouchableOpacity className="w-12 h-12 bg-surface rounded-lg items-center justify-center border border-divider">
-                            <Ionicons name="share-social-outline" size={24} color={COLORS.textSecondary} />
-                        </TouchableOpacity>
-                    </View>
+                        <Animated.View style={bookmarkAnimStyle}>
+                            <TouchableOpacity
+                                style={[S.iconBtn, isBookmarked && { borderColor: color }]}
+                                onPress={handleToggleBookmark}
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons
+                                    name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                                    size={22}
+                                    color={isBookmarked ? color : COLORS.textSecondary}
+                                />
+                            </TouchableOpacity>
+                        </Animated.View>
 
-                    {/* Description */}
-                    <View>
-                        <Text className="text-lg font-bold text-primary mb-2">Sinopsis</Text>
-                        <Text className="text-base text-secondary leading-relaxed">
-                            {getDescription() || 'No hay descripción disponible para este contenido.'}
-                        </Text>
-                    </View>
+                        <TouchableOpacity style={S.iconBtn}>
+                            <Ionicons name="share-social-outline" size={22} color={COLORS.textSecondary} />
+                        </TouchableOpacity>
+                    </Animated.View>
 
-                    {/* Report button for Anything items */}
+                    {description ? (
+                        <Animated.View entering={FadeInDown.duration(350).delay(350)} style={S.synWrap}>
+                            <Text style={S.synTitle}>Sinopsis</Text>
+                            <Text style={S.synBody}>{description}</Text>
+                        </Animated.View>
+                    ) : null}
+
                     {item.type === 'anything' && (
                         <TouchableOpacity
                             onPress={() => setShowReportModal(true)}
                             disabled={hasReported}
-                            className="flex-row items-center justify-center mt-8 py-3 border border-divider rounded-xl"
-                            style={{ opacity: hasReported ? 0.5 : 1 }}
+                            style={[S.report, { opacity: hasReported ? 0.5 : 1 }]}
                         >
                             <Ionicons
                                 name={hasReported ? 'checkmark-circle' : 'flag-outline'}
                                 size={18}
                                 color={hasReported ? COLORS.success : COLORS.textSecondary}
                             />
-                            <Text className="text-secondary ml-2">
+                            <Text style={S.reportTxt}>
                                 {hasReported ? 'Ya has reportado este item' : 'Reportar contenido inapropiado'}
                             </Text>
                         </TouchableOpacity>
@@ -184,7 +163,6 @@ export default function ContentDetailsScreen() {
                 </View>
             </ScrollView>
 
-            {/* Report Modal */}
             {item.type === 'anything' && (
                 <ReportModal
                     visible={showReportModal}
@@ -197,11 +175,28 @@ export default function ContentDetailsScreen() {
     );
 }
 
-function Badge({ text, icon }: { text: string; icon: keyof typeof Ionicons.glyphMap }) {
-    return (
-        <View className="flex-row items-center bg-surface px-3 py-1.5 rounded-full border border-divider">
-            <Ionicons name={icon} size={14} color={COLORS.textSecondary} />
-            <Text className="text-xs font-medium text-secondary ml-1.5">{text}</Text>
-        </View>
-    );
+function getDescription(item: ReturnType<typeof useContentDetails>['data']): string | undefined {
+    if (!item) return undefined;
+    switch (item.type) {
+        case 'movie': return (item as Movie).overview;
+        case 'series': return (item as Series).overview;
+        case 'anything': return (item as Anything).description;
+        default:
+            return (item as { description?: string }).description;
+    }
 }
+
+const S = StyleSheet.create({
+    screen: { flex: 1, backgroundColor: COLORS.background },
+    scroll: { paddingBottom: 48 },
+    body: { paddingHorizontal: SPACING.base, marginTop: SPACING.lg },
+    rateRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginTop: SPACING.xl },
+    rateBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: SPACING.md, borderRadius: RADIUS.md, gap: SPACING.sm },
+    rateTxt: { fontSize: 16, fontFamily: 'SpaceGrotesk_700Bold', color: '#FFF' },
+    iconBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.surface, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.divider },
+    synWrap: { marginTop: SPACING['2xl'] },
+    synTitle: { fontSize: 20, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary, marginBottom: SPACING.sm },
+    synBody: { fontSize: 16, fontFamily: 'SpaceGrotesk_500Medium', color: COLORS.textSecondary, lineHeight: 24 },
+    report: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: SPACING['2xl'], paddingVertical: SPACING.md, borderWidth: 1, borderColor: COLORS.divider, borderRadius: RADIUS.md },
+    reportTxt: { fontSize: 14, color: COLORS.textSecondary, marginLeft: SPACING.sm },
+});
