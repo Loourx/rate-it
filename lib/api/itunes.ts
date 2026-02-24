@@ -35,50 +35,16 @@ const getImageUrl = (url: string | null): string | null => {
     return url.replace('100x100bb.jpg', '600x600bb.jpg');
 };
 
-// -- Public Functions --
+// -- Helpers --
 
-export async function searchMusic(query: string): Promise<Music[]> {
-    if (!query) return [];
+const isSingleOrEP = (item: ItunesResult): boolean => {
+    const name = item.collectionName?.toLowerCase() ?? '';
+    return item.collectionType === 'Single' || name.includes('- single')
+        || item.collectionType === 'EP' || name.includes('- ep');
+};
 
-    // Fetch more results so we can filter out singles/EPs and still have enough albums
-    const params = new URLSearchParams({
-        term: query,
-        entity: 'album',
-        limit: '50',
-        media: 'music'
-    });
-
-    const response = await fetch(`${ITUNES_SEARCH_URL}?${params.toString()}`);
-
-    if (!response.ok) {
-        throw new Error(`iTunes API Search Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data: ItunesResponse = await response.json();
-
-    // Separate real albums from singles/EPs, then combine (albums first)
-    const albums = data.results.filter(item => {
-        // Keep only actual albums — exclude Singles and EPs
-        const name = item.collectionName?.toLowerCase() ?? '';
-        const isSingle = item.collectionType === 'Single' || name.includes('- single');
-        const isEP = item.collectionType === 'EP' || name.includes('- ep');
-        return !isSingle && !isEP;
-    });
-
-    const singlesAndEPs = data.results.filter(item => {
-        const name = item.collectionName?.toLowerCase() ?? '';
-        const isSingle = item.collectionType === 'Single' || name.includes('- single');
-        const isEP = item.collectionType === 'EP' || name.includes('- ep');
-        return isSingle || isEP;
-    });
-
-    // Sort albums by track count descending (major albums tend to have more tracks)
-    albums.sort((a, b) => (b.trackCount ?? 0) - (a.trackCount ?? 0));
-
-    // Combine: real albums first, then singles/EPs as fallback, cap at 20
-    const combined = [...albums, ...singlesAndEPs].slice(0, 20);
-
-    return combined.map(item => ({
+function mapAlbumResult(item: ItunesResult): Music {
+    return {
         id: item.collectionId.toString(),
         title: item.collectionName,
         artist: item.artistName,
@@ -89,7 +55,75 @@ export async function searchMusic(query: string): Promise<Music[]> {
         genre: item.primaryGenreName,
         trackCount: item.trackCount,
         isAlbum: true,
-    }));
+    };
+}
+
+// -- Public Functions --
+
+export async function searchMusic(query: string): Promise<Music[]> {
+    if (!query) return [];
+
+    const albumParams = new URLSearchParams({ term: query, entity: 'album', limit: '30', media: 'music' });
+    const songParams  = new URLSearchParams({ term: query, entity: 'song',  limit: '30', media: 'music' });
+
+    // Fetch albums and songs in parallel; tolerate individual failures
+    const [albumRes, songRes] = await Promise.allSettled([
+        fetch(`${ITUNES_SEARCH_URL}?${albumParams.toString()}`),
+        fetch(`${ITUNES_SEARCH_URL}?${songParams.toString()}`),
+    ]);
+
+    const albumData: ItunesResult[] = albumRes.status === 'fulfilled' && albumRes.value.ok
+        ? ((await albumRes.value.json()) as ItunesResponse).results
+        : [];
+    const songData: ItunesResult[] = songRes.status === 'fulfilled' && songRes.value.ok
+        ? ((await songRes.value.json()) as ItunesResponse).results
+        : [];
+
+    if (albumData.length === 0 && songData.length === 0) return [];
+
+    // Direct album results (filter singles/EPs)
+    const directAlbums = albumData.filter(item => !isSingleOrEP(item));
+
+    // Extract unique albums discovered via song results
+    const albumsFromSongs = new Map<string, ItunesResult>();
+    songData.forEach(item => {
+        const colId = item.collectionId.toString();
+        if (!albumsFromSongs.has(colId)) {
+            albumsFromSongs.set(colId, item);
+        }
+    });
+
+    // Combine both sources, deduplicating by collectionId
+    const seen = new Set<string>();
+    const combined: Music[] = [];
+
+    // Direct albums first (higher priority)
+    for (const item of directAlbums) {
+        const colId = item.collectionId.toString();
+        if (!seen.has(colId)) {
+            seen.add(colId);
+            combined.push(mapAlbumResult(item));
+        }
+    }
+
+    // Albums discovered via songs
+    for (const [colId, item] of albumsFromSongs) {
+        if (!seen.has(colId) && !isSingleOrEP(item)) {
+            seen.add(colId);
+            combined.push(mapAlbumResult(item));
+        }
+    }
+
+    // Sort by relevance: title matches query first, then by track count
+    const queryLower = query.toLowerCase();
+    combined.sort((a, b) => {
+        const aMatch = a.title.toLowerCase().includes(queryLower) ? 1 : 0;
+        const bMatch = b.title.toLowerCase().includes(queryLower) ? 1 : 0;
+        if (aMatch !== bMatch) return bMatch - aMatch;
+        return (b.trackCount ?? 0) - (a.trackCount ?? 0);
+    });
+
+    return combined.slice(0, 20);
 }
 
 export async function searchMusicTracks(query: string): Promise<Music[]> {
