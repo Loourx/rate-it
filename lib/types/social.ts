@@ -29,4 +29,6 @@ export interface FeedItem {
     hasSpoiler: boolean;
     createdAt: string;
     likesCount: number; // Siempre 0 por ahora; se poblará en el Paso 5 (likes)
+    contentSubtype?: 'album' | 'track' | null;
+    trackRatings?: string | null; // JSONB as string or null
 }

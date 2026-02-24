@@ -12,6 +12,8 @@ type RatingWithProfile = {
     review_text: string | null;
     has_spoiler: boolean;
     created_at: string;
+    content_subtype: 'album' | 'track' | null;
+    track_ratings: string | null; // JSONB from database, stored as string
     profile: {
         id: string;
         username: string;
@@ -43,7 +45,18 @@ export async function getSocialFeed(
     const { data, error } = await supabase
         .from('ratings')
         .select(`
-            *,
+            id,
+            user_id,
+            content_id,
+            content_type,
+            content_title,
+            content_image_url,
+            score,
+            review_text,
+            has_spoiler,
+            created_at,
+            content_subtype,
+            track_ratings,
             profile:profiles!ratings_user_id_fkey(
                 id,
                 username,
@@ -58,7 +71,7 @@ export async function getSocialFeed(
     if (error) throw error;
 
     // Paso 3: obtener conteos de likes para estos ratings
-    const ratingIds = (data as RatingWithProfile[]).map((r) => r.id);
+    const ratingIds = (data as unknown as RatingWithProfile[]).map((r) => r.id);
     const { data: likesData, error: likesError } = await supabase
         .from('review_likes')
         .select('rating_id')
@@ -72,7 +85,7 @@ export async function getSocialFeed(
         likesMap.set(rid, (likesMap.get(rid) ?? 0) + 1);
     }
 
-    return (data as RatingWithProfile[]).map((rating) => ({
+    return (data as unknown as RatingWithProfile[]).map((rating) => ({
         id: rating.id,
         userId: rating.user_id,
         username: rating.profile?.username ?? '',
@@ -87,6 +100,8 @@ export async function getSocialFeed(
         hasSpoiler: rating.has_spoiler,
         createdAt: rating.created_at,
         likesCount: likesMap.get(rating.id) ?? 0,
+        contentSubtype: rating.content_subtype,
+        trackRatings: rating.track_ratings,
     }));
 }
 

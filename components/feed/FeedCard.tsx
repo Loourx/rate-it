@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import Animated, {
@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import type { FeedItem } from '@/lib/types/social';
+import { TrackRatingEntry } from '@/lib/types/database';
 import { COLORS, formatScore } from '@/lib/utils/constants';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
 import { useRatingLike } from '@/lib/hooks/useRatingLike';
@@ -22,6 +23,23 @@ interface FeedCardProps {
 export default function FeedCard({ item, index }: FeedCardProps) {
     const categoryColor = getCategoryColor(item.contentType);
     const animationDelay = index < 8 ? index * 50 : 0;
+
+    // Calculate track average for album ratings
+    const trackAverage = useMemo(() => {
+        if (!item.trackRatings) return null;
+        try {
+            const ratings: TrackRatingEntry[] = typeof item.trackRatings === 'string'
+                ? JSON.parse(item.trackRatings)
+                : item.trackRatings;
+            if (!Array.isArray(ratings)) return null;
+            const rated = ratings.filter(tr => tr.score > 0);
+            if (rated.length === 0) return null;
+            const sum = rated.reduce((acc, tr) => acc + tr.score, 0);
+            return Math.round((sum / rated.length) * 10) / 10;
+        } catch {
+            return null;
+        }
+    }, [item.trackRatings]);
 
     const { isLiked, toggle, isMutating } = useRatingLike(item.id);
     const { data: likesCount } = useRatingLikesCount(item.id);
@@ -115,6 +133,14 @@ export default function FeedCard({ item, index }: FeedCardProps) {
                                 />
                             </View>
                         </View>
+                        {trackAverage !== null && (
+                            <Text
+                                className="text-xs font-medium mt-1"
+                                style={{ color: categoryColor }}
+                            >
+                                Media canciones: {trackAverage.toFixed(1)}
+                            </Text>
+                        )}
                     </View>
                 </View>
 
