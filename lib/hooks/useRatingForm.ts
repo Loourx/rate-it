@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { ContentType, ContentStatus, AllContent } from '@/lib/types/content';
+import { ContentType, ContentStatus, AllContent, AlbumTrack, Music } from '@/lib/types/content';
+import { TrackRatingEntry } from '@/lib/types/database';
 import { useContentDetails } from '@/lib/hooks/useContentDetails';
 import { useCreateRating, useExistingRating } from '@/lib/hooks/useCreateRating';
 import { useExistingContentStatus, useUpsertContentStatus } from '@/lib/hooks/useContentStatus';
@@ -26,6 +27,8 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
     const [hasSpoiler, setHasSpoiler] = useState(false);
     const [status, setStatus] = useState<ContentStatus | null>(null);
     const [prefilled, setPrefilled] = useState(false);
+    const [trackRatings, setTrackRatings] = useState<TrackRatingEntry[]>([]);
+    const [showTrackRatings, setShowTrackRatings] = useState(false);
     const [toastConfig, setToastConfig] = useState<{
         visible: boolean;
         message: string;
@@ -43,12 +46,52 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             setScore(existing.score);
             setReview(existing.review_text ?? '');
             setHasSpoiler(existing.has_spoiler ?? false);
+            if (existing.track_ratings) {
+                try {
+                    const parsed: TrackRatingEntry[] = typeof existing.track_ratings === 'string'
+                        ? JSON.parse(existing.track_ratings)
+                        : existing.track_ratings;
+                    setTrackRatings(parsed);
+                    if (parsed.some(tr => tr.score > 0)) {
+                        setShowTrackRatings(true);
+                    }
+                } catch {
+                    // track_ratings corrupto, ignorar
+                }
+            }
         }
         if (existingStatus) {
             setStatus(existingStatus.status as ContentStatus);
         }
         if (!loadingExisting && !loadingStatus) setPrefilled(true);
     }, [existing, existingStatus, loadingExisting, loadingStatus, prefilled]);
+
+    const setTrackScore = useCallback((trackId: string, score: number) => {
+        setTrackRatings(prev =>
+            prev.map(tr => tr.trackId === trackId ? { ...tr, score } : tr)
+        );
+    }, []);
+
+    const initializeTrackRatings = useCallback((tracks: AlbumTrack[]) => {
+        setTrackRatings(prev => {
+            if (prev.length > 0) return prev;
+            return tracks.map(t => ({
+                trackId: t.trackId,
+                trackName: t.trackName,
+                trackNumber: t.trackNumber,
+                score: 0,
+            }));
+        });
+    }, []);
+
+    const trackAverage = useMemo(() => {
+        const rated = trackRatings.filter(tr => tr.score > 0);
+        if (rated.length === 0) return null;
+        const sum = rated.reduce((acc, tr) => acc + tr.score, 0);
+        return Math.round((sum / rated.length) * 10) / 10;
+    }, [trackRatings]);
+
+    const isAlbumContent = contentType === 'music' && (item as Music)?.isAlbum === true;
 
     const handleSave = useCallback(async () => {
         if (!item) return;
@@ -61,6 +104,11 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 score,
                 reviewText: review.trim() || null,
                 hasSpoiler,
+                contentSubtype: isAlbumContent ? 'album'
+                    : (contentType === 'music' ? 'track' : null),
+                trackRatings: isAlbumContent && trackRatings.some(tr => tr.score > 0)
+                    ? trackRatings.filter(tr => tr.score > 0)
+                    : null,
             });
             if (status) {
                 await upsertStatus.mutateAsync({
@@ -87,7 +135,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 type: 'error',
             });
         }
-    }, [item, score, review, hasSpoiler, status, contentType, contentId]);
+    }, [item, score, review, hasSpoiler, status, contentType, contentId, isAlbumContent, trackRatings]);
 
     const isLoading = loadingContent || loadingExisting || loadingStatus;
     const isSaving = createRating.isPending || upsertStatus.isPending;
@@ -100,6 +148,9 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             review,
             hasSpoiler,
             status,
+            trackRatings,
+            showTrackRatings,
+            trackAverage,
         },
         state: {
             isLoading,
@@ -107,6 +158,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             isSaving,
             isEditing,
             toastConfig,
+            isAlbumContent,
         },
         actions: {
             setScore,
@@ -116,6 +168,9 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             setToastConfig,
             handleSave,
             refetch,
+            setTrackScore,
+            setShowTrackRatings,
+            initializeTrackRatings,
         },
     };
 }

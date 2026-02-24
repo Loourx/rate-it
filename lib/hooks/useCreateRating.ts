@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { ContentType } from '@/lib/types/content';
+import { TrackRatingEntry } from '@/lib/types/database';
 
 interface CreateRatingInput {
     contentType: ContentType;
@@ -11,6 +12,8 @@ interface CreateRatingInput {
     score: number;
     reviewText: string | null;
     hasSpoiler: boolean;
+    contentSubtype?: 'album' | 'track' | null;
+    trackRatings?: TrackRatingEntry[] | null;
 }
 
 interface UpdateRatingInput {
@@ -41,6 +44,10 @@ export function useCreateRating() {
                         score: input.score,
                         review_text: input.reviewText,
                         has_spoiler: input.hasSpoiler,
+                        content_subtype: input.contentSubtype ?? null,
+                        track_ratings: input.trackRatings?.length
+                            ? JSON.stringify(input.trackRatings)
+                            : null,
                     },
                     { onConflict: 'user_id,content_type,content_id' },
                 )
