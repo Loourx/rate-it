@@ -14,7 +14,7 @@ export const COLORS = {
 
     // Categories (Primary) - Nueva paleta vibrant
     categoryMovie: '#FF595E',    // Vibrant Coral
-    categorySeries: '#6A4C93',   // Dusty Grape
+    categorySeries: '#8939F7',   // Vibrant Purple
     categoryBook: '#8AC926',     // Yellow Green
     categoryGame: '#1982C4',     // Steel Blue
     categoryMusic: '#FFCA3A',    // Golden Pollen
@@ -23,7 +23,7 @@ export const COLORS = {
 
     // Categories (Faded - 20% opacity)
     categoryMovieFaded: 'rgba(255, 89, 94, 0.2)',
-    categorySeriesFaded: 'rgba(106, 76, 147, 0.2)',
+    categorySeriesFaded: 'rgba(137, 57, 247, 0.2)',
     categoryBookFaded: 'rgba(138, 201, 38, 0.2)',
     categoryGameFaded: 'rgba(25, 130, 196, 0.2)',
     categoryMusicFaded: 'rgba(255, 202, 58, 0.2)',

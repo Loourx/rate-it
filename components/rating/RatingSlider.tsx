@@ -110,6 +110,8 @@ export function RatingSlider({
 
     const pan = Gesture.Pan()
         .enabled(!isDisplay && !disabled)
+        .activeOffsetX([-12, 12])
+        .failOffsetY([-8, 8])
         .onUpdate((e) => {
             if (layoutWidth === 0) return;
             const ratio = Math.max(0, Math.min(1, e.x / layoutWidth));

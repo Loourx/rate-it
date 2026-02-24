@@ -16,6 +16,7 @@ export interface Movie extends BaseContent {
     overview?: string;
     genres?: string[];
     runtime?: number; // minutos
+    popularity?: number; // TMDB popularity score (for sorting only)
 }
 
 export interface Series extends BaseContent {
@@ -26,6 +27,7 @@ export interface Series extends BaseContent {
     genres?: string[];
     seasons?: number;
     episodes?: number;
+    popularity?: number; // TMDB popularity score (for sorting only)
 }
 
 export interface Book extends BaseContent {

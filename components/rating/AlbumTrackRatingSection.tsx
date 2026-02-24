@@ -67,6 +67,14 @@ export function AlbumTrackRatingSection({
                 </View>
             </TouchableOpacity>
 
+            {trackAverage !== null && (
+                <Text
+                    style={[styles.averageLabel, { color: categoryColor }]}
+                >
+                    Media canciones: {trackAverage.toFixed(1)}
+                </Text>
+            )}
+
             {expanded && (
                 <View style={styles.body}>
                     {isLoading && (

@@ -16,7 +16,7 @@ module.exports = {
                 tertiary: '#666666',
                 // Category Colors (Nueva paleta vibrant)
                 'category-movie': '#FF595E',    // Vibrant Coral
-                'category-series': '#6A4C93',   // Dusty Grape
+                'category-series': '#8939F7',   // Vibrant Purple
                 'category-book': '#8AC926',     // Yellow Green
                 'category-game': '#1982C4',     // Steel Blue
                 'category-music': '#FFCA3A',    // Golden Pollen
@@ -24,7 +24,7 @@ module.exports = {
                 'category-anything': '#FFFBFF', // Soft White
                 // Faded Colors (20% opacity)
                 'category-movie-faded': 'rgba(255, 89, 94, 0.2)',
-                'category-series-faded': 'rgba(106, 76, 147, 0.2)',
+                'category-series-faded': 'rgba(137, 57, 247, 0.2)',
                 'category-book-faded': 'rgba(138, 201, 38, 0.2)',
                 'category-game-faded': 'rgba(25, 130, 196, 0.2)',
                 'category-music-faded': 'rgba(255, 202, 58, 0.2)',
