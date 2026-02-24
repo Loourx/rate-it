@@ -103,19 +103,19 @@ export default function HomeScreen() {
                                 contentContainerClassName="px-6"
                             >
                                 {catRatings.map((rating) => {
-                                    // Construct base content on the fly
+                                    // Construct base content from rating data
                                     const content: BaseContent = {
                                         id: rating.content_id,
                                         type: rating.content_type,
-                                        title: (rating as any).content_title || 'Unknown',
-                                        imageUrl: (rating as any).content_image_url
+                                        title: rating.content_title,
+                                        imageUrl: rating.content_image_url
                                     };
 
                                     return (
                                         <ContentCard
                                             key={rating.id}
                                             content={content}
-                                            rating={rating.rating}
+                                            rating={rating.score}
                                             onPress={handlePress}
                                             orientation="vertical"
                                         />

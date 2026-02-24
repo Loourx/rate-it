@@ -14,27 +14,27 @@ module.exports = {
                 primary: '#FFFFFF',
                 secondary: '#A0A0A0',
                 tertiary: '#666666',
-                // Category Colors
-                'category-movie': '#FF6B6B',
-                'category-series': '#4ECDC4',
-                'category-book': '#FFE66D',
-                'category-game': '#95E1D3',
-                'category-music': '#F3A683',
-                'category-podcast': '#A8D8EA',
-                'category-anything': '#B3B3B3',
+                // Category Colors (Nueva paleta vibrant)
+                'category-movie': '#FF595E',    // Vibrant Coral
+                'category-series': '#6A4C93',   // Dusty Grape
+                'category-book': '#8AC926',     // Yellow Green
+                'category-game': '#1982C4',     // Steel Blue
+                'category-music': '#FFCA3A',    // Golden Pollen
+                'category-podcast': '#5BC0EB',  // Sky Blue
+                'category-anything': '#FFFBFF', // Soft White
                 // Faded Colors (20% opacity)
-                'category-movie-faded': 'rgba(255, 107, 107, 0.2)',
-                'category-series-faded': 'rgba(78, 205, 196, 0.2)',
-                'category-book-faded': 'rgba(255, 230, 109, 0.2)',
-                'category-game-faded': 'rgba(149, 225, 211, 0.2)',
-                'category-music-faded': 'rgba(243, 166, 131, 0.2)',
-                'category-podcast-faded': 'rgba(168, 216, 234, 0.2)',
-                'category-anything-faded': 'rgba(179, 179, 179, 0.2)',
+                'category-movie-faded': 'rgba(255, 89, 94, 0.2)',
+                'category-series-faded': 'rgba(106, 76, 147, 0.2)',
+                'category-book-faded': 'rgba(138, 201, 38, 0.2)',
+                'category-game-faded': 'rgba(25, 130, 196, 0.2)',
+                'category-music-faded': 'rgba(255, 202, 58, 0.2)',
+                'category-podcast-faded': 'rgba(91, 192, 235, 0.2)',
+                'category-anything-faded': 'rgba(255, 251, 255, 0.2)',
                 // Status
-                success: '#95E1D3',
-                warning: '#FFE66D',
-                error: '#FF6B6B',
-                link: '#4ECDC4',
+                success: '#34C759',
+                warning: '#FFD60A',
+                error: '#FF453A',
+                link: '#64D2FF',
             },
             spacing: {
                 xs: '4px',

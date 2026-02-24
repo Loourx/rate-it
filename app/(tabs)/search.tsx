@@ -50,9 +50,16 @@ export default function SearchScreen() {
         router.push(`/content/${item.type}/${item.id}`);
     };
 
+    const handleCreateAnything = () => {
+        router.push('/anything/create');
+    };
+
     const dismissKeyboard = () => {
         Keyboard.dismiss();
     };
+
+    // Props for empty state when searching Anything
+    const showCreateAnythingButton = selectedCategory === 'anything' && query.length >= 3 && (!data || data.length === 0);
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -75,7 +82,15 @@ export default function SearchScreen() {
                             isLoading={isLoading && query.length >= 3}
                             isError={isError}
                             onItemPress={handleItemPress}
-                            emptyMessage={query.length < 3 ? 'Escribe al menos 3 caracteres' : 'No se encontraron resultados'}
+                            emptyMessage={
+                                query.length < 3
+                                    ? 'Escribe al menos 3 caracteres'
+                                    : selectedCategory === 'anything'
+                                    ? '¿No existe? ¡Créalo tú mismo!'
+                                    : 'No se encontraron resultados'
+                            }
+                            emptyActionLabel={showCreateAnythingButton ? 'Crear Anything' : undefined}
+                            onEmptyAction={showCreateAnythingButton ? handleCreateAnything : undefined}
                         />
                     </View>
                 </View>

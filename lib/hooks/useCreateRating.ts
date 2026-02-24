@@ -29,15 +29,12 @@ export function useCreateRating() {
         mutationFn: async (input: CreateRatingInput) => {
             if (!userId) throw new Error('No autenticado');
 
-            // Map 'anything' to 'custom' for DB compatibility
-            const dbContentType = input.contentType === 'anything' ? 'custom' : input.contentType;
-
             const { data, error } = await supabase
                 .from('ratings')
                 .upsert(
                     {
                         user_id: userId,
-                        content_type: dbContentType,
+                        content_type: input.contentType,
                         content_id: input.contentId,
                         content_title: input.contentTitle,
                         content_image_url: input.contentImageUrl,
@@ -65,10 +62,9 @@ export function useCreateRating() {
 export function useExistingRating(contentType: ContentType, contentId: string) {
     const { session } = useAuthStore();
     const userId = session?.user.id;
-    const dbContentType = contentType === 'anything' ? 'custom' : contentType;
 
     return useQuery({
-        queryKey: ['ratings', userId, dbContentType, contentId],
+        queryKey: ['ratings', userId, contentType, contentId],
         queryFn: async () => {
             if (!userId) return null;
 
@@ -76,7 +72,7 @@ export function useExistingRating(contentType: ContentType, contentId: string) {
                 .from('ratings')
                 .select('*')
                 .eq('user_id', userId)
-                .eq('content_type', dbContentType)
+                .eq('content_type', contentType)
                 .eq('content_id', contentId)
                 .maybeSingle();
 

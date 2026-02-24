@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'expo-router';
+import { COLORS } from '@/lib/utils/constants';
 
 export default function LoginScreen() {
     const { signInWithGoogle, signInWithEmail, isLoading, isAuthenticated } = useAuth();
@@ -52,7 +53,7 @@ export default function LoginScreen() {
             </View>
 
             {isLoading ? (
-                <ActivityIndicator size="large" color="#4ECDC4" />
+                <ActivityIndicator size="large" color={COLORS.link} />
             ) : (
                 <View className="w-full max-w-sm gap-4">
                     <TouchableOpacity
@@ -90,13 +91,13 @@ export default function LoginScreen() {
                             <TouchableOpacity
                                 onPress={handleDevLogin}
                                 disabled={devLoading}
-                                className="bg-surface-elevated border border-accent rounded-full py-3 px-8"
+                                className="bg-surface-elevated border border-link rounded-full py-3 px-8"
                                 activeOpacity={0.8}
                             >
                                 {devLoading ? (
-                                    <ActivityIndicator size="small" color="#4ECDC4" />
+                                    <ActivityIndicator size="small" color={COLORS.link} />
                                 ) : (
-                                    <Text className="text-accent text-center font-semibold">
+                                    <Text className="text-link text-center font-semibold">
                                         Dev Login (Email)
                                     </Text>
                                 )}

@@ -164,12 +164,12 @@ export default function FeedCard({ item, index }: FeedCardProps) {
 function getCategoryColor(type: FeedItem['contentType']): string {
     const colors: Record<FeedItem['contentType'], string> = {
         movie: COLORS.categoryMovie,
-        tv: COLORS.categorySeries,
+        series: COLORS.categorySeries,
         book: COLORS.categoryBook,
         game: COLORS.categoryGame,
         music: COLORS.categoryMusic,
         podcast: COLORS.categoryPodcast,
-        custom: COLORS.categoryAnything,
+        anything: COLORS.categoryAnything,
     };
     return colors[type] ?? COLORS.textPrimary;
 }

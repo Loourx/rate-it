@@ -21,7 +21,7 @@ export interface FeedItem {
     userAvatarUrl: string | null;
     userDisplayName: string | null;
     contentId: string;
-    contentType: 'movie' | 'tv' | 'book' | 'game' | 'music' | 'podcast' | 'custom';
+    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
     contentTitle: string;
     contentImageUrl: string | null;
     score: number;

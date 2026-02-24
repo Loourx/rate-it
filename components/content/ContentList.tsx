@@ -12,6 +12,8 @@ interface ContentListProps {
     isError: boolean;
     onItemPress: (content: BaseContent) => void;
     emptyMessage?: string;
+    emptyActionLabel?: string;
+    onEmptyAction?: () => void;
 }
 
 export function ContentList({
@@ -19,7 +21,9 @@ export function ContentList({
     isLoading,
     isError,
     onItemPress,
-    emptyMessage = 'No se encontraron resultados'
+    emptyMessage = 'No se encontraron resultados',
+    emptyActionLabel,
+    onEmptyAction,
 }: ContentListProps) {
 
     if (isLoading) {
@@ -48,6 +52,8 @@ export function ContentList({
                 icon="search-outline"
                 title="Sin resultados"
                 description={emptyMessage}
+                actionLabel={emptyActionLabel}
+                onAction={onEmptyAction}
             />
         );
     }

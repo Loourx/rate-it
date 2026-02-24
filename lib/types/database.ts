@@ -12,7 +12,7 @@ export interface Profile {
 export interface Rating {
     id: string; // uuid
     userId: string; // uuid references profiles
-    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'custom';
+    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
     contentId: string; // text
     contentTitle: string; // text
     contentImageUrl: string | null; // text
@@ -26,7 +26,7 @@ export interface Rating {
 export interface UserContentStatus {
     id: string; // uuid
     userId: string; // uuid references profiles
-    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'custom';
+    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
     contentId: string; // text
     contentTitle: string; // text
     contentImageUrl: string | null; // text
@@ -38,7 +38,7 @@ export interface UserContentStatus {
 export interface PinnedItem {
     id: string; // uuid
     userId: string; // uuid references profiles
-    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'custom';
+    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
     contentId: string; // text
     contentTitle: string; // text
     contentImageUrl: string | null; // text

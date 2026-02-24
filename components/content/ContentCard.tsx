@@ -46,7 +46,7 @@ export function ContentCard({ content, onPress, rating, orientation = 'horizonta
             case 'podcast':
                 return (item as Podcast).publisher || 'Podcast';
             case 'anything':
-                return (item as Anything).categoryTag ? `${(item as Anything).categoryTag}` : 'Custom';
+                return (item as Anything).categoryTag ? `${(item as Anything).categoryTag}` : 'Anything';
             default:
                 return 'Contenido';
         }
@@ -74,11 +74,11 @@ export function ContentCard({ content, onPress, rating, orientation = 'horizonta
     // Dynamic classes based on orientation
     const containerClasses = orientation === 'horizontal'
         ? "flex-row p-3 bg-surface rounded-2xl mb-3 overflow-hidden"
-        : "w-[160px] p-3 bg-surface rounded-2xl mr-3 overflow-hidden h-[260px]"; // Fixed width for carousel
+        : "w-[160px] p-3 bg-surface rounded-2xl mr-3 overflow-hidden"; // Fixed width for carousel
 
     const imageContainerClasses = orientation === 'horizontal'
         ? "w-16 h-24 rounded-lg mr-4"
-        : "w-full h-[180px] rounded-lg mb-3";
+        : "w-full h-[140px] rounded-lg mb-2";
 
     return (
         <AnimatedPressable
@@ -102,8 +102,11 @@ export function ContentCard({ content, onPress, rating, orientation = 'horizonta
                 )}
             </View>
 
-            <View className="flex-1 justify-center">
-                <Text className="text-base font-semibold text-primary mb-1" numberOfLines={orientation === 'vertical' ? 1 : 2}>
+            <View className={orientation === 'vertical' ? "flex-1" : "flex-1 justify-center"}>
+                <Text 
+                    className="text-sm font-semibold text-primary mb-1" 
+                    numberOfLines={orientation === 'vertical' ? 2 : 2}
+                >
                     {content.title}
                 </Text>
                 {orientation === 'horizontal' && (
@@ -118,6 +121,7 @@ export function ContentCard({ content, onPress, rating, orientation = 'horizonta
                         onValueChange={() => undefined}
                         category={content.type}
                         size="display"
+                        layout={orientation === 'vertical' ? 'vertical' : 'horizontal'}
                     />
                 ) : (
                     <View className="flex-row items-center">

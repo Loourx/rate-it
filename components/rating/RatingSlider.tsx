@@ -35,6 +35,7 @@ interface RatingSliderProps {
     category: ContentType;
     disabled?: boolean;
     size?: 'display' | 'interactive';
+    layout?: 'horizontal' | 'vertical'; // For display mode: horizontal = number beside bar, vertical = number above bar
 }
 
 function clampAndSnap(raw: number): number {
@@ -54,6 +55,7 @@ export function RatingSlider({
     category,
     disabled = false,
     size = 'interactive',
+    layout = 'horizontal',
 }: RatingSliderProps) {
     const categoryColor = CATEGORY_COLORS[category];
     /** Use red when score is exactly 0 */
@@ -156,9 +158,25 @@ export function RatingSlider({
     }, [isDisplay, value]);
 
     if (isDisplay) {
+        // Vertical layout: number on top, bar below (for card carousels)
+        if (layout === 'vertical') {
+            return (
+                <View style={styles.displayVertical}>
+                    <Text style={[styles.displayNumberLarge, { color }]}>
+                        {formatScore(value)}
+                    </Text>
+                    <View style={[styles.track, { height: barHeight }]}>
+                        <Animated.View
+                            style={[styles.fill, { backgroundColor: color }, fillStyle]}
+                        />
+                    </View>
+                </View>
+            );
+        }
+        // Horizontal layout: bar with number beside (default)
         return (
             <View style={styles.displayRow}>
-                <View style={[styles.track, { height: barHeight }]}>
+                <View style={[styles.trackFlex, { height: barHeight }]}>
                     <Animated.View
                         style={[styles.fill, { backgroundColor: color }, fillStyle]}
                     />
@@ -207,6 +225,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
     },
+    displayVertical: {
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 4,
+        width: '100%',
+    },
     interactiveRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -218,6 +242,12 @@ const styles = StyleSheet.create({
     },
     track: {
         width: '100%',
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: 999,
+        overflow: 'hidden',
+    },
+    trackFlex: {
+        flex: 1,
         backgroundColor: COLORS.surfaceElevated,
         borderRadius: 999,
         overflow: 'hidden',
@@ -237,10 +267,14 @@ const styles = StyleSheet.create({
         borderRadius: 0.5,
     },
     displayNumber: {
-        fontSize: FONT_SIZE.bodySmall,
+        fontSize: FONT_SIZE.bodyMedium,
         fontWeight: '700',
-        width: 28,
+        minWidth: 24,
         textAlign: 'right',
+    },
+    displayNumberLarge: {
+        fontSize: FONT_SIZE.headlineMedium,
+        fontWeight: '700',
     },
     interactiveNumber: {
         fontSize: FONT_SIZE.headlineLarge,

@@ -4,7 +4,7 @@ import { useAuthStore } from '@/lib/stores/authStore';
 
 const PAGE_SIZE = 20;
 
-type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'custom';
+type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
 
 export interface RatingHistoryItem {
     id: string;

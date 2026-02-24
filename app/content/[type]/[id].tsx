@@ -1,31 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useContentDetails } from '../../../lib/hooks/useContentDetails';
 import { ContentType, Movie, Series, Book, Game, Music, Podcast, Anything } from '../../../lib/types/content';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '@/lib/utils/constants';
+import { ReportModal } from '@/components/anything/ReportModal';
+import { useHasReported } from '@/lib/hooks/useReportAnything';
 
 export default function ContentDetailsScreen() {
     const { type, id } = useLocalSearchParams<{ type: ContentType; id: string }>();
     const router = useRouter();
+    const [showReportModal, setShowReportModal] = useState(false);
 
     // Ensure type is a valid ContentType, though routing should handle this if configured strictly
     const { data: item, isLoading, isError, error } = useContentDetails(type as ContentType, id);
+    const { data: hasReported } = useHasReported(type === 'anything' ? id : '');
 
     if (isLoading) {
         return (
-            <View className="flex-1 items-center justify-center bg-white dark:bg-black">
-                <ActivityIndicator size="large" color="#2563EB" />
+            <View className="flex-1 items-center justify-center bg-background">
+                <ActivityIndicator size="large" color={COLORS.link} />
             </View>
         );
     }
 
     if (isError || !item) {
         return (
-            <View className="flex-1 items-center justify-center bg-white dark:bg-black px-6">
-                <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
-                <Text className="text-red-500 text-lg font-bold mt-4 text-center">Error al cargar contenido</Text>
-                <Text className="text-gray-500 text-center mt-2">{error?.message || 'No se encontró el contenido especificado.'}</Text>
+            <View className="flex-1 items-center justify-center bg-background px-6">
+                <Ionicons name="alert-circle-outline" size={48} color={COLORS.error} />
+                <Text className="text-error text-lg font-bold mt-4 text-center">Error al cargar contenido</Text>
+                <Text className="text-secondary text-center mt-2">{error?.message || 'No se encontró el contenido especificado.'}</Text>
             </View>
         );
     }
@@ -107,9 +112,9 @@ export default function ContentDetailsScreen() {
     return (
         <>
             <Stack.Screen options={{ title: 'Detalles', headerBackTitle: 'Atrás' }} />
-            <ScrollView className="flex-1 bg-white dark:bg-black">
+            <ScrollView className="flex-1 bg-background">
                 {/* Header Image */}
-                <View className="w-full h-80 bg-gray-200 dark:bg-gray-800 relative">
+                <View className="w-full h-80 bg-surface-elevated relative">
                     {item.imageUrl ? (
                         <Image
                             source={{ uri: item.imageUrl }}
@@ -118,7 +123,7 @@ export default function ContentDetailsScreen() {
                         />
                     ) : (
                         <View className="w-full h-full items-center justify-center">
-                            <Text className="text-4xl text-gray-400 font-bold">{item.title.substring(0, 1)}</Text>
+                            <Text className="text-4xl text-tertiary font-bold">{item.title.substring(0, 1)}</Text>
                         </View>
                     )}
                     <View className="absolute bottom-0 left-0 right-0 h-24 bg-black/60" />
@@ -127,7 +132,7 @@ export default function ContentDetailsScreen() {
                 {/* Content Info */}
                 <View className="px-6 -mt-10 pb-10">
                     {/* Title */}
-                    <Text className="text-3xl font-bold text-white mb-2">{item.title}</Text>
+                    <Text className="text-3xl font-bold text-primary mb-2">{item.title}</Text>
 
                     {/* Metadata Badges */}
                     {renderMetadata()}
@@ -135,42 +140,68 @@ export default function ContentDetailsScreen() {
                     {/* Action Buttons */}
                     <View className="flex-row gap-4 my-6">
                         <TouchableOpacity
-                            className="flex-1 bg-blue-600 py-3 rounded-lg flex-row items-center justify-center"
+                            className="flex-1 bg-link py-3 rounded-lg flex-row items-center justify-center"
                             onPress={() => router.push(`/rate/${type}/${id}`)}
                         >
                             <Ionicons name="star" size={20} color="white" className="mr-2" />
-                            <Text className="text-white font-bold text-base ml-2">Valorar</Text>
+                            <Text className="text-primary font-bold text-base ml-2">Valorar</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg items-center justify-center border border-gray-200 dark:border-gray-700">
-                            <Ionicons name="bookmark-outline" size={24} color="#4B5563" />
+                        <TouchableOpacity className="w-12 h-12 bg-surface rounded-lg items-center justify-center border border-divider">
+                            <Ionicons name="bookmark-outline" size={24} color={COLORS.textSecondary} />
                         </TouchableOpacity>
-                        <TouchableOpacity className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg items-center justify-center border border-gray-200 dark:border-gray-700">
-                            <Ionicons name="share-social-outline" size={24} color="#4B5563" />
+                        <TouchableOpacity className="w-12 h-12 bg-surface rounded-lg items-center justify-center border border-divider">
+                            <Ionicons name="share-social-outline" size={24} color={COLORS.textSecondary} />
                         </TouchableOpacity>
                     </View>
 
                     {/* Description */}
                     <View>
-                        <Text className="text-lg font-bold text-gray-900 dark:text-white mb-2">Sinopsis</Text>
-                        <Text className="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                        <Text className="text-lg font-bold text-primary mb-2">Sinopsis</Text>
+                        <Text className="text-base text-secondary leading-relaxed">
                             {getDescription() || 'No hay descripción disponible para este contenido.'}
                         </Text>
                     </View>
 
-                    {/* Debug Info (Remove in production) */}
-                    {/* <Text className="mt-10 text-xs text-gray-400 font-mono">ID: {item.id} | Type: {item.type}</Text> */}
+                    {/* Report button for Anything items */}
+                    {item.type === 'anything' && (
+                        <TouchableOpacity
+                            onPress={() => setShowReportModal(true)}
+                            disabled={hasReported}
+                            className="flex-row items-center justify-center mt-8 py-3 border border-divider rounded-xl"
+                            style={{ opacity: hasReported ? 0.5 : 1 }}
+                        >
+                            <Ionicons
+                                name={hasReported ? 'checkmark-circle' : 'flag-outline'}
+                                size={18}
+                                color={hasReported ? COLORS.success : COLORS.textSecondary}
+                            />
+                            <Text className="text-secondary ml-2">
+                                {hasReported ? 'Ya has reportado este item' : 'Reportar contenido inapropiado'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </ScrollView>
+
+            {/* Report Modal */}
+            {item.type === 'anything' && (
+                <ReportModal
+                    visible={showReportModal}
+                    onClose={() => setShowReportModal(false)}
+                    anythingItemId={item.id}
+                    itemTitle={item.title}
+                />
+            )}
         </>
     );
 }
 
 function Badge({ text, icon }: { text: string; icon: keyof typeof Ionicons.glyphMap }) {
     return (
-        <View className="flex-row items-center bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700">
-            <Ionicons name={icon} size={14} color="#6B7280" />
-            <Text className="text-xs font-medium text-gray-700 dark:text-gray-300 ml-1.5">{text}</Text>
+        <View className="flex-row items-center bg-surface px-3 py-1.5 rounded-full border border-divider">
+            <Ionicons name={icon} size={14} color={COLORS.textSecondary} />
+            <Text className="text-xs font-medium text-secondary ml-1.5">{text}</Text>
         </View>
     );
 }

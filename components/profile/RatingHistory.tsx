@@ -22,7 +22,7 @@ const CATEGORY_META: Record<string, { label: string; color: string }> = {
     game: { label: 'Juegos', color: COLORS.categoryGame },
     music: { label: 'Música', color: COLORS.categoryMusic },
     podcast: { label: 'Podcasts', color: COLORS.categoryPodcast },
-    custom: { label: 'Otros', color: COLORS.categoryAnything },
+    anything: { label: 'Anything', color: COLORS.categoryAnything },
 };
 
 function SkeletonCard() {
@@ -48,8 +48,6 @@ function SkeletonCard() {
 
 function HistoryItem({ item, onPress }: { item: RatingHistoryItem; onPress: () => void }) {
     const meta = CATEGORY_META[item.contentType] ?? { label: item.contentType, color: COLORS.textTertiary };
-    // Map 'custom' to 'anything' for RatingSlider ContentType
-    const sliderCategory: ContentType = item.contentType === 'custom' ? 'anything' : item.contentType;
 
     return (
         <TouchableOpacity onPress={onPress} style={styles.item} activeOpacity={0.7}>
@@ -93,8 +91,7 @@ export function RatingHistory({ userId }: { userId?: string }) {
 
     const handlePress = useCallback(
         (item: RatingHistoryItem) => {
-            const routeType = item.contentType === 'custom' ? 'anything' : item.contentType;
-            router.push(`/content/${routeType}/${item.contentId}`);
+            router.push(`/content/${item.contentType}/${item.contentId}`);
         },
         [router],
     );

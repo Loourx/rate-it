@@ -12,29 +12,29 @@ export const COLORS = {
     textSecondary: '#A0A0A0',
     textTertiary: '#666666',
 
-    // Categories (Primary)
-    categoryMovie: '#FF6B6B',   // Coral Red
-    categorySeries: '#4ECDC4',  // Teal
-    categoryBook: '#FFE66D',    // Sunny Yellow
-    categoryGame: '#95E1D3',    // Mint
-    categoryMusic: '#F3A683',   // Peach
-    categoryPodcast: '#A8D8EA', // Light Blue
-    categoryAnything: '#B3B3B3',// Grey
+    // Categories (Primary) - Nueva paleta vibrant
+    categoryMovie: '#FF595E',    // Vibrant Coral
+    categorySeries: '#6A4C93',   // Dusty Grape
+    categoryBook: '#8AC926',     // Yellow Green
+    categoryGame: '#1982C4',     // Steel Blue
+    categoryMusic: '#FFCA3A',    // Golden Pollen
+    categoryPodcast: '#5BC0EB',  // Sky Blue
+    categoryAnything: '#FFFBFF', // Soft White
 
     // Categories (Faded - 20% opacity)
-    categoryMovieFaded: 'rgba(255, 107, 107, 0.2)',
-    categorySeriesFaded: 'rgba(78, 205, 196, 0.2)',
-    categoryBookFaded: 'rgba(255, 230, 109, 0.2)',
-    categoryGameFaded: 'rgba(149, 225, 211, 0.2)',
-    categoryMusicFaded: 'rgba(243, 166, 131, 0.2)',
-    categoryPodcastFaded: 'rgba(168, 216, 234, 0.2)',
-    categoryAnythingFaded: 'rgba(179, 179, 179, 0.2)',
+    categoryMovieFaded: 'rgba(255, 89, 94, 0.2)',
+    categorySeriesFaded: 'rgba(106, 76, 147, 0.2)',
+    categoryBookFaded: 'rgba(138, 201, 38, 0.2)',
+    categoryGameFaded: 'rgba(25, 130, 196, 0.2)',
+    categoryMusicFaded: 'rgba(255, 202, 58, 0.2)',
+    categoryPodcastFaded: 'rgba(91, 192, 235, 0.2)',
+    categoryAnythingFaded: 'rgba(255, 251, 255, 0.2)',
 
     // Status
-    success: '#95E1D3',
-    warning: '#FFE66D',
-    error: '#FF6B6B',
-    link: '#4ECDC4',
+    success: '#34C759',
+    warning: '#FFD60A',
+    error: '#FF453A',
+    link: '#64D2FF',
 };
 
 export const SPACING = {

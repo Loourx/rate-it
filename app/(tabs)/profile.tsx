@@ -26,11 +26,8 @@ export default function ProfileScreen() {
     };
     const { data: feedData } = useSocialFeed();
     const feedItems = feedData?.pages.flatMap(page => page) ?? [];
-
-    console.log('📰 Total items en feed:', feedItems.length);
-    console.log('📝 Items:', feedItems.map(item => `${item.username} - ${item.contentTitle}`));
     const myUserId = useAuthStore((state) => state.user?.id);
-    console.log('🆔 MI UUID:', myUserId);
+
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
             <ScrollView contentContainerClassName="pb-24">

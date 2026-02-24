@@ -14,10 +14,9 @@ interface UpsertStatusInput {
 export function useExistingContentStatus(contentType: ContentType, contentId: string) {
     const { session } = useAuthStore();
     const userId = session?.user.id;
-    const dbContentType = contentType === 'anything' ? 'custom' : contentType;
 
     return useQuery({
-        queryKey: ['content-status', userId, dbContentType, contentId],
+        queryKey: ['content-status', userId, contentType, contentId],
         queryFn: async () => {
             if (!userId) return null;
 
@@ -25,7 +24,7 @@ export function useExistingContentStatus(contentType: ContentType, contentId: st
                 .from('user_content_status')
                 .select('*')
                 .eq('user_id', userId)
-                .eq('content_type', dbContentType)
+                .eq('content_type', contentType)
                 .eq('content_id', contentId)
                 .maybeSingle();
 
@@ -45,14 +44,12 @@ export function useUpsertContentStatus() {
         mutationFn: async (input: UpsertStatusInput) => {
             if (!userId) throw new Error('No autenticado');
 
-            const dbContentType = input.contentType === 'anything' ? 'custom' : input.contentType;
-
             const { data, error } = await supabase
                 .from('user_content_status')
                 .upsert(
                     {
                         user_id: userId,
-                        content_type: dbContentType,
+                        content_type: input.contentType,
                         content_id: input.contentId,
                         content_title: input.contentTitle,
                         content_image_url: input.contentImageUrl,

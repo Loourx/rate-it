@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 
-type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'custom';
+type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
 
 export interface CategoryStat {
     type: DbContentType;
