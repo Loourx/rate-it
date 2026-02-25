@@ -85,6 +85,7 @@ export interface AnythingItem {
     title: string; // text (max 200)
     description: string | null; // text (max 500)
     categoryTag: string | null; // text
+    imageUrl: string | null; // text – public URL from Storage bucket 'anything-images'
     createdAt: string; // timestamptz
 }
 

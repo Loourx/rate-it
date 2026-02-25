@@ -1,42 +1,65 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import {
+    View, Text, TextInput, TouchableOpacity,
+    KeyboardAvoidingView, Platform, ScrollView, Image, StyleSheet,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '@/lib/utils/constants';
+import * as ImagePicker from 'expo-image-picker';
+import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
 import { useCreateAnythingItem } from '@/lib/hooks/useCreateAnythingItem';
+import { Toast } from '@/components/ui/Toast';
 
-const MAX_TITLE_LENGTH = 200;
-const MAX_DESCRIPTION_LENGTH = 500;
+const MAX_TITLE = 200;
+const MAX_TAG = 50;
+const MAX_DESC = 500;
 
 export default function CreateAnythingScreen() {
     const router = useRouter();
     const { mutate: createItem, isPending } = useCreateAnythingItem();
 
     const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
     const [categoryTag, setCategoryTag] = useState('');
+    const [description, setDescription] = useState('');
+    const [imageUri, setImageUri] = useState<string | null>(null);
+    const [toastMsg, setToastMsg] = useState<string | null>(null);
+    const [toastError, setToastError] = useState(false);
 
     const isValid = title.trim().length >= 2;
 
+    const pickImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.7,
+        });
+        if (!result.canceled && result.assets[0]) {
+            setImageUri(result.assets[0].uri);
+        }
+    };
+
     const handleCreate = () => {
         if (!isValid || isPending) return;
-
         createItem(
             {
                 title: title.trim(),
                 description: description.trim() || undefined,
                 categoryTag: categoryTag.trim() || undefined,
+                imageUri: imageUri ?? undefined,
             },
             {
                 onSuccess: (data) => {
-                    // Navigate to rate the newly created item
-                    router.replace(`/rate/anything/${data.id}`);
+                    setToastMsg('¡Item creado!');
+                    setToastError(false);
+                    setTimeout(() => router.replace(`/content/anything/${data.id}`), 700);
                 },
                 onError: (error) => {
-                    Alert.alert('Error', error.message || 'No se pudo crear el item');
+                    setToastMsg(error.message || 'No se pudo crear el item');
+                    setToastError(true);
                 },
-            }
+            },
         );
     };
 
@@ -44,120 +67,151 @@ export default function CreateAnythingScreen() {
         <>
             <Stack.Screen
                 options={{
-                    headerShown: true,
-                    title: 'Crear Anything',
+                    title: 'Crear item',
                     headerStyle: { backgroundColor: COLORS.background },
                     headerTintColor: COLORS.textPrimary,
                 }}
             />
-            <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+            <SafeAreaView style={s.safe} edges={['bottom']}>
                 <KeyboardAvoidingView
+                    style={s.flex}
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    className="flex-1"
                 >
-                    <ScrollView className="flex-1 px-6 pt-6" keyboardShouldPersistTaps="handled">
-                        {/* Hero Section */}
-                        <View className="items-center mb-8">
-                            <View
-                                className="w-20 h-20 rounded-full items-center justify-center mb-4"
-                                style={{ backgroundColor: COLORS.categoryAnything + '33' }}
-                            >
-                                <Ionicons name="sparkles" size={40} color={COLORS.categoryAnything} />
-                            </View>
-                            <Text className="text-primary text-xl font-bold text-center">
-                                ¿No encuentras lo que buscas?
-                            </Text>
-                            <Text className="text-secondary text-center mt-2">
-                                Crea tu propio item para valorar cualquier cosa
-                            </Text>
-                        </View>
+                    <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
+
+                        {/* Image Picker */}
+                        <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={s.imageTouchable}>
+                            {imageUri ? (
+                                <>
+                                    <Image source={{ uri: imageUri }} style={s.imagePreview} />
+                                    <View style={s.imageOverlay}>
+                                        <Ionicons name="camera" size={22} color={COLORS.textPrimary} />
+                                        <Text style={s.imageOverlayText}>Cambiar</Text>
+                                    </View>
+                                </>
+                            ) : (
+                                <View style={s.imagePlaceholder}>
+                                    <Ionicons name="camera-outline" size={36} color={COLORS.categoryAnything} />
+                                    <Text style={s.imagePlaceholderText}>Añadir foto</Text>
+                                    <Text style={s.imagePlaceholderHint}>Opcional</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                        {imageUri && (
+                            <TouchableOpacity onPress={() => setImageUri(null)} style={s.removeBtn}>
+                                <Ionicons name="close-circle" size={20} color={COLORS.textTertiary} />
+                                <Text style={s.removeText}>Eliminar foto</Text>
+                            </TouchableOpacity>
+                        )}
 
                         {/* Form */}
-                        <View className="gap-4">
+                        <View style={s.form}>
                             {/* Title */}
-                            <View>
-                                <Text className="text-secondary text-sm mb-2">Título *</Text>
-                                <TextInput
-                                    className="bg-surface text-primary px-4 py-3 rounded-xl border border-divider"
-                                    placeholderTextColor={COLORS.textTertiary}
-                                    placeholder="Ej: Mi café favorito, El parque del barrio..."
-                                    value={title}
-                                    onChangeText={(text) => setTitle(text.slice(0, MAX_TITLE_LENGTH))}
-                                    maxLength={MAX_TITLE_LENGTH}
-                                    autoFocus
-                                />
-                                <Text className="text-tertiary text-xs text-right mt-1">
-                                    {title.length}/{MAX_TITLE_LENGTH}
-                                </Text>
-                            </View>
+                            <Text style={s.label}>Título *</Text>
+                            <TextInput
+                                style={s.input}
+                                placeholderTextColor={COLORS.textTertiary}
+                                placeholder="Ej: Espátula IKEA GNARP"
+                                value={title}
+                                onChangeText={(t) => setTitle(t.slice(0, MAX_TITLE))}
+                                maxLength={MAX_TITLE}
+                                autoFocus
+                            />
+                            <Text style={s.counter}>{title.length}/{MAX_TITLE}</Text>
 
                             {/* Category Tag */}
-                            <View>
-                                <Text className="text-secondary text-sm mb-2">Categoría (opcional)</Text>
-                                <TextInput
-                                    className="bg-surface text-primary px-4 py-3 rounded-xl border border-divider"
-                                    placeholderTextColor={COLORS.textTertiary}
-                                    placeholder="Ej: Comida, Lugar, Experiencia..."
-                                    value={categoryTag}
-                                    onChangeText={setCategoryTag}
-                                />
-                            </View>
+                            <Text style={s.label}>Subcategoría</Text>
+                            <TextInput
+                                style={s.input}
+                                placeholderTextColor={COLORS.textTertiary}
+                                placeholder="Ej: Cocina, Restaurante, Gadget..."
+                                value={categoryTag}
+                                onChangeText={(t) => setCategoryTag(t.slice(0, MAX_TAG))}
+                                maxLength={MAX_TAG}
+                            />
 
                             {/* Description */}
-                            <View>
-                                <Text className="text-secondary text-sm mb-2">Descripción (opcional)</Text>
-                                <TextInput
-                                    className="bg-surface text-primary px-4 py-3 rounded-xl border border-divider min-h-[100px]"
-                                    placeholderTextColor={COLORS.textTertiary}
-                                    placeholder="Añade contexto o detalles sobre este item..."
-                                    value={description}
-                                    onChangeText={(text) => setDescription(text.slice(0, MAX_DESCRIPTION_LENGTH))}
-                                    maxLength={MAX_DESCRIPTION_LENGTH}
-                                    multiline
-                                    textAlignVertical="top"
-                                />
-                                <Text className="text-tertiary text-xs text-right mt-1">
-                                    {description.length}/{MAX_DESCRIPTION_LENGTH}
-                                </Text>
-                            </View>
-                        </View>
-
-                        {/* Info Box */}
-                        <View className="mt-6 bg-surface p-4 rounded-xl border border-divider">
-                            <View className="flex-row items-center gap-2 mb-2">
-                                <Ionicons name="information-circle" size={20} color={COLORS.link} />
-                                <Text className="text-link font-semibold">Sobre Anything</Text>
-                            </View>
-                            <Text className="text-secondary text-sm leading-5">
-                                Los items de Anything son creados por la comunidad. Si creas algo inapropiado,
-                                otros usuarios pueden reportarlo.
-                            </Text>
+                            <Text style={[s.label, { marginTop: SPACING.base }]}>Descripción</Text>
+                            <TextInput
+                                style={[s.input, s.multilineInput]}
+                                placeholderTextColor={COLORS.textTertiary}
+                                placeholder="Describe brevemente este item..."
+                                value={description}
+                                onChangeText={(t) => setDescription(t.slice(0, MAX_DESC))}
+                                maxLength={MAX_DESC}
+                                multiline
+                                textAlignVertical="top"
+                                numberOfLines={3}
+                            />
+                            <Text style={s.counter}>{description.length}/{MAX_DESC}</Text>
                         </View>
                     </ScrollView>
 
-                    {/* Submit Button */}
-                    <View className="px-6 py-4 border-t border-divider">
+                    {/* Submit */}
+                    <View style={s.bottomBar}>
                         <TouchableOpacity
                             onPress={handleCreate}
                             disabled={!isValid || isPending}
-                            className="py-4 rounded-xl items-center"
-                            style={{
-                                backgroundColor: isValid ? COLORS.categoryAnything : COLORS.surfaceElevated,
-                                opacity: isPending ? 0.7 : 1,
-                            }}
+                            style={[s.submitBtn, { backgroundColor: isValid ? COLORS.categoryAnything : COLORS.surfaceElevated, opacity: isPending ? 0.7 : 1 }]}
+                            activeOpacity={0.85}
                         >
                             {isPending ? (
-                                <Text className="text-primary font-bold text-base">Creando...</Text>
+                                <Text style={s.submitText}>Creando...</Text>
                             ) : (
-                                <View className="flex-row items-center gap-2">
-                                    <Ionicons name="add-circle" size={20} color={COLORS.textPrimary} />
-                                    <Text className="text-primary font-bold text-base">Crear y valorar</Text>
+                                <View style={s.submitRow}>
+                                    <Ionicons name="sparkles" size={18} color={COLORS.textPrimary} />
+                                    <Text style={s.submitText}>Crear y publicar</Text>
                                 </View>
                             )}
                         </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
+
+                <Toast
+                    message={toastMsg ?? ''}
+                    visible={!!toastMsg}
+                    onDismiss={() => setToastMsg(null)}
+                />
             </SafeAreaView>
         </>
     );
 }
+
+const s = StyleSheet.create({
+    safe: { flex: 1, backgroundColor: COLORS.background },
+    flex: { flex: 1 },
+    scroll: { flex: 1 },
+    scrollContent: { padding: SPACING.xl, paddingBottom: 20 },
+    imageTouchable: {
+        width: 200, height: 200, borderRadius: RADIUS.lg,
+        alignSelf: 'center', marginBottom: SPACING.sm,
+        overflow: 'hidden', backgroundColor: COLORS.surfaceElevated,
+    },
+    imagePreview: { width: '100%', height: '100%' },
+    imageOverlay: {
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)', paddingVertical: 8,
+        alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 6,
+    },
+    imageOverlayText: { color: COLORS.textPrimary, fontSize: FONT_SIZE.bodySmall, fontWeight: '600' },
+    imagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 },
+    imagePlaceholderText: { color: COLORS.categoryAnything, fontSize: FONT_SIZE.bodyMedium, fontWeight: '600' },
+    imagePlaceholderHint: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall },
+    removeBtn: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+        gap: 4, marginBottom: SPACING.lg,
+    },
+    removeText: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall },
+    form: { gap: SPACING.sm },
+    label: { color: COLORS.textSecondary, fontSize: FONT_SIZE.bodySmall, fontWeight: '500', marginTop: SPACING.sm },
+    input: {
+        backgroundColor: COLORS.surfaceElevated, color: COLORS.textPrimary,
+        borderRadius: RADIUS.md, padding: SPACING.base, fontSize: FONT_SIZE.bodyLarge,
+    },
+    multilineInput: { minHeight: 80, textAlignVertical: 'top' },
+    counter: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall, textAlign: 'right', marginTop: 2 },
+    bottomBar: { padding: SPACING.xl, paddingBottom: 32, borderTopWidth: 1, borderTopColor: COLORS.divider },
+    submitBtn: { borderRadius: RADIUS.full, paddingVertical: 16, alignItems: 'center' },
+    submitRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    submitText: { color: COLORS.textPrimary, fontSize: FONT_SIZE.bodyLarge, fontWeight: '700' },
+});

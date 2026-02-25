@@ -8,7 +8,7 @@ const mapAnythingItemToContent = (item: AnythingItem): Anything => ({
     id: item.id,
     type: 'anything',
     title: item.title,
-    imageUrl: null, // TODO: Add image support when available in DB
+    imageUrl: item.imageUrl ?? null,
     createdBy: item.createdBy,
     description: item.description || undefined,
     categoryTag: item.categoryTag || undefined,

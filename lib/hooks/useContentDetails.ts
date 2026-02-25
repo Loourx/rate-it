@@ -37,10 +37,10 @@ export function useContentDetails(type: ContentType, id: string, isAlbum?: boole
                     id: data.id,
                     type: 'anything',
                     title: data.title,
-                    imageUrl: null, // TODO: Add image support
-                    createdBy: data.createdBy,
+                    imageUrl: data.image_url ?? null,
+                    createdBy: data.created_by,
                     description: data.description || undefined,
-                    categoryTag: data.categoryTag || undefined,
+                    categoryTag: data.category_tag || undefined,
                 } as Anything;
             }
             throw new Error(`Content type ${type} is not supported by the current APIs`);
