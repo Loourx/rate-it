@@ -6,6 +6,7 @@ import { useProfile } from '@/lib/hooks/useProfile';
 import { ProfileStats } from '@/components/profile/ProfileStats';
 import { RatingHistory } from '@/components/profile/RatingHistory';
 import { BookmarksList } from '@/components/profile/BookmarksList';
+import { PinnedItemsGrid } from '@/components/profile/PinnedItemsGrid';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
@@ -70,6 +71,9 @@ export default function ProfileScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
+
+                {/* Pinned Favorites */}
+                {myUserId && <PinnedItemsGrid userId={myUserId} isOwnProfile />}
 
                 {/* Stats */}
                 <ProfileStats />

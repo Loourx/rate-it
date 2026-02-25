@@ -15,6 +15,7 @@ import { useIsFollowing } from '@/lib/hooks/useIsFollowing';
 import { useFollow } from '@/lib/hooks/useFollow';
 import { ProfileStats } from '@/components/profile/ProfileStats';
 import { RatingHistory } from '@/components/profile/RatingHistory';
+import { PinnedItemsGrid } from '@/components/profile/PinnedItemsGrid';
 import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
@@ -136,6 +137,7 @@ export default function UserProfileScreen() {
                 </View>
             ) : (
                 <>
+                    <PinnedItemsGrid userId={id} isOwnProfile={false} />
                     <ProfileStats userId={id} />
                     <RatingHistory userId={id} />
                 </>

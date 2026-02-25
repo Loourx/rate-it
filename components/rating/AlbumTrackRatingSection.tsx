@@ -115,14 +115,6 @@ export function AlbumTrackRatingSection({
                                 </View>
                             );
                         })}
-
-                    {trackAverage !== null && (
-                        <Text
-                            style={[styles.averageLabel, { color: categoryColor }]}
-                        >
-                            Media canciones: {trackAverage.toFixed(1)}
-                        </Text>
-                    )}
                 </View>
             )}
         </View>

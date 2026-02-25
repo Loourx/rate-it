@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import Animated, {
     FadeInDown,
@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsBookmarked, useToggleBookmark } from '@/lib/hooks/useBookmark';
+import { useIsPinned, usePinItem, useUnpinItem } from '@/lib/hooks/usePinnedItems';
 import { useContentDetails } from '@/lib/hooks/useContentDetails';
 import { ContentType, Movie, Series, Anything, Music } from '@/lib/types/content';
 import { AlbumTrackList } from '@/components/content/AlbumTrackList';
@@ -72,6 +73,42 @@ export default function ContentDetailsScreen() {
             contentImageUrl: item?.imageUrl ?? null,
         });
     }, [contentType, id, item, toggleBookmark, bookmarkScale]);
+
+    // Pin
+    const { data: pinnedItem } = useIsPinned(contentType, id);
+    const pinItem = usePinItem();
+    const unpinItem = useUnpinItem();
+    const pinScale = useSharedValue(1);
+
+    const pinAnimStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: pinScale.value }],
+    }));
+
+    const handleTogglePin = useCallback(() => {
+        pinScale.value = withSpring(1.3, { damping: 6, stiffness: 200 }, () => {
+            pinScale.value = withSpring(1);
+        });
+        void import('expo-haptics').then(({ impactAsync, ImpactFeedbackStyle }) =>
+            impactAsync(ImpactFeedbackStyle.Light),
+        );
+        if (pinnedItem) {
+            unpinItem.mutate(pinnedItem.id);
+        } else {
+            pinItem.mutate(
+                { contentType, contentId: id, contentTitle: item?.title ?? '', contentImageUrl: item?.imageUrl ?? null },
+                {
+                    onError: (err) => {
+                        if ((err as Error).message === 'MAX_PINNED') {
+                            Alert.alert(
+                                'Máximo alcanzado',
+                                'Has alcanzado el máximo de 5 favoritos. Desancla uno desde tu perfil.',
+                            );
+                        }
+                    },
+                },
+            );
+        }
+    }, [pinnedItem, pinItem, unpinItem, contentType, id, item, pinScale]);
 
     if (isLoading) {
         return (
@@ -146,6 +183,20 @@ export default function ContentDetailsScreen() {
                                     name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
                                     size={22}
                                     color={isBookmarked ? color : COLORS.textSecondary}
+                                />
+                            </TouchableOpacity>
+                        </Animated.View>
+
+                        <Animated.View style={pinAnimStyle}>
+                            <TouchableOpacity
+                                style={[S.iconBtn, !!pinnedItem && { borderColor: color }]}
+                                onPress={handleTogglePin}
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons
+                                    name={pinnedItem ? 'pin' : 'pin-outline'}
+                                    size={22}
+                                    color={pinnedItem ? color : COLORS.textSecondary}
                                 />
                             </TouchableOpacity>
                         </Animated.View>
