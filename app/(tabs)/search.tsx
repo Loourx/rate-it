@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Text } from 'react-native';
+import { View, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CategoryPicker } from '../../components/content/CategoryPicker';
@@ -74,11 +75,22 @@ export default function SearchScreen() {
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
             <TouchableWithoutFeedback onPress={dismissKeyboard}>
                 <View className="flex-1">
-                    <SearchBar
-                        value={query}
-                        onChangeText={setQuery}
-                        placeholder={`Buscar ${selectedCategory}...`}
-                    />
+                    <View style={searchStyles.searchRow}>
+                        <View style={searchStyles.barWrapper}>
+                            <SearchBar
+                                value={query}
+                                onChangeText={setQuery}
+                                placeholder={`Buscar ${selectedCategory}...`}
+                            />
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => router.push('/users/search')}
+                            style={searchStyles.peopleButton}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="people-outline" size={24} color={COLORS.textSecondary} />
+                        </TouchableOpacity>
+                    </View>
 
                     <CategoryPicker
                         selectedCategory={selectedCategory}
@@ -151,3 +163,15 @@ export default function SearchScreen() {
         </SafeAreaView>
     );
 }
+
+const searchStyles = StyleSheet.create({
+    searchRow: { flexDirection: 'row', alignItems: 'center', paddingRight: 12 },
+    barWrapper: { flex: 1 },
+    peopleButton: {
+        padding: 8,
+        borderRadius: 999,
+        backgroundColor: COLORS.surfaceElevated,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});

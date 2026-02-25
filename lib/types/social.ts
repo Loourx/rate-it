@@ -1,3 +1,11 @@
+export interface UserSearchResult {
+    id: string;
+    username: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+    isPrivate: boolean;
+}
+
 export interface FollowerProfile {
     id: string;
     username: string;
