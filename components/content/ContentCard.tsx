@@ -117,8 +117,11 @@ export function ContentCard({ content, onPress, rating, orientation = 'horizonta
                 )}
             </View>
 
-            <View className={orientation === 'vertical' ? "flex-1" : "flex-1 justify-center"}>
-                <Text className="text-sm font-semibold text-primary mb-1" numberOfLines={2}>
+            <View
+                className={orientation === 'horizontal' ? "flex-1 justify-center" : undefined}
+                style={orientation === 'vertical' ? { height: 76, justifyContent: 'space-between' } : undefined}
+            >
+                <Text className={`text-sm font-semibold text-primary ${orientation === 'horizontal' ? 'mb-1' : ''}`} numberOfLines={2}>
                     {content.title}
                 </Text>
 

@@ -6,9 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRatings, Rating } from '@/lib/hooks/useRatings';
 import { useFriendsTrending } from '@/lib/hooks/useFriendsTrending';
 import { useGlobalTrending, type GlobalTrendingItem } from '@/lib/hooks/useGlobalTrending';
+import { useSuggestedContent, type SuggestedItem } from '@/lib/hooks/useSuggestedContent';
 import { ContentCard } from '@/components/content/ContentCard';
 import { TrendingCard } from '@/components/content/TrendingCard';
 import { GlobalTrendingCard } from '@/components/content/GlobalTrendingCard';
+import { SuggestionCard } from '@/components/content/SuggestionCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -23,6 +25,9 @@ export default function HomeScreen() {
     const isFollowingNobody = trending !== undefined && trending.length === 0;
     const { data: globalTrending, isLoading: loadingGlobal } = useGlobalTrending();
     const hasGlobalTrending = globalTrending && globalTrending.length > 0;
+    const { data: suggested } = useSuggestedContent();
+    const hasSuggestions = suggested && suggested.length > 0;
+    // No loading state para esta sección — si no hay datos simplemente no aparece
 
     const sections = useMemo(() => {
         if (!ratings) return {};
@@ -174,6 +179,28 @@ export default function HomeScreen() {
                         </ScrollView>
                     )}
                 </View>
+
+                {/* ── Sección: Quizás te interese (solo si hay datos) ── */}
+                {hasSuggestions && (
+                    <View style={trendingStyles.section}>
+                        <Text style={trendingStyles.sectionTitle}>Quizás te interese</Text>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={trendingStyles.horizontalList}
+                        >
+                            {suggested!.map((item) => (
+                                <SuggestionCard
+                                    key={`${item.contentType}-${item.contentId}`}
+                                    item={item}
+                                    onPress={() =>
+                                        router.push(`/content/${item.contentType}/${item.contentId}`)
+                                    }
+                                />
+                            ))}
+                        </ScrollView>
+                    </View>
+                )}
 
                 {/* ── Sección: Tu biblioteca (existente, sin cambios) ── */}
                 <View className="px-6 mb-6">

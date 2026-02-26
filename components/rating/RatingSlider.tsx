@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AccessibilityInfo, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     runOnJS,
@@ -28,6 +29,18 @@ const TOUCH_TARGET_HEIGHT = 44;
 
 /** Color for score 0.0 (terrible) */
 const ZERO_COLOR = COLORS.error; // red
+
+const ENHANCED_BAR_HEIGHT = 22;
+
+/** Lighten a hex color by blending towards white */
+function lightenColor(hex: string, percent: number = 0.18): string {
+    if (!hex.startsWith('#')) return hex;
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = (num >> 16) & 255;
+    const g = (num >> 8) & 255;
+    const b = num & 255;
+    return `rgb(${Math.min(255, Math.round(r + (255 - r) * percent))}, ${Math.min(255, Math.round(g + (255 - g) * percent))}, ${Math.min(255, Math.round(b + (255 - b) * percent))})`;
+}
 
 interface RatingSliderProps {
     value: number;
@@ -163,19 +176,61 @@ export function RatingSlider({
         return <View style={styles.tickContainer}>{marks}</View>;
     }, [isDisplay, value]);
 
+    /** Subtle scale marks at integer positions for the enhanced display bar */
+    const displayTicks = useMemo(() => {
+        if (!isDisplay || layout !== 'vertical') return null;
+        const marks: React.ReactNode[] = [];
+        for (let i = RATING.MIN; i <= RATING.MAX; i += 1) {
+            const pct = ((i - RATING.MIN) / (RATING.MAX - RATING.MIN)) * 100;
+            marks.push(
+                <View
+                    key={i}
+                    style={{
+                        position: 'absolute' as const,
+                        left: `${pct}%`,
+                        width: 1.5,
+                        height: '65%',
+                        backgroundColor: 'rgba(255,255,255,0.17)',
+                        borderRadius: 1,
+                    }}
+                />,
+            );
+        }
+        return (
+            <View style={[StyleSheet.absoluteFillObject, { justifyContent: 'center' }]}>
+                {marks}
+            </View>
+        );
+    }, [isDisplay, layout]);
+
+    const lighterColor = useMemo(() => lightenColor(color, 0.18), [color]);
+
     if (isDisplay) {
-        // Vertical layout: number on top, bar below (for card carousels)
+        // Enhanced vertical layout: gradient bar with embedded score badge
         if (layout === 'vertical') {
             return (
-                <View style={styles.displayVertical}>
-                    <Text style={[styles.displayNumberLarge, { color }]}>
-                        {displayedScore}
-                    </Text>
-                    <View style={[styles.track, { height: barHeight }]}>
-                        <Animated.View
-                            style={[styles.fill, { backgroundColor: color }, fillStyle]}
-                        />
+                <View style={styles.enhancedBarOuter}>
+                    {/* Track background with tick marks */}
+                    <View style={styles.enhancedTrack}>
+                        {displayTicks}
+                        {/* Gradient fill — rounded on both ends */}
+                        <Animated.View style={[styles.enhancedFillClip, fillStyle]}>
+                            <LinearGradient
+                                colors={[color, lighterColor]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.enhancedGradient}
+                            />
+                        </Animated.View>
                     </View>
+                    {/* Score badge centered on fill edge */}
+                    <Animated.View style={[styles.badgePositioner, fillStyle]}>
+                        <View style={[styles.scoreBadgeInBar, { borderColor: color, borderWidth: 1.5 }]}>
+                            <Text style={[styles.scoreBadgeInBarText, { color }]}>
+                                {displayedScore}
+                            </Text>
+                        </View>
+                    </Animated.View>
                 </View>
             );
         }
@@ -287,5 +342,46 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         minWidth: 48,
         textAlign: 'right',
+    },
+    // ── Enhanced display bar (vertical layout) ──
+    enhancedBarOuter: {
+        width: '100%',
+        height: ENHANCED_BAR_HEIGHT,
+        overflow: 'visible' as const,
+    },
+    enhancedTrack: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: 999,
+        overflow: 'hidden' as const,
+    },
+    enhancedFillClip: {
+        height: '100%',
+        borderRadius: 999,
+        overflow: 'hidden' as const,
+    },
+    enhancedGradient: {
+        flex: 1,
+    },
+    badgePositioner: {
+        position: 'absolute' as const,
+        top: 0,
+        bottom: 0,
+        left: 0,
+        flexDirection: 'row' as const,
+        alignItems: 'center' as const,
+        overflow: 'visible' as const,
+    },
+    scoreBadgeInBar: {
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+        borderRadius: 999,
+        // Shift right so badge is centered on the fill edge
+        marginRight: -16,
+    },
+    scoreBadgeInBarText: {
+        fontSize: 11,
+        fontFamily: 'SpaceGrotesk_700Bold',
     },
 });
