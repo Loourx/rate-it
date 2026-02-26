@@ -7,9 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
-import { useCreateAnythingItem } from '@/lib/hooks/useCreateAnythingItem';
+import { RatingSlider } from '@/components/rating/RatingSlider';
 import { Toast } from '@/components/ui/Toast';
+import { COLORS, SPACING, RADIUS, FONT_SIZE, RATING } from '@/lib/utils/constants';
+import { useCreateAnythingItem } from '@/lib/hooks/useCreateAnythingItem';
 
 const MAX_TITLE = 200;
 const MAX_TAG = 50;
@@ -23,6 +24,8 @@ export default function CreateAnythingScreen() {
     const [categoryTag, setCategoryTag] = useState('');
     const [description, setDescription] = useState('');
     const [imageUri, setImageUri] = useState<string | null>(null);
+    const [score, setScore] = useState<number | null>(null);
+    const [wantsToRate, setWantsToRate] = useState(false);
     const [toastMsg, setToastMsg] = useState<string | null>(null);
     const [toastError, setToastError] = useState(false);
 
@@ -48,6 +51,7 @@ export default function CreateAnythingScreen() {
                 description: description.trim() || undefined,
                 categoryTag: categoryTag.trim() || undefined,
                 imageUri: imageUri ?? undefined,
+                score: wantsToRate ? (score ?? RATING.DEFAULT) : null,
             },
             {
                 onSuccess: (data) => {
@@ -70,109 +74,144 @@ export default function CreateAnythingScreen() {
                     title: 'Crear item',
                     headerStyle: { backgroundColor: COLORS.background },
                     headerTintColor: COLORS.textPrimary,
+                    headerTitleStyle: { fontFamily: 'SpaceGrotesk_600SemiBold' },
                 }}
             />
-            <SafeAreaView style={s.safe} edges={['bottom']}>
-                <KeyboardAvoidingView
-                    style={s.flex}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                >
-                    <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
+            <KeyboardAvoidingView
+                style={s.flex}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            >
+                <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} keyboardShouldPersistTaps="handled">
 
-                        {/* Image Picker */}
-                        <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={s.imageTouchable}>
-                            {imageUri ? (
-                                <>
-                                    <Image source={{ uri: imageUri }} style={s.imagePreview} />
-                                    <View style={s.imageOverlay}>
-                                        <Ionicons name="camera" size={22} color={COLORS.textPrimary} />
-                                        <Text style={s.imageOverlayText}>Cambiar</Text>
-                                    </View>
-                                </>
-                            ) : (
-                                <View style={s.imagePlaceholder}>
-                                    <Ionicons name="camera-outline" size={36} color={COLORS.categoryAnything} />
-                                    <Text style={s.imagePlaceholderText}>Añadir foto</Text>
-                                    <Text style={s.imagePlaceholderHint}>Opcional</Text>
+                    {/* Image Picker */}
+                    <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={s.imageTouchable}>
+                        {imageUri ? (
+                            <>
+                                <Image source={{ uri: imageUri }} style={s.imagePreview} />
+                                <View style={s.imageOverlay}>
+                                    <Ionicons name="camera" size={22} color={COLORS.textPrimary} />
+                                    <Text style={s.imageOverlayText}>Cambiar</Text>
                                 </View>
-                            )}
-                        </TouchableOpacity>
-                        {imageUri && (
-                            <TouchableOpacity onPress={() => setImageUri(null)} style={s.removeBtn}>
-                                <Ionicons name="close-circle" size={20} color={COLORS.textTertiary} />
-                                <Text style={s.removeText}>Eliminar foto</Text>
-                            </TouchableOpacity>
+                            </>
+                        ) : (
+                            <View style={s.imagePlaceholder}>
+                                <Ionicons name="camera-outline" size={36} color={COLORS.categoryAnything} />
+                                <Text style={s.imagePlaceholderText}>Añadir foto</Text>
+                                <Text style={s.imagePlaceholderHint}>Opcional</Text>
+                            </View>
                         )}
+                    </TouchableOpacity>
+                    {imageUri && (
+                        <TouchableOpacity onPress={() => setImageUri(null)} style={s.removeBtn}>
+                            <Ionicons name="close-circle" size={20} color={COLORS.textTertiary} />
+                            <Text style={s.removeText}>Eliminar foto</Text>
+                        </TouchableOpacity>
+                    )}
 
-                        {/* Form */}
-                        <View style={s.form}>
-                            {/* Title */}
-                            <Text style={s.label}>Título *</Text>
-                            <TextInput
-                                style={s.input}
-                                placeholderTextColor={COLORS.textTertiary}
-                                placeholder="Ej: Espátula IKEA GNARP"
-                                value={title}
-                                onChangeText={(t) => setTitle(t.slice(0, MAX_TITLE))}
-                                maxLength={MAX_TITLE}
-                                autoFocus
-                            />
-                            <Text style={s.counter}>{title.length}/{MAX_TITLE}</Text>
+                    {/* Form */}
+                    <View style={s.form}>
+                        {/* Title */}
+                        <Text style={s.label}>Título *</Text>
+                        <TextInput
+                            style={s.input}
+                            placeholderTextColor={COLORS.textTertiary}
+                            placeholder="Ej: Espátula IKEA GNARP"
+                            value={title}
+                            onChangeText={(t) => setTitle(t.slice(0, MAX_TITLE))}
+                            maxLength={MAX_TITLE}
+                            autoFocus
+                        />
+                        <Text style={s.counter}>{title.length}/{MAX_TITLE}</Text>
 
-                            {/* Category Tag */}
-                            <Text style={s.label}>Subcategoría</Text>
-                            <TextInput
-                                style={s.input}
-                                placeholderTextColor={COLORS.textTertiary}
-                                placeholder="Ej: Cocina, Restaurante, Gadget..."
-                                value={categoryTag}
-                                onChangeText={(t) => setCategoryTag(t.slice(0, MAX_TAG))}
-                                maxLength={MAX_TAG}
-                            />
+                        {/* Category Tag */}
+                        <Text style={s.label}>Subcategoría</Text>
+                        <TextInput
+                            style={s.input}
+                            placeholderTextColor={COLORS.textTertiary}
+                            placeholder="Ej: Cocina, Restaurante, Gadget..."
+                            value={categoryTag}
+                            onChangeText={(t) => setCategoryTag(t.slice(0, MAX_TAG))}
+                            maxLength={MAX_TAG}
+                        />
 
-                            {/* Description */}
-                            <Text style={[s.label, { marginTop: SPACING.base }]}>Descripción</Text>
-                            <TextInput
-                                style={[s.input, s.multilineInput]}
-                                placeholderTextColor={COLORS.textTertiary}
-                                placeholder="Describe brevemente este item..."
-                                value={description}
-                                onChangeText={(t) => setDescription(t.slice(0, MAX_DESC))}
-                                maxLength={MAX_DESC}
-                                multiline
-                                textAlignVertical="top"
-                                numberOfLines={3}
-                            />
-                            <Text style={s.counter}>{description.length}/{MAX_DESC}</Text>
-                        </View>
-                    </ScrollView>
+                        {/* Description */}
+                        <Text style={[s.label, { marginTop: SPACING.base }]}>Descripción</Text>
+                        <TextInput
+                            style={[s.input, s.multilineInput]}
+                            placeholderTextColor={COLORS.textTertiary}
+                            placeholder="Describe brevemente este item..."
+                            value={description}
+                            onChangeText={(t) => setDescription(t.slice(0, MAX_DESC))}
+                            maxLength={MAX_DESC}
+                            multiline
+                            textAlignVertical="top"
+                            numberOfLines={3}
+                        />
+                        <Text style={s.counter}>{description.length}/{MAX_DESC}</Text>
 
-                    {/* Submit */}
-                    <View style={s.bottomBar}>
-                        <TouchableOpacity
-                            onPress={handleCreate}
-                            disabled={!isValid || isPending}
-                            style={[s.submitBtn, { backgroundColor: isValid ? COLORS.categoryAnything : COLORS.surfaceElevated, opacity: isPending ? 0.7 : 1 }]}
-                            activeOpacity={0.85}
-                        >
-                            {isPending ? (
-                                <Text style={s.submitText}>Creando...</Text>
+                        {/* Rating Section */}
+                        <View style={s.ratingSection}>
+                            <Text style={s.label}>Tu valoración</Text>
+                            {!wantsToRate ? (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setWantsToRate(true);
+                                        setScore(RATING.DEFAULT);
+                                    }}
+                                    style={s.addRatingBtn}
+                                    activeOpacity={0.7}
+                                >
+                                    <Ionicons name="star-outline" size={20} color={COLORS.categoryAnything} />
+                                    <Text style={s.addRatingText}>Añadir valoración</Text>
+                                </TouchableOpacity>
                             ) : (
-                                <View style={s.submitRow}>
-                                    <Ionicons name="sparkles" size={18} color={COLORS.textPrimary} />
-                                    <Text style={s.submitText}>Crear y publicar</Text>
+                                <View style={s.sliderContainer}>
+                                    <RatingSlider
+                                        value={score ?? RATING.DEFAULT}
+                                        onValueChange={setScore}
+                                        category="anything"
+                                        size="interactive"
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setWantsToRate(false);
+                                            setScore(null);
+                                        }}
+                                        style={s.removeRatingBtn}
+                                    >
+                                        <Text style={s.removeRatingText}>Quitar valoración</Text>
+                                    </TouchableOpacity>
                                 </View>
                             )}
-                        </TouchableOpacity>
+                        </View>
                     </View>
-                </KeyboardAvoidingView>
+                </ScrollView>
 
-                <Toast
-                    message={toastMsg ?? ''}
-                    visible={!!toastMsg}
-                    onDismiss={() => setToastMsg(null)}
-                />
-            </SafeAreaView>
+                {/* Submit */}
+                <View style={s.bottomBar}>
+                    <TouchableOpacity
+                        onPress={handleCreate}
+                        disabled={!isValid || isPending}
+                        style={[s.submitBtn, { backgroundColor: isValid ? COLORS.categoryAnything : COLORS.surfaceElevated, opacity: isPending ? 0.7 : 1 }]}
+                        activeOpacity={0.85}
+                    >
+                        {isPending ? (
+                            <Text style={s.submitText}>Creando...</Text>
+                        ) : (
+                            <View style={s.submitRow}>
+                                <Ionicons name="sparkles" size={18} color={COLORS.textPrimary} />
+                                <Text style={s.submitText}>Crear y publicar</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
+
+            <Toast
+                message={toastMsg ?? ''}
+                visible={!!toastMsg}
+                onDismiss={() => setToastMsg(null)}
+            />
         </>
     );
 }
@@ -210,8 +249,40 @@ const s = StyleSheet.create({
     },
     multilineInput: { minHeight: 80, textAlignVertical: 'top' },
     counter: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall, textAlign: 'right', marginTop: 2 },
-    bottomBar: { padding: SPACING.xl, paddingBottom: 32, borderTopWidth: 1, borderTopColor: COLORS.divider },
+    ratingSection: { marginTop: SPACING.lg },
+    addRatingBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: RADIUS.md,
+        padding: SPACING.base,
+        marginTop: SPACING.sm,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 251, 255, 0.1)',
+    },
+    addRatingText: {
+        color: COLORS.categoryAnything,
+        fontSize: FONT_SIZE.bodyLarge,
+        fontWeight: '600',
+        marginLeft: SPACING.sm,
+    },
+    sliderContainer: {
+        marginTop: SPACING.sm,
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: RADIUS.md,
+        padding: SPACING.base,
+    },
+    removeRatingBtn: {
+        marginTop: SPACING.sm,
+        alignSelf: 'flex-end',
+    },
+    removeRatingText: {
+        color: COLORS.textTertiary,
+        fontSize: FONT_SIZE.bodySmall,
+    },
+    bottomBar: { padding: SPACING.xl, paddingBottom: 40, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.background },
     submitBtn: { borderRadius: RADIUS.full, paddingVertical: 16, alignItems: 'center' },
     submitRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    submitText: { color: COLORS.textPrimary, fontSize: FONT_SIZE.bodyLarge, fontWeight: '700' },
+    submitText: { color: '#000000', fontSize: FONT_SIZE.bodyLarge, fontWeight: '700' },
 });

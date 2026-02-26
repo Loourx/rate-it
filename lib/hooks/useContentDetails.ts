@@ -26,12 +26,14 @@ export function useContentDetails(type: ContentType, id: string, isAlbum?: boole
             } else if (type === 'anything') {
                 const { data, error } = await supabase
                     .from('anything_items')
-                    .select('*')
+                    .select('*, profiles!created_by(username)')
                     .eq('id', id)
                     .single();
 
                 if (error) throw new Error(error.message);
                 if (!data) throw new Error('Item not found');
+
+                const profile = data.profiles as { username: string } | null;
 
                 return {
                     id: data.id,
@@ -39,6 +41,7 @@ export function useContentDetails(type: ContentType, id: string, isAlbum?: boole
                     title: data.title,
                     imageUrl: data.image_url ?? null,
                     createdBy: data.created_by,
+                    creatorUsername: profile?.username ?? undefined,
                     description: data.description || undefined,
                     categoryTag: data.category_tag || undefined,
                 } as Anything;

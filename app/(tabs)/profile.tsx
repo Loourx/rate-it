@@ -76,10 +76,10 @@ export default function ProfileScreen() {
                 {myUserId && <PinnedItemsGrid userId={myUserId} isOwnProfile />}
 
                 {/* Stats */}
-                <ProfileStats />
+                <ProfileStats userId={myUserId} />
 
                 {/* Rating History */}
-                <RatingHistory />
+                <RatingHistory userId={myUserId} />
 
                 {/* Bookmarks */}
                 <BookmarksList />

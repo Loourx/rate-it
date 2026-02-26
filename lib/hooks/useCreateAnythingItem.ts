@@ -8,6 +8,7 @@ interface CreateAnythingInput {
     description?: string;
     categoryTag?: string;
     imageUri?: string; // local file URI from image picker
+    score?: number | null;
 }
 
 export function useCreateAnythingItem() {
@@ -31,6 +32,7 @@ export function useCreateAnythingItem() {
                 imageUrl = publicUrl;
             }
 
+            // 1. Create anything_item
             const { data, error } = await supabase
                 .from('anything_items')
                 .insert({
@@ -56,10 +58,35 @@ export function useCreateAnythingItem() {
                 throw error;
             }
 
+            // 2. Create rating if score is provided
+            if (input.score !== undefined && input.score !== null) {
+                const { error: ratingError } = await supabase
+                    .from('ratings')
+                    .insert({
+                        user_id: userId,
+                        content_type: 'anything',
+                        content_id: data.id,
+                        content_title: data.title,
+                        content_image_url: imageUrl,
+                        score: input.score,
+                        review_text: null,
+                        has_spoiler: false,
+                    });
+
+                if (ratingError) {
+                    console.error('Error creating initial rating:', ratingError);
+                }
+            }
+
             return data;
         },
-        onSuccess: () => {
+        onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['search', 'anything'] });
+            if (variables.score !== undefined && variables.score !== null) {
+                queryClient.invalidateQueries({ queryKey: ['ratings'] });
+                queryClient.invalidateQueries({ queryKey: ['feed'] });
+                queryClient.invalidateQueries({ queryKey: ['profile-stats'] });
+            }
         },
     });
 }

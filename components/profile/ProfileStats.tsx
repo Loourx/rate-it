@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { useFollowCounts } from '@/lib/hooks/useFollowCounts';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -66,8 +68,9 @@ export function ProfileStats({ userId }: { userId?: string }) {
 
     // Even when loading, we show counters with 0.
     const ratingCount = data?.totalRatings ?? 0;
-    const followersCount = 0;
-    const followingCount = 0;
+    const { data: followData } = useFollowCounts(userId);
+    const followersCount = followData?.followersCount ?? 0;
+    const followingCount = followData?.followingCount ?? 0;
 
     const renderCounters = () => (
         <View style={styles.countersRow}>
@@ -75,14 +78,22 @@ export function ProfileStats({ userId }: { userId?: string }) {
                 <Text style={styles.counterNumber}>{isLoading ? '-' : ratingCount}</Text>
                 <Text style={styles.counterLabel}>Ratings</Text>
             </View>
-            <View style={styles.counterItem}>
+            <TouchableOpacity
+                style={styles.counterItem}
+                onPress={() => userId && router.push(`/profile/followers?userId=${userId}`)}
+                activeOpacity={0.7}
+            >
                 <Text style={styles.counterNumber}>{followersCount}</Text>
                 <Text style={styles.counterLabel}>Seguidores</Text>
-            </View>
-            <View style={styles.counterItem}>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.counterItem}
+                onPress={() => userId && router.push(`/profile/following?userId=${userId}`)}
+                activeOpacity={0.7}
+            >
                 <Text style={styles.counterNumber}>{followingCount}</Text>
                 <Text style={styles.counterLabel}>Siguiendo</Text>
-            </View>
+            </TouchableOpacity>
         </View>
     );
 

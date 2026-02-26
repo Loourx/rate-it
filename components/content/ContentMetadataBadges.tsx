@@ -129,7 +129,7 @@ function getMetadata(item: AllContent): { badges: BadgeInfo[]; genres: string[] 
             const a = item as Anything;
             const badges: BadgeInfo[] = [];
             if (a.categoryTag) badges.push({ icon: 'pricetag-outline', label: a.categoryTag });
-            if (a.createdBy) badges.push({ icon: 'person-outline', label: a.createdBy });
+            if (a.creatorUsername) badges.push({ icon: 'person-outline', label: `@${a.creatorUsername}` });
             return { badges, genres: [] };
         }
         default:

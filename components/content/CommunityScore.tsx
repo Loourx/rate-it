@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { ContentType } from '@/lib/types/content';
+import React from 'react';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import type { ContentType } from '@/lib/types/content';
 import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
 import { RatingSlider } from '@/components/rating/RatingSlider';
+import { useCommunityScore } from '@/lib/hooks/useCommunityScore';
 
 interface CommunityScoreProps {
     contentId: string;
@@ -10,37 +11,40 @@ interface CommunityScoreProps {
 }
 
 export function CommunityScore({ contentId, contentType }: CommunityScoreProps) {
-    // TODO: Reemplazar placeholder por datos reales de Supabase (avg de ratings por content_id)
-    const { score, users } = useMemo(() => {
-        let hash = 0;
-        for (let i = 0; i < contentId.length; i++) {
-            hash = ((hash << 5) - hash) + contentId.charCodeAt(i);
-            hash |= 0;
-        }
-        const seed = Math.abs(hash);
+    const { data, isLoading, isError } = useCommunityScore(contentType, contentId);
 
-        // Generar un número de pasos de 0.1 entre 4.0 y 9.5
-        // (9.5 - 4.0) / 0.1 = 55 pasos, 56 valores posibles
-        const steps = 56;
-        const stepIndex = seed % steps;
-        const generatedScore = 4.0 + stepIndex * 0.1;
+    if (isLoading) {
+        return (
+            <View style={S.container}>
+                <ActivityIndicator color={COLORS.textSecondary} />
+            </View>
+        );
+    }
 
-        // Usuarios aleatorios entre 10 y 500
-        const generatedUsers = 10 + (seed % 491);
+    if (isError || !data) {
+        return null; // Fallo silencioso — no romper la pantalla de detalle
+    }
 
-        return { score: generatedScore, users: generatedUsers };
-    }, [contentId]);
+    if (data.totalRatings === 0) {
+        return (
+            <View style={S.container}>
+                <Text style={S.label}>Sin valoraciones aún</Text>
+            </View>
+        );
+    }
 
     return (
         <View style={S.container}>
-            <Text style={S.label}>Nota media · {users} usuarios</Text>
+            <Text style={S.label}>
+                Nota media · {data.totalRatings} {data.totalRatings === 1 ? 'usuario' : 'usuarios'}
+            </Text>
             <View pointerEvents="none">
                 <RatingSlider
-                    value={score}
-                    onValueChange={() => { }}
+                    value={data.averageScore}
+                    onValueChange={() => {}}
                     category={contentType}
-                    size="interactive" // Using interactive provides headlineLarge bold as requested
-                    disabled={true} // Effectively display mode
+                    size="interactive"
+                    disabled={true}
                     exactScoreDisplay={true}
                 />
             </View>
@@ -57,6 +61,6 @@ const S = StyleSheet.create({
         fontSize: FONT_SIZE.bodyLarge,
         fontFamily: 'SpaceGrotesk_700Bold',
         color: COLORS.textPrimary,
-        marginBottom: -SPACING.sm, // Acercar un poco el slider al texto
+        marginBottom: -SPACING.sm,
     },
 });

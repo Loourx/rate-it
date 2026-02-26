@@ -125,9 +125,14 @@ function mapToProfile(raw: unknown): FollowerProfile {
 }
 
 export async function followUser(targetUserId: string): Promise<void> {
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('No autenticado');
+
     const { error } = await supabase
         .from('follows')
-        .insert({ following_id: targetUserId });
+        .insert({ follower_id: user.id, following_id: targetUserId });
 
     if (error) throw error;
 }

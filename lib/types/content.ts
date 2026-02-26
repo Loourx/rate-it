@@ -88,6 +88,7 @@ export interface Podcast extends BaseContent {
 export interface Anything extends BaseContent {
     type: 'anything';
     createdBy: string;
+    creatorUsername?: string; // Resolved from profiles join
     description?: string;
     categoryTag?: string;
 }
