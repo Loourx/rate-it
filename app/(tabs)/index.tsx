@@ -5,8 +5,10 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRatings, Rating } from '@/lib/hooks/useRatings';
 import { useFriendsTrending } from '@/lib/hooks/useFriendsTrending';
+import { useGlobalTrending, type GlobalTrendingItem } from '@/lib/hooks/useGlobalTrending';
 import { ContentCard } from '@/components/content/ContentCard';
 import { TrendingCard } from '@/components/content/TrendingCard';
+import { GlobalTrendingCard } from '@/components/content/GlobalTrendingCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -19,6 +21,8 @@ export default function HomeScreen() {
     const { data: trending, isLoading: loadingTrending } = useFriendsTrending();
     const hasTrending = trending && trending.length > 0;
     const isFollowingNobody = trending !== undefined && trending.length === 0;
+    const { data: globalTrending, isLoading: loadingGlobal } = useGlobalTrending();
+    const hasGlobalTrending = globalTrending && globalTrending.length > 0;
 
     const sections = useMemo(() => {
         if (!ratings) return {};
@@ -130,6 +134,47 @@ export default function HomeScreen() {
                     )}
                 </View>
 
+                {/* ── Sección: Lo más valorado ── */}
+                <View style={trendingStyles.section}>
+                    <Text style={trendingStyles.sectionTitle}>Lo más valorado</Text>
+
+                    {loadingGlobal && (
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={trendingStyles.horizontalList}>
+                            {[1, 2, 3].map((i) => (
+                                <View
+                                    key={i}
+                                    style={[{ width: 130, marginRight: SPACING.sm, opacity: 0.3, backgroundColor: COLORS.surfaceElevated, height: 240, borderRadius: RADIUS.md }]}
+                                />
+                            ))}
+                        </ScrollView>
+                    )}
+
+                    {!loadingGlobal && !hasGlobalTrending && (
+                        <Text style={trendingStyles.emptyHint}>
+                            Aún no hay suficientes valoraciones. ¡Empieza a valorar!
+                        </Text>
+                    )}
+
+                    {!loadingGlobal && hasGlobalTrending && (
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={trendingStyles.horizontalList}
+                        >
+                            {globalTrending!.map((item) => (
+                                <GlobalTrendingCard
+                                    key={`${item.contentType}-${item.contentId}`}
+                                    item={item}
+                                    onPress={() =>
+                                        router.push(`/content/${item.contentType}/${item.contentId}`)
+                                    }
+                                />
+                            ))}
+                        </ScrollView>
+                    )}
+                </View>
+
                 {/* ── Sección: Tu biblioteca (existente, sin cambios) ── */}
                 <View className="px-6 mb-6">
                     <Text className="text-3xl font-bold text-primary">Tu Biblioteca</Text>
@@ -208,5 +253,12 @@ const trendingStyles = StyleSheet.create({
     ctaSubtitle: {
         fontSize: FONT_SIZE.bodySmall,
         color: COLORS.textSecondary,
+    },
+    emptyHint: {
+        fontSize: FONT_SIZE.bodyMedium,
+        color: COLORS.textSecondary,
+        fontFamily: 'SpaceGrotesk_500Medium',
+        paddingHorizontal: SPACING.md,
+        marginTop: SPACING.sm,
     },
 });
