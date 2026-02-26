@@ -177,55 +177,64 @@ export default function ContentDetailsScreen() {
 
                     <CommunityScore contentId={id} contentType={contentType} />
 
-                    <Animated.View entering={FadeInDown.duration(350).delay(250)} style={S.rateRow}>
+                    <Animated.View entering={FadeInDown.duration(350).delay(250)} style={S.actionsContainer}>
+
+                        {/* Fila 1: Botón Valorar — ancho completo */}
                         <TouchableOpacity
                             activeOpacity={0.85}
                             style={[S.rateBtn, { backgroundColor: color }]}
-                            onPress={() => router.push(isAlbumContent ? `/rate/${type}/${id}?isAlbum=true` : `/rate/${type}/${id}`)}
+                            onPress={() => router.push(isAlbumContent
+                                ? `/rate/${type}/${id}?isAlbum=true`
+                                : `/rate/${type}/${id}`)}
                         >
                             <Ionicons name="star" size={20} color="#FFFFFF" />
                             <Text style={S.rateTxt}>Valorar</Text>
                         </TouchableOpacity>
 
-                        <Animated.View style={bookmarkAnimStyle}>
+                        {/* Fila 2: Acciones secundarias */}
+                        <View style={S.secondaryActions}>
+
+                            <Animated.View style={bookmarkAnimStyle}>
+                                <TouchableOpacity
+                                    style={[S.iconBtn, isBookmarked && { borderColor: color }]}
+                                    onPress={handleToggleBookmark}
+                                    activeOpacity={0.7}
+                                >
+                                    <Ionicons
+                                        name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+                                        size={22}
+                                        color={isBookmarked ? color : COLORS.textSecondary}
+                                    />
+                                </TouchableOpacity>
+                            </Animated.View>
+
+                            <Animated.View style={pinAnimStyle}>
+                                <TouchableOpacity
+                                    style={[S.iconBtn, !!pinnedItem && { borderColor: color }]}
+                                    onPress={handleTogglePin}
+                                    activeOpacity={0.7}
+                                >
+                                    <Ionicons
+                                        name={pinnedItem ? 'pin' : 'pin-outline'}
+                                        size={22}
+                                        color={pinnedItem ? color : COLORS.textSecondary}
+                                    />
+                                </TouchableOpacity>
+                            </Animated.View>
+
+                            <TouchableOpacity style={S.iconBtn} onPress={handleShare} activeOpacity={0.7}>
+                                <Ionicons name="share-social-outline" size={22} color={COLORS.textSecondary} />
+                            </TouchableOpacity>
+
                             <TouchableOpacity
-                                style={[S.iconBtn, isBookmarked && { borderColor: color }]}
-                                onPress={handleToggleBookmark}
+                                style={S.iconBtn}
+                                onPress={() => setShowRecommendModal(true)}
                                 activeOpacity={0.7}
                             >
-                                <Ionicons
-                                    name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
-                                    size={22}
-                                    color={isBookmarked ? color : COLORS.textSecondary}
-                                />
+                                <Ionicons name="paper-plane-outline" size={22} color={COLORS.textSecondary} />
                             </TouchableOpacity>
-                        </Animated.View>
 
-                        <Animated.View style={pinAnimStyle}>
-                            <TouchableOpacity
-                                style={[S.iconBtn, !!pinnedItem && { borderColor: color }]}
-                                onPress={handleTogglePin}
-                                activeOpacity={0.7}
-                            >
-                                <Ionicons
-                                    name={pinnedItem ? 'pin' : 'pin-outline'}
-                                    size={22}
-                                    color={pinnedItem ? color : COLORS.textSecondary}
-                                />
-                            </TouchableOpacity>
-                        </Animated.View>
-
-                        <TouchableOpacity style={S.iconBtn} onPress={handleShare} activeOpacity={0.7}>
-                            <Ionicons name="share-social-outline" size={22} color={COLORS.textSecondary} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={S.iconBtn}
-                            onPress={() => setShowRecommendModal(true)}
-                            activeOpacity={0.7}
-                        >
-                            <Ionicons name="paper-plane-outline" size={22} color={COLORS.textSecondary} />
-                        </TouchableOpacity>
+                        </View>
                     </Animated.View>
 
                     {description ? (
@@ -290,10 +299,11 @@ const S = StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     scroll: { paddingBottom: 48 },
     body: { paddingHorizontal: SPACING.base, marginTop: SPACING.lg },
-    rateRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginTop: SPACING.xl },
-    rateBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: SPACING.md, borderRadius: RADIUS.md, gap: SPACING.sm },
+    actionsContainer: { marginTop: SPACING.xl, gap: SPACING.md },
+    rateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: RADIUS.md, gap: SPACING.sm },
     rateTxt: { fontSize: 16, fontFamily: 'SpaceGrotesk_700Bold', color: '#FFF' },
-    iconBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.surface, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.divider },
+    secondaryActions: { flexDirection: 'row', justifyContent: 'space-evenly' },
+    iconBtn: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.surface, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.divider },
     synWrap: { marginTop: SPACING['2xl'] },
     synTitle: { fontSize: 20, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary, marginBottom: SPACING.sm },
     synBody: { fontSize: 16, fontFamily: 'SpaceGrotesk_500Medium', color: COLORS.textSecondary, lineHeight: 24 },
