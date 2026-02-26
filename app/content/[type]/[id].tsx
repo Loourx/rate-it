@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Share } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import Animated, {
     FadeInDown,
@@ -110,6 +110,18 @@ export default function ContentDetailsScreen() {
         }
     }, [pinnedItem, pinItem, unpinItem, contentType, id, item, pinScale]);
 
+    const handleShare = useCallback(async () => {
+        if (!item) return;
+        try {
+            await Share.share({
+                title: item.title,
+                message: `🎯 "${item.title}" en Rate-it\n\nDescúbrelo en la app: https://rateit.app/content/${type}/${id}`, // TODO F11e: reemplazar con deep link real
+            });
+        } catch {
+            // El usuario canceló el share — no hacer nada
+        }
+    }, [item, type, id]);
+
     if (isLoading) {
         return (
             <>
@@ -201,7 +213,7 @@ export default function ContentDetailsScreen() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <TouchableOpacity style={S.iconBtn}>
+                        <TouchableOpacity style={S.iconBtn} onPress={handleShare} activeOpacity={0.7}>
                             <Ionicons name="share-social-outline" size={22} color={COLORS.textSecondary} />
                         </TouchableOpacity>
                     </Animated.View>
