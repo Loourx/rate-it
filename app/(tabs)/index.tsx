@@ -1,18 +1,24 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, RefreshControl, Image, Pressable } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, Image, Pressable, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useRatings, Rating } from '@/lib/hooks/useRatings';
+import { useFriendsTrending } from '@/lib/hooks/useFriendsTrending';
 import { ContentCard } from '@/components/content/ContentCard';
+import { TrendingCard } from '@/components/content/TrendingCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { ContentType, BaseContent } from '@/lib/types/content';
-import { COLORS } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
 
 export default function HomeScreen() {
     const router = useRouter();
     const { data: ratings, isLoading, refetch } = useRatings();
+    const { data: trending, isLoading: loadingTrending } = useFriendsTrending();
+    const hasTrending = trending && trending.length > 0;
+    const isFollowingNobody = trending !== undefined && trending.length === 0;
 
     const sections = useMemo(() => {
         if (!ratings) return {};
@@ -82,6 +88,49 @@ export default function HomeScreen() {
                 }
                 contentContainerClassName="pb-24 pt-4"
             >
+                {/* ── Sección: Popular entre tus amigos ── */}
+                <View style={trendingStyles.section}>
+                    <Text style={trendingStyles.sectionTitle}>Popular entre tus amigos</Text>
+
+                    {loadingTrending && (
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={trendingStyles.horizontalList}>
+                            {[1, 2, 3].map((i) => (
+                                <View key={i} style={{ width: 130, marginRight: SPACING.sm, opacity: 0.3, backgroundColor: COLORS.surfaceElevated, height: 240, borderRadius: RADIUS.md }} />
+                            ))}
+                        </ScrollView>
+                    )}
+
+                    {!loadingTrending && isFollowingNobody && (
+                        <TouchableOpacity
+                            style={trendingStyles.ctaCard}
+                            onPress={() => router.push('/users/search')}
+                            activeOpacity={0.8}
+                        >
+                            <Ionicons name="people-outline" size={28} color={COLORS.textSecondary} />
+                            <Text style={trendingStyles.ctaTitle}>Sigue a tus amigos</Text>
+                            <Text style={trendingStyles.ctaSubtitle}>Descubre qué están valorando</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {!loadingTrending && hasTrending && (
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={trendingStyles.horizontalList}
+                        >
+                            {trending!.map((item) => (
+                                <TrendingCard
+                                    key={item.ratingId}
+                                    item={item}
+                                    onPress={() => router.push(`/content/${item.contentType}/${item.contentId}`)}
+                                />
+                            ))}
+                        </ScrollView>
+                    )}
+                </View>
+
+                {/* ── Sección: Tu biblioteca (existente, sin cambios) ── */}
                 <View className="px-6 mb-6">
                     <Text className="text-3xl font-bold text-primary">Tu Biblioteca</Text>
                 </View>
@@ -129,3 +178,35 @@ export default function HomeScreen() {
         </SafeAreaView>
     );
 }
+
+const trendingStyles = StyleSheet.create({
+    section: { marginBottom: SPACING.xl },
+    sectionTitle: {
+        fontSize: FONT_SIZE.headlineSmall,
+        fontFamily: 'SpaceGrotesk_700Bold',
+        color: COLORS.textPrimary,
+        marginBottom: SPACING.sm,
+        paddingHorizontal: SPACING.xl,
+    },
+    horizontalList: { paddingHorizontal: SPACING.xl },
+    ctaCard: {
+        alignItems: 'center',
+        gap: SPACING.sm,
+        paddingVertical: SPACING.xl,
+        marginHorizontal: SPACING.xl,
+        backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.md,
+        borderWidth: 1,
+        borderColor: COLORS.divider,
+        borderStyle: 'dashed',
+    },
+    ctaTitle: {
+        fontSize: FONT_SIZE.bodyLarge,
+        fontFamily: 'SpaceGrotesk_700Bold',
+        color: COLORS.textPrimary,
+    },
+    ctaSubtitle: {
+        fontSize: FONT_SIZE.bodySmall,
+        color: COLORS.textSecondary,
+    },
+});
