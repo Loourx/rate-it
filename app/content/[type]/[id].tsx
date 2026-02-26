@@ -21,6 +21,7 @@ import { ContentDetailSkeleton } from '@/components/content/ContentDetailSkeleto
 import { CommunityScore } from '@/components/content/CommunityScore';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { ReportModal } from '@/components/anything/ReportModal';
+import { RecommendModal } from '@/components/content/RecommendModal';
 import { useHasReported } from '@/lib/hooks/useReportAnything';
 
 const TYPE_LABELS: Record<ContentType, string> = {
@@ -37,6 +38,7 @@ export default function ContentDetailsScreen() {
     const { type, id, isAlbum } = useLocalSearchParams<{ type: ContentType; id: string; isAlbum?: string }>();
     const router = useRouter();
     const [showReportModal, setShowReportModal] = useState(false);
+    const [showRecommendModal, setShowRecommendModal] = useState(false);
 
     const { data: item, isLoading, isError, refetch } = useContentDetails(type as ContentType, id);
     const { data: hasReported } = useHasReported(type === 'anything' ? id : '');
@@ -216,6 +218,14 @@ export default function ContentDetailsScreen() {
                         <TouchableOpacity style={S.iconBtn} onPress={handleShare} activeOpacity={0.7}>
                             <Ionicons name="share-social-outline" size={22} color={COLORS.textSecondary} />
                         </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={S.iconBtn}
+                            onPress={() => setShowRecommendModal(true)}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="paper-plane-outline" size={22} color={COLORS.textSecondary} />
+                        </TouchableOpacity>
                     </Animated.View>
 
                     {description ? (
@@ -252,6 +262,15 @@ export default function ContentDetailsScreen() {
                     itemTitle={item.title}
                 />
             )}
+
+            <RecommendModal
+                visible={showRecommendModal}
+                onClose={() => setShowRecommendModal(false)}
+                contentType={contentType}
+                contentId={id}
+                contentTitle={item?.title ?? ''}
+                contentImageUrl={item?.imageUrl ?? null}
+            />
         </>
     );
 }

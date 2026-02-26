@@ -54,6 +54,10 @@ export async function getNotifications(userId: string): Promise<Notification[]> 
             ratingId: (notif.reference_id as string) ?? null,
             ratingTitle: rating?.content_title ?? null,
             ratingType: rating?.content_type ?? null,
+            recContentType: (notif.rec_content_type as string) ?? null,
+            recContentId: (notif.rec_content_id as string) ?? null,
+            recContentTitle: (notif.rec_content_title as string) ?? null,
+            recContentImage: (notif.rec_content_image as string) ?? null,
             isRead: notif.is_read as boolean,
             createdAt: notif.created_at as string,
         };
@@ -86,6 +90,36 @@ export async function markAllAsRead(userId: string): Promise<void> {
         .update({ is_read: true })
         .eq('recipient_id', userId)
         .eq('is_read', false);
+
+    if (error) throw error;
+}
+
+export async function sendRecommendation({
+    senderId,
+    recipientId,
+    contentType,
+    contentId,
+    contentTitle,
+    contentImageUrl,
+}: {
+    senderId: string;
+    recipientId: string;
+    contentType: string;
+    contentId: string;
+    contentTitle: string;
+    contentImageUrl: string | null;
+}): Promise<void> {
+    const { error } = await supabase
+        .from('notifications')
+        .insert({
+            sender_id: senderId,
+            recipient_id: recipientId,
+            type: 'recommendation',
+            rec_content_type: contentType,
+            rec_content_id: contentId,
+            rec_content_title: contentTitle,
+            rec_content_image: contentImageUrl,
+        });
 
     if (error) throw error;
 }

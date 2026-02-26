@@ -16,6 +16,10 @@ export default function NotificationItem({ notification }: NotificationItemProps
             router.push(
                 `/content/${notification.ratingType}/${notification.ratingId}` as never,
             );
+        } else if (notification.type === 'recommendation' && notification.recContentId) {
+            router.push(
+                `/content/${notification.recContentType}/${notification.recContentId}` as never,
+            );
         }
     };
 
@@ -35,6 +39,16 @@ export default function NotificationItem({ notification }: NotificationItemProps
                     <Text className="font-semibold">{notification.actorUsername}</Text>
                     <Text className="text-secondary"> le gustó tu reseña de </Text>
                     <Text className="font-semibold">{notification.ratingTitle}</Text>
+                </Text>
+            );
+        }
+
+        if (notification.type === 'recommendation') {
+            return (
+                <Text className="text-primary text-sm">
+                    <Text className="font-semibold">{notification.actorUsername}</Text>
+                    <Text className="text-secondary"> te recomienda </Text>
+                    <Text className="font-semibold">{notification.recContentTitle}</Text>
                 </Text>
             );
         }
