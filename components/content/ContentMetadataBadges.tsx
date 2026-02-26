@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { ContentType, Movie, Series, Book, Game, Music, Podcast, Anything, AllContent } from '@/lib/types/content';
+import { Movie, Series, Book, Game, Music, Podcast, Anything, AllContent } from '@/lib/types/content';
 import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,30 +11,64 @@ interface ContentMetadataBadgesProps {
     categoryFadedColor: string;
 }
 
-/** Renders type-specific metadata badges and genre/category pills. */
+/**
+ * Three-layer metadata display:
+ *   Layer 1 — Identity (year · creator) — plain text, secondary color
+ *   Layer 2 — Platforms (chips with platform icons, horizontal scroll) — games only
+ *   Layer 3 — Genres (minimal semi-transparent pills, wrap)
+ */
 export function ContentMetadataBadges({ item, categoryColor, categoryFadedColor }: ContentMetadataBadgesProps) {
-    const { badges, genres } = getMetadata(item);
+    const { identityParts, platforms, genres } = getLayeredMetadata(item);
+
+    const hasIdentity = identityParts.length > 0;
+    const hasPlatforms = platforms.length > 0;
+    const hasGenres = genres.length > 0;
+
+    if (!hasIdentity && !hasPlatforms && !hasGenres) return null;
 
     return (
-        <Animated.View entering={FadeInDown.duration(350).delay(150)}>
-            {/* Info badges */}
-            {badges.length > 0 && (
-                <View style={styles.row}>
-                    {badges.map((b, i) => (
-                        <View key={i} style={[styles.badge, { borderColor: categoryColor, backgroundColor: categoryFadedColor }]}>
-                            <Ionicons name={b.icon} size={14} color={categoryColor} style={{ marginRight: 4 }} />
-                            <Text style={[styles.badgeText, { color: categoryColor }]}>{b.label}</Text>
-                        </View>
-                    ))}
-                </View>
+        <Animated.View entering={FadeInDown.duration(350).delay(150)} style={styles.container}>
+            {/* ── Layer 1 — Identity metadata ── */}
+            {hasIdentity && (
+                <Text style={styles.identityText}>{identityParts.join('  ·  ')}</Text>
             )}
 
-            {/* Genre pills */}
-            {genres.length > 0 && (
-                <View style={[styles.row, { marginTop: SPACING.sm }]}>
+            {/* ── Layer 2 — Platforms (horizontal scroll chips) ── */}
+            {hasPlatforms && (
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.platformScroll}
+                    contentContainerStyle={styles.platformContent}
+                >
+                    {platforms.map((p, i) => {
+                        const info = getPlatformInfo(p);
+                        return (
+                            <View
+                                key={i}
+                                style={[styles.platformChip, { backgroundColor: categoryFadedColor }]}
+                            >
+                                <Ionicons
+                                    name={info.icon}
+                                    size={15}
+                                    color={info.color}
+                                    style={styles.platformIcon}
+                                />
+                                <Text style={[styles.platformText, { color: categoryColor }]}>
+                                    {info.shortLabel ?? p}
+                                </Text>
+                            </View>
+                        );
+                    })}
+                </ScrollView>
+            )}
+
+            {/* ── Layer 3 — Genres (minimal pills) ── */}
+            {hasGenres && (
+                <View style={styles.genreRow}>
                     {genres.map((g, i) => (
-                        <View key={i} style={[styles.pill, { borderColor: categoryColor, backgroundColor: categoryFadedColor }]}>
-                            <Text style={[styles.pillText, { color: categoryColor }]}>{g}</Text>
+                        <View key={i} style={styles.genrePill}>
+                            <Text style={styles.genreText}>{g}</Text>
                         </View>
                     ))}
                 </View>
@@ -43,11 +77,73 @@ export function ContentMetadataBadges({ item, categoryColor, categoryFadedColor 
     );
 }
 
-// ── helpers ──────────────────────────────────────────────
+// ── Platform icon / color mapping ────────────────────────
 
-interface BadgeInfo {
+interface PlatformInfo {
     icon: keyof typeof Ionicons.glyphMap;
-    label: string;
+    color: string;
+    shortLabel?: string;
+}
+
+function getPlatformInfo(platform: string): PlatformInfo {
+    const l = platform.toLowerCase();
+
+    // PlayStation family
+    if (l.includes('playstation 5') || l === 'ps5')
+        return { icon: 'logo-playstation', color: '#0070D1', shortLabel: 'PS5' };
+    if (l.includes('playstation 4') || l === 'ps4')
+        return { icon: 'logo-playstation', color: '#0070D1', shortLabel: 'PS4' };
+    if (l.includes('playstation 3') || l === 'ps3')
+        return { icon: 'logo-playstation', color: '#0070D1', shortLabel: 'PS3' };
+    if (l.includes('ps vita'))
+        return { icon: 'logo-playstation', color: '#0070D1', shortLabel: 'PS Vita' };
+    if (l.includes('playstation'))
+        return { icon: 'logo-playstation', color: '#0070D1' };
+
+    // Xbox family
+    if (l.includes('xbox series'))
+        return { icon: 'logo-xbox', color: '#107C10', shortLabel: 'Xbox S|X' };
+    if (l.includes('xbox one'))
+        return { icon: 'logo-xbox', color: '#107C10', shortLabel: 'Xbox One' };
+    if (l.includes('xbox 360'))
+        return { icon: 'logo-xbox', color: '#107C10', shortLabel: 'Xbox 360' };
+    if (l.includes('xbox'))
+        return { icon: 'logo-xbox', color: '#107C10' };
+
+    // Nintendo
+    if (l.includes('nintendo switch') || l === 'switch')
+        return { icon: 'game-controller-outline', color: '#E60012', shortLabel: 'Switch' };
+    if (l.includes('nintendo') || l.includes('wii') || l.includes('game boy'))
+        return { icon: 'game-controller-outline', color: '#E60012' };
+
+    // PC / Desktop
+    if (l === 'pc' || l.includes('windows'))
+        return { icon: 'desktop-outline', color: '#00A4EF', shortLabel: 'PC' };
+    if (l === 'macos' || l === 'mac')
+        return { icon: 'logo-apple', color: '#A2AAAD', shortLabel: 'macOS' };
+    if (l === 'linux')
+        return { icon: 'terminal-outline', color: '#FCC624', shortLabel: 'Linux' };
+
+    // Mobile
+    if (l === 'ios' || l === 'iphone')
+        return { icon: 'phone-portrait-outline', color: '#A2AAAD', shortLabel: 'iOS' };
+    if (l === 'android')
+        return { icon: 'logo-android', color: '#3DDC84', shortLabel: 'Android' };
+
+    // Web
+    if (l === 'web')
+        return { icon: 'globe-outline', color: '#64D2FF', shortLabel: 'Web' };
+
+    // Fallback
+    return { icon: 'hardware-chip-outline', color: '#A0A0A0' };
+}
+
+// ── Layered metadata extraction ──────────────────────────
+
+interface LayeredMetadata {
+    identityParts: string[];
+    platforms: string[];
+    genres: string[];
 }
 
 function formatRuntime(mins: number): string {
@@ -56,103 +152,136 @@ function formatRuntime(mins: number): string {
     return h > 0 ? `${h}h ${m}min` : `${m}min`;
 }
 
-function getMetadata(item: AllContent): { badges: BadgeInfo[]; genres: string[] } {
+function getLayeredMetadata(item: AllContent): LayeredMetadata {
     switch (item.type) {
         case 'movie': {
             const m = item as Movie;
-            const badges: BadgeInfo[] = [];
-            if (m.year) badges.push({ icon: 'calendar-outline', label: m.year });
-            if (m.director) badges.push({ icon: 'videocam-outline', label: m.director });
-            if (m.runtime) badges.push({ icon: 'time-outline', label: formatRuntime(m.runtime) });
-            return { badges, genres: m.genres ?? [] };
+            const parts: string[] = [];
+            if (m.year) parts.push(m.year);
+            if (m.director) parts.push(m.director);
+            if (m.runtime) parts.push(formatRuntime(m.runtime));
+            return { identityParts: parts, platforms: [], genres: m.genres ?? [] };
         }
         case 'series': {
             const s = item as Series;
-            const badges: BadgeInfo[] = [];
-            if (s.year) badges.push({ icon: 'calendar-outline', label: s.year });
-            if (s.creator) badges.push({ icon: 'person-outline', label: s.creator });
             const parts: string[] = [];
-            if (s.seasons) parts.push(`${s.seasons} temporadas`);
-            if (s.episodes) parts.push(`${s.episodes} episodios`);
-            if (parts.length) badges.push({ icon: 'tv-outline', label: parts.join(' · ') });
-            return { badges, genres: s.genres ?? [] };
+            if (s.year) parts.push(s.year);
+            if (s.creator) parts.push(s.creator);
+            const sub: string[] = [];
+            if (s.seasons) sub.push(`${s.seasons} temporadas`);
+            if (s.episodes) sub.push(`${s.episodes} episodios`);
+            if (sub.length) parts.push(sub.join(', '));
+            return { identityParts: parts, platforms: [], genres: s.genres ?? [] };
         }
         case 'book': {
             const b = item as Book;
-            const badges: BadgeInfo[] = [];
-            if (b.author) badges.push({ icon: 'person-outline', label: b.author });
-            if (b.pages) badges.push({ icon: 'book-outline', label: `${b.pages} págs` });
-            if (b.year) badges.push({ icon: 'calendar-outline', label: b.year });
-            return { badges, genres: b.categories ?? [] };
+            const parts: string[] = [];
+            if (b.author) parts.push(b.author);
+            if (b.year) parts.push(b.year);
+            if (b.pages) parts.push(`${b.pages} págs`);
+            return { identityParts: parts, platforms: [], genres: b.categories ?? [] };
         }
         case 'game': {
             const g = item as Game;
-            const badges: BadgeInfo[] = [];
-            if (g.year) badges.push({ icon: 'calendar-outline', label: g.year });
-            if (g.developer) badges.push({ icon: 'code-outline', label: g.developer });
-            // Platforms as individual badges
-            g.platforms?.forEach((p) => badges.push({ icon: 'hardware-chip-outline', label: p }));
-            return { badges, genres: g.genres ?? [] };
+            const parts: string[] = [];
+            if (g.year) parts.push(g.year);
+            if (g.developer) parts.push(g.developer);
+            return { identityParts: parts, platforms: g.platforms ?? [], genres: g.genres ?? [] };
         }
         case 'music': {
             const mu = item as Music;
-            const badges: BadgeInfo[] = [];
-            if (mu.artist) badges.push({ icon: 'person-outline', label: mu.artist });
-            if (mu.year) badges.push({ icon: 'calendar-outline', label: mu.year });
-            if (mu.genre) badges.push({ icon: 'musical-notes-outline', label: mu.genre });
+            const parts: string[] = [];
+            if (mu.artist) parts.push(mu.artist);
+            if (mu.year) parts.push(mu.year);
+            if (mu.genre) parts.push(mu.genre);
             if (mu.isAlbum) {
-                // Album badges
-                if (mu.trackCount) badges.push({ icon: 'list-outline', label: `${mu.trackCount} tracks` });
+                if (mu.trackCount) parts.push(`${mu.trackCount} tracks`);
             } else {
-                // Track badges
-                if (mu.album && mu.album !== mu.title) {
-                    badges.push({ icon: 'disc-outline', label: mu.album });
-                }
+                if (mu.album && mu.album !== mu.title) parts.push(mu.album);
                 if (mu.durationMs) {
                     const totalSecs = Math.floor(mu.durationMs / 1000);
                     const mins = Math.floor(totalSecs / 60);
                     const secs = totalSecs % 60;
-                    badges.push({ icon: 'time-outline', label: `${mins}:${secs.toString().padStart(2, '0')}` });
+                    parts.push(`${mins}:${secs.toString().padStart(2, '0')}`);
                 }
             }
-            return { badges, genres: [] };
+            return { identityParts: parts, platforms: [], genres: [] };
         }
         case 'podcast': {
             const pod = item as Podcast;
-            const badges: BadgeInfo[] = [];
-            if (pod.publisher) badges.push({ icon: 'mic-outline', label: pod.publisher });
-            if (pod.genre) badges.push({ icon: 'pricetag-outline', label: pod.genre });
-            if (pod.episodeCount) badges.push({ icon: 'list-outline', label: `${pod.episodeCount} episodios` });
-            return { badges, genres: [] };
+            const parts: string[] = [];
+            if (pod.publisher) parts.push(pod.publisher);
+            if (pod.genre) parts.push(pod.genre);
+            if (pod.episodeCount) parts.push(`${pod.episodeCount} episodios`);
+            return { identityParts: parts, platforms: [], genres: [] };
         }
         case 'anything': {
             const a = item as Anything;
-            const badges: BadgeInfo[] = [];
-            if (a.categoryTag) badges.push({ icon: 'pricetag-outline', label: a.categoryTag });
-            if (a.creatorUsername) badges.push({ icon: 'person-outline', label: `@${a.creatorUsername}` });
-            return { badges, genres: [] };
+            const parts: string[] = [];
+            if (a.categoryTag) parts.push(a.categoryTag);
+            if (a.creatorUsername) parts.push(`@${a.creatorUsername}`);
+            return { identityParts: parts, platforms: [], genres: [] };
         }
         default:
-            return { badges: [], genres: [] };
+            return { identityParts: [], platforms: [], genres: [] };
     }
 }
 
+// ── Styles ───────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-    row: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
-    badge: {
+    container: {
+        gap: SPACING.lg, // 20px between layers — perceptual grouping via spacing
+    },
+
+    /* Layer 1 — Identity */
+    identityText: {
+        fontSize: 14,
+        fontFamily: 'SpaceGrotesk_500Medium',
+        color: COLORS.textSecondary,
+        lineHeight: 20,
+    },
+
+    /* Layer 2 — Platforms */
+    platformScroll: {
+        marginHorizontal: -SPACING.base, // bleed to screen edges for scroll affordance
+    },
+    platformContent: {
+        paddingHorizontal: SPACING.base,
+        gap: SPACING.sm,
         flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1,
-        borderRadius: RADIUS.full,
-        paddingHorizontal: SPACING.md,
-        paddingVertical: SPACING.xs + 2,
     },
-    badgeText: { fontSize: 12, fontFamily: 'SpaceGrotesk_600SemiBold' },
-    pill: {
-        borderWidth: 1,
+    platformChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: RADIUS.md,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: SPACING.sm,
+    },
+    platformIcon: {
+        marginRight: 6,
+    },
+    platformText: {
+        fontSize: 13,
+        fontFamily: 'SpaceGrotesk_600SemiBold',
+    },
+
+    /* Layer 3 — Genres */
+    genreRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: SPACING.sm,
+    },
+    genrePill: {
+        backgroundColor: 'rgba(255, 255, 255, 0.07)',
         borderRadius: RADIUS.full,
         paddingHorizontal: SPACING.md,
         paddingVertical: SPACING.xs,
     },
-    pillText: { fontSize: 12, fontFamily: 'SpaceGrotesk_500Medium' },
+    genreText: {
+        fontSize: 12,
+        fontFamily: 'SpaceGrotesk_500Medium',
+        color: COLORS.textTertiary,
+    },
 });
