@@ -7,6 +7,7 @@ import { ProfileStats } from '@/components/profile/ProfileStats';
 import { RatingHistory } from '@/components/profile/RatingHistory';
 import { BookmarksList } from '@/components/profile/BookmarksList';
 import { PinnedItemsGrid } from '@/components/profile/PinnedItemsGrid';
+import { ScoreDistribution } from '@/components/profile/ScoreDistribution';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
@@ -77,6 +78,9 @@ export default function ProfileScreen() {
 
                 {/* Stats */}
                 <ProfileStats userId={myUserId} />
+
+                {/* Score Distribution Histogram */}
+                <ScoreDistribution userId={myUserId} />
 
                 {/* Rating History */}
                 <RatingHistory userId={myUserId} />
