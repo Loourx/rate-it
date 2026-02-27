@@ -8,7 +8,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
-import { COLORS, getCategoryColor, formatScore, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS, getCategoryColor, formatScore } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { DiaryDay } from '@/lib/api/diary';
 import type { ContentType } from '@/lib/types/content';
 
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
         padding: 12,
     },
     dateLabel: {
-        fontSize: FONT_SIZE.labelLarge,
+        ...TYPO.bodySmall,
         color: COLORS.textSecondary,
         marginBottom: 10,
         textTransform: 'capitalize',
@@ -144,17 +145,15 @@ const styles = StyleSheet.create({
     },
     posterLetter: {
         color: COLORS.textSecondary,
-        fontSize: 18,
-        fontWeight: '700',
+        ...TYPO.h4,
     },
     cardInfo: {
         flex: 1,
         gap: 6,
     },
     cardTitle: {
-        fontSize: FONT_SIZE.bodySmall,
+        ...TYPO.caption,
         color: COLORS.textPrimary,
-        fontWeight: '500',
     },
     typeBadge: {
         alignSelf: 'flex-start',
@@ -163,8 +162,7 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
     typeLabel: {
-        fontSize: FONT_SIZE.labelSmall,
-        fontWeight: '600',
+        ...TYPO.label,
     },
     scoreBox: {
         borderWidth: 1.5,
@@ -175,7 +173,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     scoreText: {
-        fontSize: FONT_SIZE.bodySmall,
-        fontWeight: '700',
+        ...TYPO.caption,
+        fontFamily: FONT.bold,
     },
 });

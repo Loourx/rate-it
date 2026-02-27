@@ -13,7 +13,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePendingRatings } from '@/lib/hooks/usePendingRatings';
 import { useRatings } from '@/lib/hooks/useRatings';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { ContentType } from '@/lib/types/content';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -180,8 +181,7 @@ const S = StyleSheet.create({
         paddingBottom: SPACING['2xl'],
     },
     header: {
-        fontSize: FONT_SIZE.headlineLarge,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.h2,
         color: COLORS.textPrimary,
         paddingVertical: SPACING.md,
     },
@@ -198,22 +198,22 @@ const S = StyleSheet.create({
         marginBottom: SPACING.xl,
     },
     searchPlaceholder: {
-        fontSize: FONT_SIZE.bodyMedium,
+        ...TYPO.bodySmall,
+        fontFamily: FONT.medium,
         color: COLORS.textTertiary,
-        fontFamily: 'SpaceGrotesk_500Medium',
     },
     section: { marginBottom: SPACING.xl },
     sectionTitle: {
-        fontSize: FONT_SIZE.headlineSmall,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.h4,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginBottom: SPACING.sm,
     },
     loader: { marginTop: SPACING.md },
     emptyText: {
-        fontSize: FONT_SIZE.bodyMedium,
+        ...TYPO.bodySmall,
+        fontFamily: FONT.medium,
         color: COLORS.textSecondary,
-        fontFamily: 'SpaceGrotesk_500Medium',
         marginTop: SPACING.sm,
     },
     row: {
@@ -231,14 +231,14 @@ const S = StyleSheet.create({
         alignItems: 'center',
     },
     thumbLetter: {
-        fontSize: FONT_SIZE.bodyLarge,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.body,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
     },
     rowInfo: { flex: 1, gap: 4 },
     rowTitle: {
-        fontSize: FONT_SIZE.bodyMedium,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.bodySmall,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
     },
     badge: {
@@ -248,12 +248,12 @@ const S = StyleSheet.create({
         borderRadius: RADIUS.full,
     },
     badgeText: {
-        fontSize: FONT_SIZE.bodySmall,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.caption,
+        fontFamily: FONT.bold,
     },
     score: {
-        fontSize: FONT_SIZE.headlineSmall,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.h4,
+        fontFamily: FONT.bold,
     },
     anythingCta: {
         flexDirection: 'row',
@@ -269,8 +269,8 @@ const S = StyleSheet.create({
     },
     anythingCtaText: {
         flex: 1,
-        fontSize: FONT_SIZE.bodyMedium,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.bodySmall,
+        fontFamily: FONT.bold,
         color: COLORS.categoryAnything,
     },
 });

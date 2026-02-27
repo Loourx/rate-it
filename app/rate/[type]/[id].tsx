@@ -19,7 +19,8 @@ import { StatusPicker } from '@/components/rating/StatusPicker';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Toast } from '@/components/ui/Toast';
-import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import { useRatingForm } from '@/lib/hooks/useRatingForm';
 import { AlbumTrackRatingSection } from '@/components/rating/AlbumTrackRatingSection';
 
@@ -211,17 +212,17 @@ const styles = StyleSheet.create({
     flex: { flex: 1, backgroundColor: COLORS.background },
     scroll: { padding: SPACING.xl, paddingBottom: 140 },
     section: { marginTop: SPACING['2xl'] },
-    sectionLabel: { color: COLORS.textSecondary, fontSize: FONT_SIZE.bodyMedium, fontWeight: '500', marginBottom: SPACING.md },
+    sectionLabel: { color: COLORS.textSecondary, ...TYPO.bodySmall, fontFamily: FONT.medium, marginBottom: SPACING.md },
     textInput: {
         backgroundColor: COLORS.surfaceElevated,
         color: COLORS.textPrimary,
         borderRadius: RADIUS.md,
         padding: SPACING.base,
-        fontSize: FONT_SIZE.bodyLarge,
+        ...TYPO.body,
         minHeight: 120,
         textAlignVertical: 'top',
     },
-    charCount: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall, textAlign: 'right', marginTop: SPACING.xs },
+    charCount: { color: COLORS.textTertiary, ...TYPO.caption, textAlign: 'right', marginTop: SPACING.xs },
     spoilerRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.surfaceElevated,
         borderRadius: RADIUS.md,
     },
-    spoilerText: { color: COLORS.textPrimary, fontSize: FONT_SIZE.bodyLarge, marginLeft: SPACING.md },
+    spoilerText: { color: COLORS.textPrimary, ...TYPO.body, marginLeft: SPACING.md },
     privateNoteToggle: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.surfaceElevated,
         borderRadius: RADIUS.md,
     },
-    privateNoteToggleText: { color: COLORS.textSecondary, fontSize: FONT_SIZE.bodyMedium, fontWeight: '500' },
+    privateNoteToggleText: { color: COLORS.textSecondary, ...TYPO.bodySmall, fontFamily: FONT.medium },
     privateNoteContainer: {
         backgroundColor: COLORS.surfaceElevated,
         borderRadius: RADIUS.md,
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
     },
     privateNoteInput: {
         color: COLORS.textPrimary,
-        fontSize: FONT_SIZE.bodyLarge,
+        ...TYPO.body,
         minHeight: 100,
         textAlignVertical: 'top',
         paddingTop: SPACING.base,
@@ -267,6 +268,6 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
     },
     saveButton: { paddingVertical: SPACING.base, borderRadius: RADIUS.full, alignItems: 'center' },
-    saveText: { color: COLORS.background, fontSize: FONT_SIZE.headlineSmall, fontWeight: '700' },
-    trackAverageLabel: { fontSize: FONT_SIZE.bodyMedium, fontFamily: 'SpaceGrotesk_600SemiBold', textAlign: 'center', paddingVertical: SPACING.sm },
+    saveText: { color: COLORS.background, ...TYPO.h4, fontFamily: FONT.bold },
+    trackAverageLabel: { ...TYPO.bodySmall, fontFamily: FONT.semibold, textAlign: 'center', paddingVertical: SPACING.sm },
 });

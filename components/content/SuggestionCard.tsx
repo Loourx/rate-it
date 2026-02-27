@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getCategoryColor, COLORS, FONT_SIZE, SPACING, RADIUS } from '@/lib/utils/constants';
+import { getCategoryColor, COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { SuggestedItem } from '@/lib/hooks/useSuggestedContent';
 
 export function SuggestionCard({
@@ -52,7 +53,7 @@ const S = StyleSheet.create({
     posterFallback: { justifyContent: 'center', alignItems: 'center' },
     posterLetter: {
         fontSize: 36,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        fontFamily: FONT.bold,
         color: COLORS.textTertiary,
     },
     scoreBadge: {
@@ -63,7 +64,7 @@ const S = StyleSheet.create({
         paddingVertical: 2,
         borderRadius: RADIUS.full,
     },
-    scoreText: { fontSize: 11, fontFamily: 'SpaceGrotesk_700Bold', color: '#FFF' },
+    scoreText: { fontSize: 11, fontFamily: FONT.bold, color: '#FFF' },
     friendBadge: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -73,11 +74,11 @@ const S = StyleSheet.create({
     friendText: {
         fontSize: 10,
         color: COLORS.textSecondary,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
     },
     title: {
-        fontSize: FONT_SIZE.bodySmall,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.caption,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginTop: 2,
     },

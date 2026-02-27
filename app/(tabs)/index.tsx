@@ -15,7 +15,8 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { ContentType, BaseContent } from '@/lib/types/content';
-import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 
 export default function HomeScreen() {
     const router = useRouter();
@@ -254,8 +255,8 @@ export default function HomeScreen() {
 const trendingStyles = StyleSheet.create({
     section: { marginBottom: SPACING.xl },
     sectionTitle: {
-        fontSize: FONT_SIZE.headlineSmall,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.h4,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginBottom: SPACING.sm,
         paddingHorizontal: SPACING.xl,
@@ -273,18 +274,18 @@ const trendingStyles = StyleSheet.create({
         borderStyle: 'dashed',
     },
     ctaTitle: {
-        fontSize: FONT_SIZE.bodyLarge,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.body,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
     },
     ctaSubtitle: {
-        fontSize: FONT_SIZE.bodySmall,
+        ...TYPO.caption,
         color: COLORS.textSecondary,
     },
     emptyHint: {
-        fontSize: FONT_SIZE.bodyMedium,
+        ...TYPO.bodySmall,
+        fontFamily: FONT.medium,
         color: COLORS.textSecondary,
-        fontFamily: 'SpaceGrotesk_500Medium',
         paddingHorizontal: SPACING.md,
         marginTop: SPACING.sm,
     },

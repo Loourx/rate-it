@@ -12,7 +12,8 @@ import { SearchBar } from '@/components/content/SearchBar';
 import { UserSearchResultCard } from '@/components/social/UserSearchResultCard';
 import { useSearchUsers } from '@/lib/hooks/useSearchUsers';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { UserSearchResult } from '@/lib/types/social';
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
@@ -136,11 +137,11 @@ const styles = StyleSheet.create({
     screen: { flex: 1, backgroundColor: COLORS.background },
     header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.sm, paddingTop: SPACING.xs },
     backButton: { paddingHorizontal: SPACING.sm, paddingVertical: SPACING.sm },
-    title: { fontSize: FONT_SIZE.headlineSmall, fontWeight: '700', color: COLORS.textPrimary, marginLeft: 4 },
+    title: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary, marginLeft: 4 },
     content: { flex: 1 },
     emptyContainer: { alignItems: 'center', paddingTop: SPACING['3xl'], paddingHorizontal: 32, gap: 10 },
-    emptyTitle: { fontSize: FONT_SIZE.headlineSmall, fontWeight: '700', color: COLORS.textPrimary, marginTop: 4 },
-    emptyText: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22 },
+    emptyTitle: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary, marginTop: 4 },
+    emptyText: { ...TYPO.bodySmall, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22 },
     skeletonRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.base, paddingVertical: 12, gap: 12 },
     skeletonAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: COLORS.surfaceElevated },
     skeletonLines: { flex: 1, gap: 8 },

@@ -11,7 +11,8 @@ import { RatingSlider } from '@/components/rating/RatingSlider';
 import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
 import { AlbumTrack } from '@/lib/types/content';
 import { TrackRatingEntry } from '@/lib/types/database';
-import { COLORS, FONT_SIZE, RADIUS, SPACING } from '@/lib/utils/constants';
+import { COLORS, RADIUS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 
 interface AlbumTrackRatingSectionProps {
     collectionId: string;
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: 15,
-        fontFamily: 'SpaceGrotesk_600SemiBold',
+        fontFamily: FONT.semibold,
         color: COLORS.textPrimary,
     },
     headerRight: {
@@ -153,8 +154,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     badgeText: {
-        fontSize: FONT_SIZE.labelSmall,
-        fontFamily: 'SpaceGrotesk_600SemiBold',
+        ...TYPO.label,
+        fontFamily: FONT.semibold,
         color: COLORS.background,
     },
     body: {
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
         paddingVertical: SPACING.lg,
     },
     errorText: {
-        fontSize: FONT_SIZE.bodySmall,
+        ...TYPO.caption,
         color: COLORS.error,
         textAlign: 'center',
         paddingVertical: SPACING.md,
@@ -179,8 +180,8 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
     averageLabel: {
-        fontSize: FONT_SIZE.bodyLarge,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.body,
+        fontFamily: FONT.bold,
         textAlign: 'center',
         marginTop: SPACING.md,
         paddingTop: SPACING.md,

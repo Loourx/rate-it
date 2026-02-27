@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import type { ContentType } from '@/lib/types/content';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import { RatingSlider } from '@/components/rating/RatingSlider';
 import { useCommunityScore } from '@/lib/hooks/useCommunityScore';
 
@@ -58,8 +59,8 @@ const S = StyleSheet.create({
         gap: SPACING.md,
     },
     label: {
-        fontSize: FONT_SIZE.bodyLarge,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.body,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginBottom: -SPACING.sm,
     },

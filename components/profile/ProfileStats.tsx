@@ -12,7 +12,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useProfileStats, type CategoryStat } from '@/lib/hooks/useProfileStats';
 import { useStreak } from '@/lib/hooks/useStreak';
-import { COLORS, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 
 const CATEGORY_META: Record<string, { emoji: string; label: string; color: string }> = {
     movie: { emoji: '🎬', label: 'Cine', color: COLORS.categoryMovie },
@@ -194,22 +195,22 @@ const styles = StyleSheet.create({
     wrapper: { width: '100%' },
     countersRow: { flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 24, paddingVertical: 16, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.divider, backgroundColor: COLORS.surface, marginBottom: 24 },
     counterItem: { alignItems: 'center' },
-    counterNumber: { fontSize: FONT_SIZE.headlineMedium, fontWeight: 'bold', color: COLORS.textPrimary },
-    counterLabel: { fontSize: FONT_SIZE.bodySmall, color: COLORS.textSecondary, marginTop: 2 },
+    counterNumber: { ...TYPO.h3, color: COLORS.textPrimary },
+    counterLabel: { ...TYPO.caption, color: COLORS.textSecondary, marginTop: 2 },
     container: { paddingHorizontal: 24, paddingBottom: 24 },
     averageContainer: { alignItems: 'center', marginBottom: 24 },
-    averageNumber: { fontSize: FONT_SIZE.headlineLarge, fontWeight: 'bold', color: COLORS.textPrimary },
-    averageLabel: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, marginTop: 4 },
+    averageNumber: { ...TYPO.h2, color: COLORS.textPrimary },
+    averageLabel: { ...TYPO.bodySmall, color: COLORS.textSecondary, marginTop: 4 },
     categoriesContainer: { gap: 12 },
     categoryRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     categoryEmoji: { fontSize: 16, width: 22 },
-    categoryLabel: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textPrimary, width: 65 },
-    categoryCount: { fontSize: FONT_SIZE.bodyMedium, fontWeight: 'bold', color: COLORS.textPrimary, width: 24, textAlign: 'right', marginRight: 4 },
+    categoryLabel: { ...TYPO.bodySmall, color: COLORS.textPrimary, width: 65 },
+    categoryCount: { ...TYPO.bodySmall, fontFamily: FONT.bold, color: COLORS.textPrimary, width: 24, textAlign: 'right', marginRight: 4 },
     barTrack: { flex: 1, height: 12, backgroundColor: COLORS.surfaceElevated, borderRadius: 999, overflow: 'hidden' },
     barFill: { height: '100%', borderRadius: 999 },
     skeletonRow: { marginBottom: 10 },
     skeletonBar: { height: 20, backgroundColor: COLORS.surfaceElevated, borderRadius: 8 },
-    errorText: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.error, textAlign: 'center' },
+    errorText: { ...TYPO.bodySmall, color: COLORS.error, textAlign: 'center' },
     retryButton: { alignSelf: 'center', marginTop: 8, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: COLORS.surfaceElevated, borderRadius: 999 },
-    retryText: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textPrimary, fontWeight: '600' },
+    retryText: { ...TYPO.bodySmall, fontFamily: FONT.semibold, color: COLORS.textPrimary },
 });

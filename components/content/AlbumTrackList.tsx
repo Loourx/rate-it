@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AlbumTrack } from '@/lib/types/content';
 import { COLORS, SPACING } from '@/lib/utils/constants';
+import { FONT } from '@/lib/utils/typography';
 
 // ── helpers ──────────────────────────────────────────────
 
@@ -102,19 +103,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 13,
         color: COLORS.textTertiary,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
     },
     trackName: {
         flex: 1,
         marginHorizontal: SPACING.sm,
         fontSize: 14,
         color: COLORS.textPrimary,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
     },
     duration: {
         fontSize: 13,
         color: COLORS.textTertiary,
-        fontFamily: 'SpaceGrotesk_400Regular',
+        fontFamily: FONT.regular,
     },
     toggleButton: {
         marginTop: SPACING.sm,
@@ -125,6 +126,6 @@ const styles = StyleSheet.create({
     },
     toggleText: {
         fontSize: 13,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
     },
 });

@@ -10,7 +10,8 @@ import { useFollowing } from '@/lib/hooks/useFollowing';
 import { useFollow } from '@/lib/hooks/useFollow';
 import { useIsFollowing } from '@/lib/hooks/useIsFollowing';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { FollowingProfile } from '@/lib/types/social';
 
 function UserRow({ profile }: { profile: FollowingProfile }) {
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1, borderBottomColor: COLORS.divider,
     },
     backBtn: { width: 40, alignItems: 'flex-start' },
-    title: { fontSize: FONT_SIZE.headlineSmall, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary },
+    title: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary },
     userRow: {
         flexDirection: 'row', alignItems: 'center',
         paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
@@ -120,18 +121,18 @@ const styles = StyleSheet.create({
     },
     avatar: { width: 44, height: 44, borderRadius: 22, marginRight: SPACING.sm },
     avatarFallback: { backgroundColor: COLORS.surfaceElevated, justifyContent: 'center', alignItems: 'center' },
-    avatarInitial: { fontSize: FONT_SIZE.bodyLarge, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary },
+    avatarInitial: { ...TYPO.body, fontFamily: FONT.bold, color: COLORS.textPrimary },
     userInfo: { flex: 1 },
-    username: { fontSize: FONT_SIZE.bodyMedium, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary },
-    displayName: { fontSize: FONT_SIZE.bodySmall, color: COLORS.textSecondary, marginTop: 2 },
+    username: { ...TYPO.bodySmall, fontFamily: FONT.bold, color: COLORS.textPrimary },
+    displayName: { ...TYPO.caption, color: COLORS.textSecondary, marginTop: 2 },
     followBtn: {
         paddingHorizontal: SPACING.md, paddingVertical: 6,
         borderRadius: 999, borderWidth: 1, borderColor: COLORS.textPrimary,
     },
     followingBtn: { backgroundColor: COLORS.surfaceElevated, borderColor: COLORS.divider },
-    followBtnText: { fontSize: FONT_SIZE.bodySmall, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary },
+    followBtnText: { ...TYPO.caption, fontFamily: FONT.bold, color: COLORS.textPrimary },
     followingBtnText: { color: COLORS.textSecondary },
     centered: { marginTop: SPACING['2xl'] },
-    emptyText: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, textAlign: 'center' },
+    emptyText: { ...TYPO.bodySmall, color: COLORS.textSecondary, textAlign: 'center' },
     emptyContainer: { flex: 1, justifyContent: 'center' },
 });

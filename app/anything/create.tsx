@@ -9,7 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { RatingSlider } from '@/components/rating/RatingSlider';
 import { Toast } from '@/components/ui/Toast';
-import { COLORS, SPACING, RADIUS, FONT_SIZE, RATING } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS, RATING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import { useCreateAnythingItem } from '@/lib/hooks/useCreateAnythingItem';
 
 const MAX_TITLE = 200;
@@ -74,7 +75,7 @@ export default function CreateAnythingScreen() {
                     title: 'Crear item',
                     headerStyle: { backgroundColor: COLORS.background },
                     headerTintColor: COLORS.textPrimary,
-                    headerTitleStyle: { fontFamily: 'SpaceGrotesk_600SemiBold' },
+                    headerTitleStyle: { fontFamily: FONT.semibold },
                 }}
             />
             <KeyboardAvoidingView
@@ -232,23 +233,23 @@ const s = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.5)', paddingVertical: 8,
         alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 6,
     },
-    imageOverlayText: { color: COLORS.textPrimary, fontSize: FONT_SIZE.bodySmall, fontWeight: '600' },
+    imageOverlayText: { color: COLORS.textPrimary, ...TYPO.caption, fontFamily: FONT.semibold },
     imagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 },
-    imagePlaceholderText: { color: COLORS.categoryAnything, fontSize: FONT_SIZE.bodyMedium, fontWeight: '600' },
-    imagePlaceholderHint: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall },
+    imagePlaceholderText: { color: COLORS.categoryAnything, ...TYPO.bodySmall, fontFamily: FONT.semibold },
+    imagePlaceholderHint: { color: COLORS.textTertiary, ...TYPO.caption },
     removeBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
         gap: 4, marginBottom: SPACING.lg,
     },
-    removeText: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall },
+    removeText: { color: COLORS.textTertiary, ...TYPO.caption },
     form: { gap: SPACING.sm },
-    label: { color: COLORS.textSecondary, fontSize: FONT_SIZE.bodySmall, fontWeight: '500', marginTop: SPACING.sm },
+    label: { color: COLORS.textSecondary, ...TYPO.caption, fontWeight: '500', marginTop: SPACING.sm },
     input: {
         backgroundColor: COLORS.surfaceElevated, color: COLORS.textPrimary,
-        borderRadius: RADIUS.md, padding: SPACING.base, fontSize: FONT_SIZE.bodyLarge,
+        borderRadius: RADIUS.md, padding: SPACING.base, ...TYPO.body,
     },
     multilineInput: { minHeight: 80, textAlignVertical: 'top' },
-    counter: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall, textAlign: 'right', marginTop: 2 },
+    counter: { color: COLORS.textTertiary, ...TYPO.caption, textAlign: 'right', marginTop: 2 },
     ratingSection: { marginTop: SPACING.lg },
     addRatingBtn: {
         flexDirection: 'row',
@@ -263,7 +264,7 @@ const s = StyleSheet.create({
     },
     addRatingText: {
         color: COLORS.categoryAnything,
-        fontSize: FONT_SIZE.bodyLarge,
+        ...TYPO.body,
         fontWeight: '600',
         marginLeft: SPACING.sm,
     },
@@ -279,10 +280,10 @@ const s = StyleSheet.create({
     },
     removeRatingText: {
         color: COLORS.textTertiary,
-        fontSize: FONT_SIZE.bodySmall,
+        ...TYPO.caption,
     },
     bottomBar: { padding: SPACING.xl, paddingBottom: 40, borderTopWidth: 1, borderTopColor: COLORS.divider, backgroundColor: COLORS.background },
     submitBtn: { borderRadius: RADIUS.full, paddingVertical: 16, alignItems: 'center' },
     submitRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    submitText: { color: '#000000', fontSize: FONT_SIZE.bodyLarge, fontWeight: '700' },
+    submitText: { color: '#000000', ...TYPO.body, fontFamily: FONT.bold },
 });

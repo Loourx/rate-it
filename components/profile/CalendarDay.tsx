@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { ContentType } from '@/lib/types/content';
 import type { DiaryDay } from '@/lib/api/diary';
 
@@ -50,7 +51,7 @@ export function CalendarDay({ day, dateKey, ratings, isSelected, isToday, onPres
                     <Text
                         style={[
                             styles.dayText,
-                            isToday && { color: COLORS.link, fontWeight: '700' },
+                            isToday && { color: COLORS.link, fontFamily: FONT.bold },
                             !hasRatings && { color: COLORS.textTertiary },
                         ]}
                     >
@@ -79,8 +80,7 @@ const styles = StyleSheet.create({
         borderColor: COLORS.link,
     },
     dayText: {
-        fontSize: 13,
-        fontWeight: '500',
+        ...TYPO.caption,
         color: COLORS.textPrimary,
     },
     dot: {

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, RADIUS, FONT_SIZE, getCategoryColor } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { TrendingFriendItem } from '@/lib/hooks/useFriendsTrending';
 
 interface TrendingCardProps {
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
     posterFallback: { justifyContent: 'center', alignItems: 'center' },
     posterLetter: {
         fontSize: 36,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        fontFamily: FONT.bold,
         color: COLORS.textTertiary,
     },
     scoreBadge: {
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     },
     scoreText: {
         fontSize: 11,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        fontFamily: FONT.bold,
         color: '#FFF',
     },
     author: {
@@ -78,15 +79,15 @@ const styles = StyleSheet.create({
         marginTop: 6,
     },
     authorName: {
-        fontSize: FONT_SIZE.bodySmall,
+        ...TYPO.caption,
         color: COLORS.textSecondary,
         flex: 1,
     },
     likes: { flexDirection: 'row', alignItems: 'center', gap: 2 },
     likesText: { fontSize: 10, color: COLORS.textSecondary },
     title: {
-        fontSize: FONT_SIZE.bodySmall,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.caption,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginTop: 2,
     },

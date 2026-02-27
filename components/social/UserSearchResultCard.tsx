@@ -5,7 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useIsFollowing } from '@/lib/hooks/useIsFollowing';
 import { useFollow } from '@/lib/hooks/useFollow';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { UserSearchResult } from '@/lib/types/social';
 
 interface Props {
@@ -88,12 +89,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    avatarInitial: { fontSize: FONT_SIZE.bodyLarge, fontWeight: '700', color: COLORS.textSecondary },
+    avatarInitial: { ...TYPO.body, fontFamily: FONT.bold, color: COLORS.textSecondary },
     info: { flex: 1, gap: 2 },
     usernameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    username: { fontSize: FONT_SIZE.bodyMedium, fontWeight: '700', color: COLORS.textPrimary },
+    username: { ...TYPO.bodySmall, fontFamily: FONT.bold, color: COLORS.textPrimary },
     lockIcon: { marginTop: 1 },
-    displayName: { fontSize: FONT_SIZE.bodySmall, color: COLORS.textSecondary },
+    displayName: { ...TYPO.caption, color: COLORS.textSecondary },
     followButton: {
         paddingHorizontal: 16,
         paddingVertical: 7,
@@ -103,6 +104,6 @@ const styles = StyleSheet.create({
         minWidth: 86,
     },
     followingButton: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: COLORS.divider },
-    followText: { fontSize: FONT_SIZE.bodySmall, fontWeight: '700', color: COLORS.background },
+    followText: { ...TYPO.caption, fontFamily: FONT.bold, color: COLORS.background },
     followingText: { color: COLORS.textPrimary },
 });

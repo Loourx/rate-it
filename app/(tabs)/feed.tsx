@@ -7,7 +7,8 @@ import FeedCard from '@/components/feed/FeedCard';
 import { FeedSkeletonList } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO } from '@/lib/utils/typography';
 import { FilterBar, type ActivityFilter } from '@/components/feed/FilterBar';
 import type { ContentType } from '@/lib/types/content';
 
@@ -93,7 +94,7 @@ export default function FeedScreen() {
                 onEndReachedThreshold={0.5}
                 ListEmptyComponent={
                     <View style={{ padding: SPACING.xl, alignItems: 'center' }}>
-                        <Text style={{ color: COLORS.textSecondary, fontSize: FONT_SIZE.bodyMedium }}>
+                        <Text style={{ color: COLORS.textSecondary, ...TYPO.bodySmall }}>
                             Sin resultados con estos filtros
                         </Text>
                     </View>

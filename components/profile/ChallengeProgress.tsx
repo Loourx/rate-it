@@ -1,91 +1,26 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useQueries } from '@tanstack/react-query';
-import { COLORS, SPACING, RADIUS, FONT_SIZE, getCategoryColor } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import { fetchChallenges, countProgress } from '@/lib/api/challenges';
 import { useCelebration } from '@/lib/hooks/useCelebration';
+import { ActivityRing } from './ActivityRing';
 import type { AnnualChallenge } from '@/lib/types/database';
-import type { ContentType } from '@/lib/types/content';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type CategoryFilter = AnnualChallenge['categoryFilter'];
 
 interface ChallengeProgressProps {
     userId: string | undefined;
     isOwnProfile?: boolean;
-    /** Called (once per session) when a newly-completed challenge is detected. */
     onCelebrate?: (markFn: () => void) => void;
 }
 
-// ─── Static metadata ──────────────────────────────────────────────────────────
-
 const YEAR = new Date().getFullYear();
 
-const CATEGORY_META: Record<CategoryFilter, { emoji: string; label: string }> = {
-    movie:    { emoji: '🎬', label: 'Películas' },
-    series:   { emoji: '📺', label: 'Series' },
-    book:     { emoji: '📚', label: 'Libros' },
-    game:     { emoji: '🎮', label: 'Videojuegos' },
-    music:    { emoji: '🎵', label: 'Música' },
-    podcast:  { emoji: '🎙️', label: 'Podcasts' },
-    anything: { emoji: '✨', label: 'Anything' },
-    all:      { emoji: '🌟', label: 'Todas' },
-};
+// ─── Celebration gate (invisible, one per challenge) ─────────────────────────
 
-function getChallengeBarColor(category: CategoryFilter): string {
-    if (category === 'all') return COLORS.link;
-    return getCategoryColor(category as ContentType);
-}
-
-// ─── Row ─────────────────────────────────────────────────────────────────────
-
-function ChallengeRow({ challenge, progress }: { challenge: AnnualChallenge; progress: number }) {
-    const pct = Math.min(100, Math.round((progress / challenge.targetCount) * 100));
-    const completed = progress >= challenge.targetCount;
-    const meta = CATEGORY_META[challenge.categoryFilter];
-    const color = getChallengeBarColor(challenge.categoryFilter);
-
-    return (
-        <View style={S.row}>
-            {/* Label */}
-            <Text style={S.rowLabel} numberOfLines={1}>
-                {meta.emoji} {meta.label}:
-            </Text>
-
-            {/* Counts */}
-            <Text style={S.rowCounts}>
-                {progress}/{challenge.targetCount}
-            </Text>
-
-            {/* Progress bar */}
-            <View style={S.barTrack}>
-                <View
-                    style={[
-                        S.barFill,
-                        { width: `${pct}%` as `${number}%`, backgroundColor: color },
-                    ]}
-                />
-            </View>
-
-            {/* Trailing indicator */}
-            {completed ? (
-                <Text style={S.trophy}>🏆</Text>
-            ) : (
-                <Text style={[S.pct, { color }]}>{pct}%</Text>
-            )}
-        </View>
-    );
-}
-
-// ─── Celebration gate (one per challenge, renders nothing) ───────────────────
-
-/**
- * Invisible component that monitors a single challenge.
- * If shouldCelebrate becomes true it calls onCelebrate once and stops.
- * Lives in the tree so it can legally call hooks per challenge.
- */
 function CelebrationGate({
     challengeId,
     isCompleted,
@@ -113,10 +48,9 @@ function CelebrationGate({
 export function ChallengeProgress({ userId, isOwnProfile = false, onCelebrate }: ChallengeProgressProps) {
     const router = useRouter();
 
-    // ── Only one celebration fires per mount (queue the rest for next open) ──
     const hasTriggeredRef = useRef(false);
     const handleGateCelebrate = useCallback((markFn: () => void) => {
-        if (hasTriggeredRef.current) return; // another challenge already won
+        if (hasTriggeredRef.current) return;
         hasTriggeredRef.current = true;
         onCelebrate?.(markFn);
     }, [onCelebrate]);
@@ -137,34 +71,34 @@ export function ChallengeProgress({ userId, isOwnProfile = false, onCelebrate }:
         })),
     });
 
-    // Don't render while loading or if no active challenges
-    if (isLoading || challenges.length === 0) return null;
+    const progressMap = useMemo(() => {
+        const map: Record<string, number> = {};
+        challenges.forEach((c, i) => {
+            map[c.id] = (progressResults[i]?.data as number | undefined) ?? 0;
+        });
+        return map;
+    }, [challenges, progressResults]);
 
-    const cardContent = (
+    if (isLoading) return null;
+
+    // Celebration gates (invisible)
+    const celebrationGates = onCelebrate
+        ? challenges.map((c) => (
+              <CelebrationGate
+                  key={`gate-${c.id}`}
+                  challengeId={c.id}
+                  isCompleted={(progressMap[c.id] ?? 0) >= c.targetCount}
+                  onCelebrate={handleGateCelebrate}
+              />
+          ))
+        : null;
+
+    const ringContent = (
         <View style={S.card}>
             <Text style={S.title}>Retos {YEAR} 🔥</Text>
-            {challenges.map((c, i) => {
-                const progress = (progressResults[i]?.data as number | undefined) ?? 0;
-                return <ChallengeRow key={c.id} challenge={c} progress={progress} />;
-            })}
+            <ActivityRing challenges={challenges} progressMap={progressMap} />
         </View>
     );
-
-    // Gates are rendered outside the card (invisible) to detect completions
-    const celebrationGates = onCelebrate
-        ? challenges.map((c, i) => {
-              const progress = (progressResults[i]?.data as number | undefined) ?? 0;
-              const isCompleted = progress >= c.targetCount;
-              return (
-                  <CelebrationGate
-                      key={`gate-${c.id}`}
-                      challengeId={c.id}
-                      isCompleted={isCompleted}
-                      onCelebrate={handleGateCelebrate}
-                  />
-              );
-          })
-        : null;
 
     if (isOwnProfile) {
         return (
@@ -174,7 +108,7 @@ export function ChallengeProgress({ userId, isOwnProfile = false, onCelebrate }:
                     onPress={() => router.push('/profile/challenge')}
                     activeOpacity={0.85}
                 >
-                    {cardContent}
+                    {ringContent}
                 </TouchableOpacity>
             </>
         );
@@ -183,7 +117,7 @@ export function ChallengeProgress({ userId, isOwnProfile = false, onCelebrate }:
     return (
         <>
             {celebrationGates}
-            {cardContent}
+            {ringContent}
         </>
     );
 }
@@ -197,54 +131,11 @@ const S = StyleSheet.create({
         backgroundColor: COLORS.surface,
         borderRadius: 16,
         padding: SPACING.base,
-        gap: SPACING.sm,
     },
     title: {
-        fontSize: FONT_SIZE.bodyLarge,
-        fontWeight: '700',
+        ...TYPO.body,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginBottom: SPACING.xs,
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        minHeight: 28,
-    },
-    rowLabel: {
-        width: 108,
-        fontSize: FONT_SIZE.bodySmall,
-        color: COLORS.textSecondary,
-        flexShrink: 0,
-    },
-    rowCounts: {
-        width: 52,
-        fontSize: FONT_SIZE.bodySmall,
-        color: COLORS.textTertiary,
-        textAlign: 'right',
-        flexShrink: 0,
-    },
-    barTrack: {
-        flex: 1,
-        height: 6,
-        backgroundColor: COLORS.surfaceElevated,
-        borderRadius: RADIUS.full,
-        overflow: 'hidden',
-    },
-    barFill: {
-        height: '100%',
-        borderRadius: RADIUS.full,
-    },
-    trophy: {
-        width: 28,
-        textAlign: 'center',
-        fontSize: 14,
-    },
-    pct: {
-        width: 34,
-        fontSize: FONT_SIZE.labelSmall ?? 10,
-        fontWeight: '600',
-        textAlign: 'right',
-        flexShrink: 0,
     },
 });

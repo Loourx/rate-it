@@ -15,6 +15,7 @@ import { ContentType, Movie, Series, Anything, Music } from '@/lib/types/content
 import { AlbumTrackList } from '@/components/content/AlbumTrackList';
 import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
 import { COLORS, SPACING, RADIUS, getCategoryColor, getCategoryFadedColor } from '@/lib/utils/constants';
+import { FONT } from '@/lib/utils/typography';
 import { ContentDetailHeader } from '@/components/content/ContentDetailHeader';
 import { ContentMetadataBadges } from '@/components/content/ContentMetadataBadges';
 import { ContentDetailSkeleton } from '@/components/content/ContentDetailSkeleton';
@@ -301,12 +302,12 @@ const S = StyleSheet.create({
     body: { paddingHorizontal: SPACING.base, marginTop: SPACING.lg },
     actionsContainer: { marginTop: SPACING.xl, gap: SPACING.md },
     rateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: RADIUS.md, gap: SPACING.sm },
-    rateTxt: { fontSize: 16, fontFamily: 'SpaceGrotesk_700Bold', color: '#FFF' },
+    rateTxt: { fontSize: 16, fontFamily: FONT.bold, color: '#FFF' },
     secondaryActions: { flexDirection: 'row', justifyContent: 'space-evenly' },
     iconBtn: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.surface, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.divider },
     synWrap: { marginTop: SPACING['2xl'] },
-    synTitle: { fontSize: 20, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary, marginBottom: SPACING.sm },
-    synBody: { fontSize: 16, fontFamily: 'SpaceGrotesk_500Medium', color: COLORS.textSecondary, lineHeight: 24 },
+    synTitle: { fontSize: 20, fontFamily: FONT.bold, color: COLORS.textPrimary, marginBottom: SPACING.sm },
+    synBody: { fontSize: 16, fontFamily: FONT.medium, color: COLORS.textSecondary, lineHeight: 24 },
     report: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: SPACING['2xl'], paddingVertical: SPACING.md, borderWidth: 1, borderColor: COLORS.divider, borderRadius: RADIUS.md },
     reportTxt: { fontSize: 14, color: COLORS.textSecondary, marginLeft: SPACING.sm },
 });

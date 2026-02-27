@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useScoreDistribution } from '@/lib/hooks/useScoreDistribution';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 
 interface ScoreDistributionProps {
     userId: string | undefined;
@@ -125,8 +126,8 @@ const S = StyleSheet.create({
         marginTop: SPACING.md,
     },
     title: {
-        fontSize: FONT_SIZE.bodyLarge,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.body,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginBottom: SPACING.md,
     },
@@ -145,7 +146,7 @@ const S = StyleSheet.create({
         fontSize: 8,
         color: COLORS.textTertiary,
         marginBottom: 2,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
     },
     barTrack: {
         width: '80%',
@@ -162,7 +163,7 @@ const S = StyleSheet.create({
         fontSize: 9,
         color: COLORS.textSecondary,
         marginTop: 4,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
         textAlign: 'center',
     },
     xLabelHidden: {
@@ -186,8 +187,7 @@ const S = StyleSheet.create({
         borderRadius: 4,
     },
     legendLabel: {
-        fontSize: 10,
+        ...TYPO.label,
         color: COLORS.textSecondary,
-        fontFamily: 'SpaceGrotesk_500Medium',
     },
 });

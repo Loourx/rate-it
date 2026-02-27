@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { COLORS } from '@/lib/utils/constants';
+import { TYPO } from '@/lib/utils/typography';
 import { useUnreadCount } from '@/lib/hooks/useUnreadCount';
 
 export default function TabLayout() {
@@ -23,8 +24,7 @@ export default function TabLayout() {
                 tabBarInactiveTintColor: COLORS.textTertiary,
                 tabBarShowLabel: true,
                 tabBarLabelStyle: {
-                    fontFamily: 'SpaceGrotesk_500Medium',
-                    fontSize: 10,
+                    ...TYPO.label,
                     marginBottom: 4,
                 },
             }}>

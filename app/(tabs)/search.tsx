@@ -16,6 +16,7 @@ import { useSearchMusicTracks } from '../../lib/hooks/useSearchMusicTracks';
 import { useSearchPodcasts } from '../../lib/hooks/useSearchPodcasts';
 import { useSearchAnything } from '../../lib/hooks/useSearchAnything';
 import { COLORS } from '../../lib/utils/constants';
+import { FolderNavigation } from '../../components/content/FolderNavigation';
 
 export default function SearchScreen() {
     const router = useRouter();
@@ -68,8 +69,8 @@ export default function SearchScreen() {
         Keyboard.dismiss();
     };
 
-    // Props for empty state when searching Anything
     const showCreateAnythingButton = selectedCategory === 'anything' && query.length >= 3 && (!data || data.length === 0);
+    const showFolders = query.length === 0;
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -141,6 +142,14 @@ export default function SearchScreen() {
                         </View>
                     )}
 
+                    {showFolders ? (
+                        <FolderNavigation
+                            onSelectCategory={(cat) => {
+                                setSelectedCategory(cat);
+                                // Focus remains on search bar, user can type immediately
+                            }}
+                        />
+                    ) : (
                     <View className="flex-1 bg-background mt-2">
                         <ContentList
                             data={data}
@@ -158,6 +167,7 @@ export default function SearchScreen() {
                             onEmptyAction={showCreateAnythingButton ? handleCreateAnything : undefined}
                         />
                     </View>
+                    )}
                 </View>
             </TouchableWithoutFeedback>
         </SafeAreaView>

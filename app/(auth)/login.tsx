@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'expo-router';
 import { COLORS } from '@/lib/utils/constants';
+import { WelcomeAnimation } from '@/components/auth/WelcomeAnimation';
 
 export default function LoginScreen() {
     const { signInWithGoogle, signInWithEmail, isLoading, isAuthenticated } = useAuth();
@@ -44,7 +45,8 @@ export default function LoginScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
-        <View className="flex-1 items-center justify-center bg-background p-6">
+        <WelcomeAnimation />
+        <View className="flex-1 items-center justify-center bg-transparent p-6">
             <View className="items-center mb-12">
                 <Text className="text-4xl font-bold text-primary mb-2">Rate-it</Text>
                 <Text className="text-lg text-secondary text-center">

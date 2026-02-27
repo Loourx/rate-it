@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { AllContent, ContentType } from '@/lib/types/content';
-import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 
 const CATEGORY_COLORS: Record<ContentType, string> = {
     movie: COLORS.categoryMovie,
@@ -108,8 +109,7 @@ const styles = StyleSheet.create({
     },
     posterFallbackText: {
         color: COLORS.textTertiary,
-        fontSize: FONT_SIZE.headlineLarge,
-        fontWeight: '700',
+        ...TYPO.h2,
     },
     info: {
         flex: 1,
@@ -117,12 +117,11 @@ const styles = StyleSheet.create({
     },
     title: {
         color: COLORS.textPrimary,
-        fontSize: FONT_SIZE.headlineMedium,
-        fontWeight: '700',
+        ...TYPO.h3,
     },
     subtitle: {
         color: COLORS.textSecondary,
-        fontSize: FONT_SIZE.bodyMedium,
+        ...TYPO.bodySmall,
     },
     badge: {
         alignSelf: 'flex-start',
@@ -132,8 +131,8 @@ const styles = StyleSheet.create({
         marginTop: SPACING.xs,
     },
     badgeText: {
-        fontSize: FONT_SIZE.labelSmall,
-        fontWeight: '700',
+        ...TYPO.label,
+        fontFamily: FONT.bold,
         textTransform: 'uppercase',
     },
 });

@@ -1,7 +1,8 @@
 import React from 'react';
 import { ScrollView, TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { ContentType, ContentStatus } from '@/lib/types/content';
-import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { TYPO } from '@/lib/utils/typography';
 
 interface StatusOption {
     value: ContentStatus;
@@ -107,8 +108,7 @@ export function StatusPicker({
 const styles = StyleSheet.create({
     label: {
         color: COLORS.textSecondary,
-        fontSize: FONT_SIZE.bodyMedium,
-        fontWeight: '500',
+        ...TYPO.bodySmall,
         marginBottom: SPACING.md,
     },
     scrollContent: {
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.full,
     },
     pillText: {
-        fontSize: FONT_SIZE.bodyMedium,
-        fontWeight: '600',
+        ...TYPO.bodySmall,
     },
 });

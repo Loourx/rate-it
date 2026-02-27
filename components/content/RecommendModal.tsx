@@ -7,7 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useFollowing } from '@/lib/hooks/useFollowing';
 import { sendRecommendation } from '@/lib/api/notifications';
-import { COLORS, FONT_SIZE, SPACING, RADIUS } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { FollowingProfile } from '@/lib/types/social';
 
 interface RecommendModalProps {
@@ -129,10 +130,10 @@ const S = StyleSheet.create({
         paddingHorizontal: SPACING.md, paddingBottom: SPACING.sm,
         borderBottomWidth: 1, borderBottomColor: COLORS.divider,
     },
-    title: { fontSize: FONT_SIZE.headlineSmall, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary },
-    subtitle: { fontSize: FONT_SIZE.bodySmall, color: COLORS.textSecondary, paddingHorizontal: SPACING.md, paddingTop: SPACING.sm },
+    title: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary },
+    subtitle: { ...TYPO.caption, color: COLORS.textSecondary, paddingHorizontal: SPACING.md, paddingTop: SPACING.sm },
     loader: { marginTop: SPACING.xl },
-    emptyText: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, textAlign: 'center', marginTop: SPACING.xl },
+    emptyText: { ...TYPO.bodySmall, color: COLORS.textSecondary, textAlign: 'center', marginTop: SPACING.xl },
     list: { marginTop: SPACING.sm },
     userRow: {
         flexDirection: 'row', alignItems: 'center',
@@ -141,6 +142,6 @@ const S = StyleSheet.create({
     },
     avatar: { width: 40, height: 40, borderRadius: 20 },
     avatarFallback: { backgroundColor: COLORS.surfaceElevated, justifyContent: 'center', alignItems: 'center' },
-    avatarInitial: { fontSize: FONT_SIZE.bodyMedium, fontFamily: 'SpaceGrotesk_700Bold', color: COLORS.textPrimary },
-    username: { flex: 1, fontSize: FONT_SIZE.bodyMedium, fontFamily: 'SpaceGrotesk_500Medium', color: COLORS.textPrimary },
+    avatarInitial: { ...TYPO.bodySmall, fontFamily: FONT.bold, color: COLORS.textPrimary },
+    username: { flex: 1, ...TYPO.bodySmall, fontFamily: FONT.medium, color: COLORS.textPrimary },
 });

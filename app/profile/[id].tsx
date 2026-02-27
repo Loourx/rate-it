@@ -18,7 +18,8 @@ import { RatingHistory } from '@/components/profile/RatingHistory';
 import { PinnedItemsGrid } from '@/components/profile/PinnedItemsGrid';
 import { ScoreDistribution } from '@/components/profile/ScoreDistribution';
 import { ChallengeProgress } from '@/components/profile/ChallengeProgress';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 
@@ -171,20 +172,20 @@ const styles = StyleSheet.create({
     header: { alignItems: 'center', paddingHorizontal: 24, paddingTop: 8, paddingBottom: 24, gap: 6 },
     avatar: { width: 88, height: 88, borderRadius: 44, marginBottom: 8 },
     avatarPlaceholder: { backgroundColor: COLORS.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
-    avatarInitial: { fontSize: FONT_SIZE.displayMedium, fontWeight: '700', color: COLORS.textSecondary },
-    username: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, letterSpacing: 0.3 },
-    displayName: { fontSize: FONT_SIZE.headlineMedium, fontWeight: 'bold', color: COLORS.textPrimary, textAlign: 'center' },
-    bio: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22, marginTop: 2 },
+    avatarInitial: { ...TYPO.h1, color: COLORS.textSecondary },
+    username: { ...TYPO.bodySmall, color: COLORS.textSecondary, letterSpacing: 0.3 },
+    displayName: { ...TYPO.h3, fontFamily: FONT.bold, color: COLORS.textPrimary, textAlign: 'center' },
+    bio: { ...TYPO.bodySmall, color: COLORS.textSecondary, textAlign: 'center', marginTop: 2 },
     followButton: { marginTop: 8, paddingHorizontal: 32, paddingVertical: 10, borderRadius: 999, backgroundColor: COLORS.link, minWidth: 120, alignItems: 'center' },
     followingButton: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: COLORS.divider },
-    followText: { fontSize: FONT_SIZE.bodyMedium, fontWeight: '700', color: COLORS.background },
+    followText: { ...TYPO.bodySmall, fontFamily: FONT.bold, color: COLORS.background },
     followingText: { color: COLORS.textPrimary },
     privateContainer: { alignItems: 'center', paddingVertical: SPACING['3xl'], paddingHorizontal: 32, gap: 10 },
-    privateTitle: { fontSize: FONT_SIZE.headlineSmall, fontWeight: '700', color: COLORS.textPrimary, marginTop: 8 },
-    privateSubtitle: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, textAlign: 'center', lineHeight: 22 },
-    errorTitle: { fontSize: FONT_SIZE.headlineSmall, fontWeight: '700', color: COLORS.textPrimary, marginTop: 12, marginBottom: 4 },
+    privateTitle: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary, marginTop: 8 },
+    privateSubtitle: { ...TYPO.bodySmall, color: COLORS.textSecondary, textAlign: 'center' },
+    errorTitle: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary, marginTop: 12, marginBottom: 4 },
     retryButton: { marginTop: 12, paddingHorizontal: 24, paddingVertical: 10, backgroundColor: COLORS.surfaceElevated, borderRadius: 999 },
-    retryText: { fontSize: FONT_SIZE.bodyMedium, fontWeight: '600', color: COLORS.textPrimary },
+    retryText: { ...TYPO.bodySmall, fontFamily: FONT.semibold, color: COLORS.textPrimary },
     skeletonHeader: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 24, paddingVertical: 20 },
     skeletonAvatar: { width: 88, height: 88, borderRadius: 44, backgroundColor: COLORS.surfaceElevated },
     skeletonLines: { flex: 1, gap: 10 },

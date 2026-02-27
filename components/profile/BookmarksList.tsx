@@ -10,7 +10,8 @@ import Animated, {
 import { useRouter } from 'expo-router';
 import { useBookmarks, type BookmarkRow } from '@/lib/hooks/useBookmark';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import { Ionicons } from '@expo/vector-icons';
 import type { ContentType } from '@/lib/types/content';
 
@@ -175,26 +176,26 @@ export function BookmarksList({ userId }: { userId?: string }) {
 
 const styles = StyleSheet.create({
     container: { paddingHorizontal: 24, paddingBottom: 24, marginTop: SPACING.xl },
-    sectionTitle: { fontSize: FONT_SIZE.headlineSmall, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 12 },
+    sectionTitle: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary, marginBottom: 12 },
     item: { flexDirection: 'row', paddingVertical: 16, alignItems: 'center' },
     separator: { height: 1, backgroundColor: COLORS.divider },
     thumbContainer: { marginRight: 16 },
     thumb: { width: 60, height: 90, borderRadius: 8 },
     thumbPlaceholder: { backgroundColor: COLORS.surfaceElevated, alignItems: 'center', justifyContent: 'center' },
-    thumbLetter: { fontSize: FONT_SIZE.displayMedium, fontWeight: '700', color: COLORS.textTertiary },
+    thumbLetter: { ...TYPO.h1, color: COLORS.textTertiary },
     itemBody: { flex: 1, justifyContent: 'center', marginRight: 12 },
-    itemTitle: { fontSize: FONT_SIZE.bodyMedium, fontWeight: 'bold', color: COLORS.textPrimary, marginBottom: 8 },
+    itemTitle: { ...TYPO.bodySmall, fontFamily: FONT.bold, color: COLORS.textPrimary, marginBottom: 8 },
     metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
     categoryBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
     categoryDot: { width: 6, height: 6, borderRadius: 3 },
-    categoryLabel: { fontSize: FONT_SIZE.labelSmall, fontWeight: '600' },
-    dateText: { fontSize: FONT_SIZE.bodySmall, color: COLORS.textSecondary },
+    categoryLabel: { ...TYPO.label },
+    dateText: { ...TYPO.caption, color: COLORS.textSecondary },
     emptyContainer: { alignItems: 'center', paddingVertical: SPACING['3xl'], paddingHorizontal: 24, gap: 8 },
-    emptyTitle: { fontSize: FONT_SIZE.headlineSmall, fontWeight: '700', color: COLORS.textPrimary, marginTop: 12 },
-    emptySubtitle: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textSecondary, textAlign: 'center' },
-    errorText: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.error, textAlign: 'center' },
+    emptyTitle: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary, marginTop: 12 },
+    emptySubtitle: { ...TYPO.bodySmall, color: COLORS.textSecondary, textAlign: 'center' },
+    errorText: { ...TYPO.bodySmall, color: COLORS.error, textAlign: 'center' },
     retryButton: { alignSelf: 'center', marginTop: 8, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: COLORS.surfaceElevated, borderRadius: 999 },
-    retryText: { fontSize: FONT_SIZE.bodyMedium, color: COLORS.textPrimary, fontWeight: '600' },
+    retryText: { ...TYPO.bodySmall, fontFamily: FONT.semibold, color: COLORS.textPrimary },
     skeletonCard: { flexDirection: 'row', paddingVertical: 16, alignItems: 'center' },
     skeletonThumb: { width: 60, height: 90, borderRadius: 8, backgroundColor: COLORS.surfaceElevated, marginRight: 16 },
     skeletonLines: { flex: 1, justifyContent: 'center', gap: 8 },

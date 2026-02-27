@@ -1,20 +1,13 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
-import { COLORS, formatScore } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS, formatScore, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { RatingHistoryItem } from '@/lib/hooks/useRatingHistory';
 
-const COLUMNS = 3;
-
-const CATEGORY_META: Record<string, { emoji: string; color: string }> = {
-    movie:    { emoji: '🎬', color: COLORS.categoryMovie },
-    series:   { emoji: '📺', color: COLORS.categorySeries },
-    book:     { emoji: '📚', color: COLORS.categoryBook },
-    game:     { emoji: '🎮', color: COLORS.categoryGame },
-    music:    { emoji: '🎵', color: COLORS.categoryMusic },
-    podcast:  { emoji: '🎙', color: COLORS.categoryPodcast },
-    anything: { emoji: '✨', color: COLORS.categoryAnything },
-};
+const SCREEN_W = Dimensions.get('window').width;
+const GAP = SPACING.md; // 12px consistent gap
+const COLUMNS = SCREEN_W > 400 ? 3 : 2;
 
 interface PosterCellProps {
     item: RatingHistoryItem;
@@ -24,34 +17,43 @@ interface PosterCellProps {
 }
 
 function PosterCell({ item, cellWidth, cellHeight, onPress }: PosterCellProps) {
-    const meta = CATEGORY_META[item.contentType] ?? { emoji: '❓', color: COLORS.textTertiary };
+    const categoryColor = getCategoryColor(item.contentType);
 
     return (
         <TouchableOpacity
-            style={{ width: cellWidth, height: cellHeight }}
+            style={[S.cellWrap, { width: cellWidth, height: cellHeight, marginBottom: GAP }]}
             onPress={onPress}
             activeOpacity={0.8}
         >
-            {item.contentImageUrl ? (
-                <Image
-                    source={{ uri: item.contentImageUrl }}
-                    style={styles.poster}
-                    contentFit="cover"
-                    cachePolicy="memory-disk"
-                />
-            ) : (
-                <View style={[styles.poster, styles.placeholder, { backgroundColor: meta.color + '22' }]}>
-                    <Text style={styles.placeholderEmoji}>{meta.emoji}</Text>
-                </View>
-            )}
+            <View style={[S.posterContainer, { borderBottomColor: categoryColor }]}>
+                {item.contentImageUrl ? (
+                    <Image
+                        source={{ uri: item.contentImageUrl }}
+                        style={S.poster}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
+                    />
+                ) : (
+                    <View style={[S.poster, S.placeholder, { backgroundColor: categoryColor + '22' }]}>
+                        <Text style={S.placeholderEmoji}>
+                            {CATEGORY_EMOJI[item.contentType] ?? '❓'}
+                        </Text>
+                    </View>
+                )}
 
-            {/* Score badge */}
-            <View style={styles.badge}>
-                <Text style={styles.badgeText}>{formatScore(item.score)}</Text>
+                {/* Score badge */}
+                <View style={S.badge}>
+                    <Text style={S.badgeText}>{formatScore(item.score)}</Text>
+                </View>
             </View>
         </TouchableOpacity>
     );
 }
+
+const CATEGORY_EMOJI: Record<string, string> = {
+    movie: '🎬', series: '📺', book: '📚', game: '🎮',
+    music: '🎵', podcast: '🎙', anything: '✨',
+};
 
 interface PosterGridProps {
     ratings: RatingHistoryItem[];
@@ -63,14 +65,16 @@ interface PosterGridProps {
 export function PosterGrid({ ratings, onPressItem, onEndReached, isFetchingNextPage }: PosterGridProps) {
     const [containerWidth, setContainerWidth] = useState(0);
 
-    // Integer pixels to eliminate sub-pixel gaps between cells on all densities.
-    const cellWidth = containerWidth > 0 ? Math.floor(containerWidth / COLUMNS) : 0;
-    const cellHeight = Math.round(cellWidth * 1.5); // 2:3 poster ratio
+    const totalGap = GAP * (COLUMNS - 1);
+    const cellWidth = containerWidth > 0
+        ? Math.floor((containerWidth - totalGap) / COLUMNS)
+        : 0;
+    const cellHeight = Math.round(cellWidth * 1.5); // 2:3
 
     const getItemLayout = useCallback(
         (_: ArrayLike<RatingHistoryItem> | null | undefined, index: number) => ({
-            length: cellHeight,
-            offset: cellHeight * Math.floor(index / COLUMNS),
+            length: cellHeight + GAP,
+            offset: (cellHeight + GAP) * Math.floor(index / COLUMNS),
             index,
         }),
         [cellHeight],
@@ -78,7 +82,7 @@ export function PosterGrid({ ratings, onPressItem, onEndReached, isFetchingNextP
 
     return (
         <View
-            style={styles.container}
+            style={S.container}
             onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
         >
             {containerWidth > 0 && (
@@ -86,6 +90,7 @@ export function PosterGrid({ ratings, onPressItem, onEndReached, isFetchingNextP
                     data={ratings}
                     keyExtractor={(item) => item.id}
                     numColumns={COLUMNS}
+                    columnWrapperStyle={{ gap: GAP }}
                     renderItem={({ item }) => (
                         <PosterCell
                             item={item}
@@ -101,8 +106,8 @@ export function PosterGrid({ ratings, onPressItem, onEndReached, isFetchingNextP
                     onEndReachedThreshold={0.5}
                     ListFooterComponent={
                         isFetchingNextPage ? (
-                            <View style={styles.loadingFooter}>
-                                <Text style={styles.loadingText}>Cargando…</Text>
+                            <View style={S.loadingFooter}>
+                                <Text style={S.loadingText}>Cargando…</Text>
                             </View>
                         ) : null
                     }
@@ -112,43 +117,38 @@ export function PosterGrid({ ratings, onPressItem, onEndReached, isFetchingNextP
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-    },
-    loadingFooter: {
-        paddingVertical: 16,
-        alignItems: 'center',
-    },
-    loadingText: {
-        fontSize: 12,
-        color: COLORS.textTertiary,
-    },
-    poster: {
+const S = StyleSheet.create({
+    container: { width: '100%' },
+    cellWrap: { overflow: 'hidden' },
+    posterContainer: {
         width: '100%',
         height: '100%',
+        borderRadius: RADIUS.sm,
+        overflow: 'hidden',
+        borderBottomWidth: 3,
     },
+    poster: { width: '100%', height: '100%' },
     placeholder: {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: COLORS.surfaceElevated,
     },
-    placeholderEmoji: {
-        fontSize: 32,
-    },
+    placeholderEmoji: { fontSize: 32 },
     badge: {
         position: 'absolute',
-        bottom: 6,
+        bottom: 9,  // above the 3px border
         right: 6,
         backgroundColor: 'rgba(0,0,0,0.65)',
-        paddingHorizontal: 5,
+        paddingHorizontal: 6,
         paddingVertical: 2,
-        borderRadius: 4,
+        borderRadius: RADIUS.sm,
     },
     badgeText: {
-        fontSize: 11,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.label,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
-        lineHeight: 15,
+        fontSize: 11,
     },
+    loadingFooter: { paddingVertical: 16, alignItems: 'center' },
+    loadingText: { ...TYPO.caption, color: COLORS.textTertiary },
 });

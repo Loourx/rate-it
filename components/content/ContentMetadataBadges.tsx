@@ -3,6 +3,7 @@ import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Movie, Series, Book, Game, Music, Podcast, Anything, AllContent } from '@/lib/types/content';
 import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { FONT } from '@/lib/utils/typography';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ContentMetadataBadgesProps {
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
     /* Layer 1 — Identity */
     identityText: {
         fontSize: 14,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
         color: COLORS.textSecondary,
         lineHeight: 20,
     },
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
     },
     platformText: {
         fontSize: 13,
-        fontFamily: 'SpaceGrotesk_600SemiBold',
+        fontFamily: FONT.semibold,
     },
 
     /* Layer 3 — Genres */
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
     },
     genreText: {
         fontSize: 12,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
         color: COLORS.textTertiary,
     },
 });

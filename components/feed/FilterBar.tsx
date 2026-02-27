@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { COLORS, FONT_SIZE, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO } from '@/lib/utils/typography';
 import type { ContentType } from '@/lib/types/content';
 
 export type ActivityFilter = 'all' | 'rated' | 'reviewed';
@@ -120,8 +121,7 @@ const S = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     chipText: {
-        fontSize: FONT_SIZE.bodySmall,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        ...TYPO.caption,
         color: COLORS.textSecondary,
     },
 });

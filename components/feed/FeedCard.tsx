@@ -1,19 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import Animated, {
-    FadeInDown,
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-} from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { FeedItem } from '@/lib/types/social';
-import { TrackRatingEntry } from '@/lib/types/database';
-import { COLORS, formatScore } from '@/lib/utils/constants';
+import type { TrackRatingEntry } from '@/lib/types/database';
+import { COLORS, formatScore, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
 import { useRatingLike } from '@/lib/hooks/useRatingLike';
 import { useRatingLikesCount } from '@/lib/hooks/useRatingLikesCount';
+import { Card } from '@/components/card';
 
 interface FeedCardProps {
     item: FeedItem;
@@ -23,8 +19,9 @@ interface FeedCardProps {
 export default function FeedCard({ item, index }: FeedCardProps) {
     const categoryColor = getCategoryColor(item.contentType);
     const animationDelay = index < 8 ? index * 50 : 0;
+    const { isLiked, toggle, isMutating } = useRatingLike(item.id);
+    const { data: likesCount } = useRatingLikesCount(item.id);
 
-    // Calculate track average for album ratings
     const trackAverage = useMemo(() => {
         if (!item.trackRatings) return null;
         try {
@@ -32,170 +29,121 @@ export default function FeedCard({ item, index }: FeedCardProps) {
                 ? JSON.parse(item.trackRatings)
                 : item.trackRatings;
             if (!Array.isArray(ratings)) return null;
-            const rated = ratings.filter(tr => tr.score > 0);
+            const rated = ratings.filter((tr) => tr.score > 0);
             if (rated.length === 0) return null;
-            const sum = rated.reduce((acc, tr) => acc + tr.score, 0);
-            return Math.round((sum / rated.length) * 10) / 10;
+            return Math.round((rated.reduce((a, tr) => a + tr.score, 0) / rated.length) * 10) / 10;
         } catch {
             return null;
         }
     }, [item.trackRatings]);
 
-    const { isLiked, toggle, isMutating } = useRatingLike(item.id);
-    const { data: likesCount } = useRatingLikesCount(item.id);
-
-    const heartScale = useSharedValue(1);
-    const heartAnimatedStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: heartScale.value }],
-    }));
-
-    const handleLikePress = useCallback(() => {
-        if (isMutating) return;
-        heartScale.value = withSpring(1.3, { damping: 15 }, () => {
-            heartScale.value = withSpring(1, { damping: 15 });
-        });
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        toggle();
-    }, [isMutating, toggle, heartScale]);
-
-    const navigateToProfile = () => {
-        router.push(`/profile/${item.userId}`);
-    };
-
-    const navigateToContent = () => {
-        router.push(`/content/${item.contentType}/${item.contentId}`);
-    };
+    const navigateToContent = useCallback(
+        () => router.push(`/content/${item.contentType}/${item.contentId}`),
+        [item.contentType, item.contentId],
+    );
 
     return (
-        <Animated.View
-            entering={FadeInDown.delay(animationDelay).duration(300)}
-            className="mx-4 mb-3"
-        >
-            <Pressable
-                className="bg-surface rounded-2xl p-4 active:opacity-80"
-                onPress={navigateToContent}
-            >
-                {/* Header: Avatar + Username + Acción */}
-                <View className="flex-row items-center mb-3">
-                    <Pressable onPress={navigateToProfile}>
-                        <Image
-                            source={{
-                                uri: item.userAvatarUrl || 'https://i.pravatar.cc/150',
-                            }}
-                            className="w-10 h-10 rounded-full"
-                        />
-                    </Pressable>
+        <Animated.View entering={FadeInDown.delay(animationDelay).duration(300)} style={S.wrapper}>
+            <Card.Container onPress={navigateToContent} style={S.card}>
+                {/* Header: Avatar + Username */}
+                <FeedHeader item={item} />
 
-                    <View className="flex-1 ml-3">
-                        <Text className="text-primary font-semibold">
-                            {item.username}
-                            <Text className="text-secondary font-normal">
-                                {' '}
-                                valoró
-                            </Text>
-                        </Text>
-                        <Text className="text-tertiary text-xs">
-                            {formatRelativeDate(item.createdAt)}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Content Card */}
-                <View className="flex-row mb-3">
+                {/* Content row: poster + score */}
+                <View style={S.contentRow}>
                     {item.contentImageUrl && (
-                        <Image
-                            source={{ uri: item.contentImageUrl }}
-                            className="w-16 h-24 rounded-lg"
-                            resizeMode="cover"
+                        <Card.Image
+                            uri={item.contentImageUrl}
+                            width={64}
+                            height={96}
+                            style={S.poster}
                         />
                     )}
-                    <View className="flex-1 ml-3 justify-center">
-                        <Text
-                            className="text-primary font-bold text-base"
-                            numberOfLines={2}
-                        >
-                            {item.contentTitle}
-                        </Text>
-                        <View className="flex-row items-center mt-2">
-                            <Text
-                                className="text-2xl font-bold mr-2"
-                                style={{ color: categoryColor }}
-                            >
-                                {formatScore(item.score)}
-                            </Text>
-                            <View className="flex-1 h-2 bg-surface-elevated rounded-full overflow-hidden">
-                                <View
-                                    className="h-full rounded-full"
-                                    style={{
-                                        width: `${(item.score / 10) * 100}%`,
-                                        backgroundColor: categoryColor,
-                                    }}
-                                />
-                            </View>
-                        </View>
+                    <View style={S.body}>
+                        <Card.Title title={item.contentTitle} />
+                        <Card.Rating score={item.score} category={item.contentType} size="compact" />
                         {trackAverage !== null && (
-                            <Text
-                                className="text-xs font-medium mt-1"
-                                style={{ color: categoryColor }}
-                            >
+                            <Text style={[S.trackAvg, { color: categoryColor }]}>
                                 Media canciones: {trackAverage.toFixed(1)}
                             </Text>
                         )}
                     </View>
                 </View>
 
-                {/* Review (si existe) */}
-                {item.reviewText && (
-                    <View className="mb-2">
-                        {item.hasSpoiler && (
-                            <View className="bg-error/20 px-2 py-1 rounded mb-1 self-start">
-                                <Text className="text-error text-xs font-semibold">
-                                    🚨 SPOILER
-                                </Text>
-                            </View>
-                        )}
-                        <Text
-                            className="text-secondary text-sm"
-                            numberOfLines={3}
-                        >
-                            {item.reviewText}
-                        </Text>
-                    </View>
-                )}
+                {/* Review */}
+                {item.reviewText && <ReviewSection text={item.reviewText} hasSpoiler={item.hasSpoiler} />}
 
-                {/* Footer: Like button */}
-                <View className="flex-row items-center pt-2 border-t border-divider">
-                    <Pressable
-                        className="flex-row items-center active:opacity-70"
-                        onPress={handleLikePress}
-                        disabled={isMutating}
-                    >
-                        <Animated.Text
-                            className="text-2xl mr-1"
-                            style={heartAnimatedStyle}
-                        >
-                            {isLiked ? '❤️' : '♡'}
-                        </Animated.Text>
-                        <Text className="text-tertiary text-sm">
-                            {likesCount ?? item.likesCount} likes
-                        </Text>
-                    </Pressable>
-                </View>
-            </Pressable>
+                {/* Footer */}
+                <Card.Actions
+                    isLiked={isLiked}
+                    likesCount={likesCount ?? item.likesCount}
+                    onLike={toggle}
+                    likeMutating={isMutating}
+                />
+            </Card.Container>
         </Animated.View>
     );
 }
 
-/** Map content type → category color from the design system */
-function getCategoryColor(type: FeedItem['contentType']): string {
-    const colors: Record<FeedItem['contentType'], string> = {
-        movie: COLORS.categoryMovie,
-        series: COLORS.categorySeries,
-        book: COLORS.categoryBook,
-        game: COLORS.categoryGame,
-        music: COLORS.categoryMusic,
-        podcast: COLORS.categoryPodcast,
-        anything: COLORS.categoryAnything,
-    };
-    return colors[type] ?? COLORS.textPrimary;
+function FeedHeader({ item }: { item: FeedItem }) {
+    const navigateToProfile = useCallback(
+        () => router.push(`/profile/${item.userId}`),
+        [item.userId],
+    );
+
+    return (
+        <View style={S.header}>
+            <Pressable onPress={navigateToProfile}>
+                <Image
+                    source={{ uri: item.userAvatarUrl || 'https://i.pravatar.cc/150' }}
+                    style={S.avatar}
+                />
+            </Pressable>
+            <View style={S.headerText}>
+                <Text style={S.username}>
+                    {item.username}
+                    <Text style={S.action}> valoró</Text>
+                </Text>
+                <Text style={S.time}>{formatRelativeDate(item.createdAt)}</Text>
+            </View>
+        </View>
+    );
 }
+
+function ReviewSection({ text, hasSpoiler }: { text: string; hasSpoiler?: boolean }) {
+    return (
+        <View style={S.review}>
+            {hasSpoiler && (
+                <View style={S.spoilerBadge}>
+                    <Text style={S.spoilerText}>🚨 SPOILER</Text>
+                </View>
+            )}
+            <Text style={S.reviewText} numberOfLines={3}>{text}</Text>
+        </View>
+    );
+}
+
+const S = StyleSheet.create({
+    wrapper: { marginHorizontal: 16, marginBottom: 12 },
+    card: { padding: 16 },
+    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+    avatar: { width: 40, height: 40, borderRadius: 20 },
+    headerText: { flex: 1, marginLeft: 12 },
+    username: { ...TYPO.bodySmall, fontFamily: FONT.semibold, color: COLORS.textPrimary },
+    action: { ...TYPO.bodySmall, fontFamily: FONT.regular, color: COLORS.textSecondary },
+    time: { ...TYPO.caption, color: COLORS.textTertiary },
+    contentRow: { flexDirection: 'row', marginBottom: 12 },
+    poster: { marginRight: 12 },
+    body: { flex: 1, justifyContent: 'center', gap: 4 },
+    trackAvg: { ...TYPO.caption, fontFamily: FONT.medium, marginTop: 2 },
+    review: { marginBottom: 8 },
+    spoilerBadge: {
+        backgroundColor: 'rgba(255,69,58,0.2)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        marginBottom: 4,
+        alignSelf: 'flex-start',
+    },
+    spoilerText: { ...TYPO.caption, color: COLORS.error, fontFamily: FONT.semibold },
+    reviewText: { ...TYPO.bodySmall, color: COLORS.textSecondary },
+});

@@ -9,7 +9,8 @@ import { useAuthStore } from '@/lib/stores/authStore';
 import { useDiary } from '@/lib/hooks/useDiary';
 import { CalendarDay } from '@/components/profile/CalendarDay';
 import { DayDetail } from '@/components/profile/DayDetail';
-import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
+import { COLORS, SPACING } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { DiaryDay } from '@/lib/api/diary';
 
 // ─── calendar grid util ───────────────────────────────────────────────────────
@@ -203,8 +204,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     headerTitle: {
-        fontSize: FONT_SIZE.headlineSmall,
-        fontWeight: '700',
+        ...TYPO.h4,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
     },
     scroll: {
@@ -226,8 +227,8 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.surface,
     },
     monthLabel: {
-        fontSize: FONT_SIZE.headlineMedium,
-        fontWeight: '700',
+        ...TYPO.h3,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
     },
     dayHeaders: {
@@ -238,8 +239,7 @@ const styles = StyleSheet.create({
     dayHeaderText: {
         flex: 1,
         textAlign: 'center',
-        fontSize: FONT_SIZE.labelSmall,
-        fontWeight: '600',
+        ...TYPO.label,
         color: COLORS.textTertiary,
         textTransform: 'uppercase',
     },
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     emptyText: {
-        fontSize: FONT_SIZE.bodyMedium,
+        ...TYPO.bodySmall,
         color: COLORS.textTertiary,
     },
 });

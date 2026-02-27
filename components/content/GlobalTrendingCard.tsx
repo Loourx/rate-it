@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { COLORS, SPACING, RADIUS, FONT_SIZE, getCategoryColor } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 import type { GlobalTrendingItem } from '@/lib/hooks/useGlobalTrending';
 
 interface GlobalTrendingCardProps {
@@ -44,7 +45,7 @@ const styles = StyleSheet.create({
     posterFallback: { justifyContent: 'center', alignItems: 'center' },
     posterLetter: {
         fontSize: 36,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        fontFamily: FONT.bold,
         color: COLORS.textTertiary,
     },
     scoreBadge: {
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     },
     scoreText: {
         fontSize: 11,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        fontFamily: FONT.bold,
         color: '#FFF',
     },
     countBadge: {
@@ -70,12 +71,12 @@ const styles = StyleSheet.create({
     },
     countText: {
         fontSize: 10,
-        fontFamily: 'SpaceGrotesk_500Medium',
+        fontFamily: FONT.medium,
         color: COLORS.textSecondary,
     },
     title: {
-        fontSize: FONT_SIZE.bodySmall,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        ...TYPO.caption,
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         marginTop: 2,
     },

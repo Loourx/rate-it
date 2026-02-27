@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { FONT } from '@/lib/utils/typography';
 
 interface ContentDetailHeaderProps {
     title: string;
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     },
     placeholderLetter: {
         fontSize: 64,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        fontFamily: FONT.bold,
         color: COLORS.textTertiary,
     },
     overlay: {
@@ -95,12 +96,12 @@ const styles = StyleSheet.create({
     },
     categoryText: {
         fontSize: 12,
-        fontFamily: 'SpaceGrotesk_600SemiBold',
+        fontFamily: FONT.semibold,
         textTransform: 'uppercase',
     },
     title: {
         fontSize: 32,
-        fontFamily: 'SpaceGrotesk_700Bold',
+        fontFamily: FONT.bold,
         color: COLORS.textPrimary,
         lineHeight: 38,
     },

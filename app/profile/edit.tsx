@@ -11,7 +11,8 @@ import { useAuthStore } from '@/lib/stores/authStore';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Toast } from '@/components/ui/Toast';
-import { COLORS, SPACING, RADIUS, FONT_SIZE } from '@/lib/utils/constants';
+import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
 
 const MAX_DISPLAY_NAME = 30;
 const MAX_BIO = 150;
@@ -202,18 +203,18 @@ const s = StyleSheet.create({
         width: 32, height: 32, borderRadius: 16,
         backgroundColor: COLORS.link, alignItems: 'center', justifyContent: 'center',
     },
-    avatarHint: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall, marginBottom: SPACING['2xl'] },
+    avatarHint: { color: COLORS.textTertiary, ...TYPO.caption, marginBottom: SPACING['2xl'] },
     label: {
-        color: COLORS.textSecondary, fontSize: FONT_SIZE.bodyMedium, fontWeight: '500',
+        color: COLORS.textSecondary, ...TYPO.bodySmall, fontFamily: FONT.medium,
         alignSelf: 'flex-start', marginBottom: SPACING.sm,
     },
     input: {
         width: '100%', backgroundColor: COLORS.surfaceElevated, color: COLORS.textPrimary,
-        borderRadius: RADIUS.md, padding: SPACING.base, fontSize: FONT_SIZE.bodyLarge,
+        borderRadius: RADIUS.md, padding: SPACING.base, ...TYPO.body,
     },
     bioInput: { minHeight: 90, textAlignVertical: 'top' },
     counter: {
-        color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall,
+        color: COLORS.textTertiary, ...TYPO.caption,
         alignSelf: 'flex-end', marginTop: SPACING.xs, marginBottom: SPACING.lg,
     },
     toggleRow: {
@@ -221,9 +222,9 @@ const s = StyleSheet.create({
         width: '100%', backgroundColor: COLORS.surfaceElevated,
         borderRadius: RADIUS.md, padding: SPACING.base, marginTop: SPACING.sm,
     },
-    toggleLabel: { color: COLORS.textPrimary, fontSize: FONT_SIZE.bodyLarge, fontWeight: '600' },
-    toggleHint: { color: COLORS.textTertiary, fontSize: FONT_SIZE.bodySmall, marginTop: 2 },
-    errorText: { color: COLORS.error, fontSize: FONT_SIZE.bodyMedium, marginTop: SPACING.base, textAlign: 'center' },
+    toggleLabel: { color: COLORS.textPrimary, ...TYPO.body, fontFamily: FONT.semibold },
+    toggleHint: { color: COLORS.textTertiary, ...TYPO.caption, marginTop: 2 },
+    errorText: { color: COLORS.error, ...TYPO.bodySmall, marginTop: SPACING.base, textAlign: 'center' },
     bottomBar: {
         position: 'absolute', bottom: 0, left: 0, right: 0,
         padding: SPACING.xl, paddingBottom: 40, backgroundColor: COLORS.background,
@@ -232,5 +233,5 @@ const s = StyleSheet.create({
         paddingVertical: SPACING.base, borderRadius: RADIUS.full,
         alignItems: 'center', backgroundColor: COLORS.link,
     },
-    saveTxt: { color: COLORS.background, fontSize: FONT_SIZE.headlineSmall, fontWeight: '700' },
+    saveTxt: { color: COLORS.background, ...TYPO.h4, fontFamily: FONT.bold },
 });
