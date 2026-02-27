@@ -56,13 +56,19 @@ export default function ProfileScreen() {
                         </Text>
                     ) : null}
 
-                    <View className="flex-row gap-3 mt-4">
+                    <View className="flex-row gap-3 mt-4 flex-wrap justify-center">
                         <TouchableOpacity
                             onPress={() => router.push('/profile/edit')}
                             className="px-4 py-2 bg-surface-elevated rounded-full flex-row items-center gap-2"
                         >
                             <Ionicons name="pencil" size={16} color={COLORS.textPrimary} />
                             <Text className="text-primary font-medium">Editar perfil</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => router.push('/profile/challenge')}
+                            className="px-4 py-2 bg-surface-elevated rounded-full flex-row items-center gap-2"
+                        >
+                            <Text className="text-primary font-medium">Mis retos 🎯</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={handleSignOut}

@@ -66,6 +66,8 @@ export function useCreateRating() {
             queryClient.invalidateQueries({ queryKey: ['rating-history'] });
             queryClient.invalidateQueries({ queryKey: ['score-distribution'] });
             queryClient.invalidateQueries({ queryKey: ['streak'] });
+            queryClient.invalidateQueries({ queryKey: ['challenges'] });
+            queryClient.invalidateQueries({ queryKey: ['challenge-progress'] });
         },
     });
 }
@@ -109,6 +111,8 @@ export function useDeleteRating() {
             queryClient.invalidateQueries({ queryKey: ['rating-history'] });
             queryClient.invalidateQueries({ queryKey: ['score-distribution'] });
             queryClient.invalidateQueries({ queryKey: ['streak'] });
+            queryClient.invalidateQueries({ queryKey: ['challenges'] });
+            queryClient.invalidateQueries({ queryKey: ['challenge-progress'] });
         },
     });
 }
