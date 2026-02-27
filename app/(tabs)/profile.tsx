@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -8,6 +8,8 @@ import { RatingHistory } from '@/components/profile/RatingHistory';
 import { BookmarksList } from '@/components/profile/BookmarksList';
 import { PinnedItemsGrid } from '@/components/profile/PinnedItemsGrid';
 import { ScoreDistribution } from '@/components/profile/ScoreDistribution';
+import { ChallengeProgress } from '@/components/profile/ChallengeProgress';
+import { ConfettiCelebration } from '@/components/profile/ConfettiCelebration';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
@@ -31,8 +33,22 @@ export default function ProfileScreen() {
     const feedItems = feedData?.pages.flatMap(page => page) ?? [];
     const myUserId = useAuthStore((state) => state.user?.id);
 
+    const [showConfetti, setShowConfetti] = useState(false);
+    const markCelebratedRef = useRef<(() => void) | null>(null);
+
+    const handleCelebrate = useCallback((markFn: () => void) => {
+        markCelebratedRef.current = markFn;
+        setShowConfetti(true);
+    }, []);
+
+    const handleConfettiFinish = useCallback(() => {
+        markCelebratedRef.current?.();
+        markCelebratedRef.current = null;
+        setShowConfetti(false);
+    }, []);
+
     return (
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+        <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ position: 'relative' }}>
             <ScrollView contentContainerClassName="pb-24">
                 {/* Header */}
                 <View className="px-6 py-6 items-center">
@@ -71,6 +87,12 @@ export default function ProfileScreen() {
                             <Text className="text-primary font-medium">Mis retos 🎯</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
+                            onPress={() => router.push('/profile/diary')}
+                            className="px-4 py-2 bg-surface-elevated rounded-full flex-row items-center gap-2"
+                        >
+                            <Text className="text-primary font-medium">Mi diario 📅</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
                             onPress={handleSignOut}
                             className="px-4 py-2 bg-surface-elevated rounded-full"
                         >
@@ -91,6 +113,9 @@ export default function ProfileScreen() {
                 {/* Stats */}
                 <ProfileStats userId={myUserId} />
 
+                {/* Challenge Progress */}
+                <ChallengeProgress userId={myUserId} isOwnProfile onCelebrate={handleCelebrate} />
+
                 {/* Score Distribution Histogram */}
                 <ScoreDistribution userId={myUserId} />
 
@@ -100,6 +125,11 @@ export default function ProfileScreen() {
                 {/* Bookmarks */}
                 <BookmarksList />
             </ScrollView>
+
+            {/* Confetti overlay — absolute, does not block scrolling */}
+            {showConfetti && (
+                <ConfettiCelebration onFinish={handleConfettiFinish} />
+            )}
         </SafeAreaView>
     );
 }

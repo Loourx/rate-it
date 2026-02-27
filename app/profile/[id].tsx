@@ -17,6 +17,7 @@ import { ProfileStats } from '@/components/profile/ProfileStats';
 import { RatingHistory } from '@/components/profile/RatingHistory';
 import { PinnedItemsGrid } from '@/components/profile/PinnedItemsGrid';
 import { ScoreDistribution } from '@/components/profile/ScoreDistribution';
+import { ChallengeProgress } from '@/components/profile/ChallengeProgress';
 import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
@@ -144,6 +145,7 @@ export default function UserProfileScreen() {
                         pinnedMode={profile?.pinnedMode ?? 'manual'}
                     />
                     <ProfileStats userId={id} />
+                    <ChallengeProgress userId={id} />
                     <ScoreDistribution userId={id} />
                     <RatingHistory userId={id} />
                 </>
