@@ -4,6 +4,19 @@ import { useAuthStore } from '@/lib/stores/authStore';
 import type { ContentType } from '@/lib/types/content';
 
 /* -------------------------------------------------- */
+/*  TopRatedItem — shape returned by useTopRatedItems  */
+/* -------------------------------------------------- */
+
+export interface TopRatedItem {
+    id: string;
+    contentType: ContentType;
+    contentId: string;
+    contentTitle: string;
+    contentImageUrl: string | null;
+    score: number;
+}
+
+/* -------------------------------------------------- */
 /*  Types                                             */
 /* -------------------------------------------------- */
 
@@ -149,6 +162,59 @@ export function useUnpinItem() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['pinned-items'] });
             queryClient.invalidateQueries({ queryKey: ['is-pinned'] });
+        },
+    });
+}
+
+/* -------------------------------------------------- */
+/*  useTopRatedItems — top 5 ratings by score          */
+/* -------------------------------------------------- */
+
+export function useTopRatedItems(userId: string | undefined) {
+    return useQuery({
+        queryKey: ['top-rated', userId],
+        queryFn: async (): Promise<TopRatedItem[]> => {
+            const { data, error } = await supabase
+                .from('ratings')
+                .select('id, content_type, content_id, content_title, content_image_url, score')
+                .eq('user_id', userId!)
+                .order('score', { ascending: false })
+                .order('created_at', { ascending: false })
+                .limit(5);
+            if (error) throw error;
+            return (data ?? []).map((r) => ({
+                id: r.id as string,
+                contentType: r.content_type as ContentType,
+                contentId: r.content_id as string,
+                contentTitle: r.content_title as string,
+                contentImageUrl: r.content_image_url as string | null,
+                score: r.score as number,
+            }));
+        },
+        enabled: !!userId,
+    });
+}
+
+/* -------------------------------------------------- */
+/*  useUpdatePinnedMode — toggle manual / auto         */
+/* -------------------------------------------------- */
+
+export function useUpdatePinnedMode() {
+    const { session } = useAuthStore();
+    const queryClient = useQueryClient();
+    const userId = session?.user.id;
+
+    return useMutation({
+        mutationFn: async (mode: 'manual' | 'auto'): Promise<void> => {
+            if (!userId) throw new Error('No autenticado');
+            const { error } = await supabase
+                .from('profiles')
+                .update({ pinned_mode: mode })
+                .eq('id', userId);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['profile', userId] });
         },
     });
 }

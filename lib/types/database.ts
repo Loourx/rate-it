@@ -5,6 +5,7 @@ export interface Profile {
     avatarUrl: string | null; // text
     bio: string | null; // text default ''
     isPrivate: boolean; // boolean default false
+    pinnedMode: 'manual' | 'auto'; // text default 'manual'
     createdAt: string; // timestamptz
     updatedAt: string; // timestamptz
 }
@@ -18,6 +19,7 @@ export interface Rating {
     contentImageUrl: string | null; // text
     score: number; // numeric(3,1), range 0-10, step 0.5
     reviewText: string | null; // text
+    privateNote: string | null; // text, max 500 chars — never exposed outside owner's form
     hasSpoiler: boolean; // boolean
     contentSubtype: 'album' | 'track' | null; // text – only for music
     trackRatings: TrackRatingEntry[] | null; // jsonb – per-track scores for album ratings

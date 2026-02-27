@@ -24,6 +24,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
 
     const [score, setScore] = useState<number>(RATING.DEFAULT);
     const [review, setReview] = useState('');
+    const [privateNote, setPrivateNote] = useState('');
     const [hasSpoiler, setHasSpoiler] = useState(false);
     const [status, setStatus] = useState<ContentStatus | null>(null);
     const [prefilled, setPrefilled] = useState(false);
@@ -45,6 +46,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
         if (existing) {
             setScore(existing.score);
             setReview(existing.review_text ?? '');
+            setPrivateNote(existing.private_note ?? '');
             setHasSpoiler(existing.has_spoiler ?? false);
             if (existing.track_ratings) {
                 try {
@@ -103,6 +105,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 contentImageUrl: item.imageUrl,
                 score,
                 reviewText: review.trim() || null,
+                privateNote: privateNote.trim() || null,
                 hasSpoiler,
                 contentSubtype: isAlbumContent ? 'album'
                     : (contentType === 'music' ? 'track' : null),
@@ -135,7 +138,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 type: 'error',
             });
         }
-    }, [item, score, review, hasSpoiler, status, contentType, contentId, isAlbumContent, trackRatings]);
+    }, [item, score, review, privateNote, hasSpoiler, status, contentType, contentId, isAlbumContent, trackRatings]);
 
     const isLoading = loadingContent || loadingExisting || loadingStatus;
     const isSaving = createRating.isPending || upsertStatus.isPending;
@@ -146,6 +149,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
         formData: {
             score,
             review,
+            privateNote,
             hasSpoiler,
             status,
             trackRatings,
@@ -163,6 +167,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
         actions: {
             setScore,
             setReview,
+            setPrivateNote,
             setHasSpoiler,
             setStatus,
             setToastConfig,

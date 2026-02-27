@@ -11,6 +11,7 @@ interface CreateRatingInput {
     contentImageUrl: string | null;
     score: number;
     reviewText: string | null;
+    privateNote: string | null;
     hasSpoiler: boolean;
     contentSubtype?: 'album' | 'track' | null;
     trackRatings?: TrackRatingEntry[] | null;
@@ -43,6 +44,7 @@ export function useCreateRating() {
                         content_image_url: input.contentImageUrl,
                         score: input.score,
                         review_text: input.reviewText,
+                        private_note: input.privateNote,
                         has_spoiler: input.hasSpoiler,
                         content_subtype: input.contentSubtype ?? null,
                         track_ratings: input.trackRatings?.length
@@ -62,6 +64,8 @@ export function useCreateRating() {
             queryClient.invalidateQueries({ queryKey: ['feed'] });
             queryClient.invalidateQueries({ queryKey: ['profile-stats'] });
             queryClient.invalidateQueries({ queryKey: ['rating-history'] });
+            queryClient.invalidateQueries({ queryKey: ['score-distribution'] });
+            queryClient.invalidateQueries({ queryKey: ['streak'] });
         },
     });
 }
@@ -103,6 +107,8 @@ export function useDeleteRating() {
             queryClient.invalidateQueries({ queryKey: ['feed'] });
             queryClient.invalidateQueries({ queryKey: ['profile-stats'] });
             queryClient.invalidateQueries({ queryKey: ['rating-history'] });
+            queryClient.invalidateQueries({ queryKey: ['score-distribution'] });
+            queryClient.invalidateQueries({ queryKey: ['streak'] });
         },
     });
 }

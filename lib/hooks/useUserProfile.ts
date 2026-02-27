@@ -29,6 +29,7 @@ export function useUserProfile(userId: string | undefined) {
                 avatarUrl: data.avatar_url,
                 bio: data.bio,
                 isPrivate: data.is_private,
+                pinnedMode: (data.pinned_mode ?? 'manual') as 'manual' | 'auto',
                 createdAt: data.created_at,
                 updatedAt: data.updated_at,
             } as Profile;

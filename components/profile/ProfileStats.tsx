@@ -4,12 +4,14 @@ import { router } from 'expo-router';
 import { useFollowCounts } from '@/lib/hooks/useFollowCounts';
 import Animated, {
     useAnimatedStyle,
+    useReducedMotion,
     useSharedValue,
     withRepeat,
     withSequence,
     withTiming,
 } from 'react-native-reanimated';
 import { useProfileStats, type CategoryStat } from '@/lib/hooks/useProfileStats';
+import { useStreak } from '@/lib/hooks/useStreak';
 import { COLORS, FONT_SIZE } from '@/lib/utils/constants';
 
 const CATEGORY_META: Record<string, { emoji: string; label: string; color: string }> = {
@@ -19,8 +21,40 @@ const CATEGORY_META: Record<string, { emoji: string; label: string; color: strin
     game: { emoji: '🎮', label: 'Juegos', color: COLORS.categoryGame },
     music: { emoji: '🎵', label: 'Música', color: COLORS.categoryMusic },
     podcast: { emoji: '🎙', label: 'Podcasts', color: COLORS.categoryPodcast },
-    custom: { emoji: '✨', label: 'Otros', color: COLORS.categoryAnything },
+    anything: { emoji: '✨', label: 'Anything', color: COLORS.categoryAnything },
 };
+
+/** Renders the streak counter with an optional pulse animation for ≥7 days. */
+function StreakStat({ streakDays }: { streakDays: number }) {
+    const reducedMotion = useReducedMotion();
+    const scale = useSharedValue(1);
+
+    React.useEffect(() => {
+        if (streakDays >= 7 && !reducedMotion) {
+            scale.value = withRepeat(
+                withSequence(
+                    withTiming(1.05, { duration: 750 }),
+                    withTiming(1, { duration: 750 }),
+                ),
+                -1,
+                true,
+            );
+        } else {
+            scale.value = withTiming(1, { duration: 300 });
+        }
+    }, [streakDays, reducedMotion, scale]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: scale.value }],
+    }));
+
+    return (
+        <Animated.View style={[styles.counterItem, animatedStyle]}>
+            <Text style={styles.counterNumber}>🔥 {streakDays}</Text>
+            <Text style={styles.counterLabel}>días</Text>
+        </Animated.View>
+    );
+}
 
 function SkeletonBar() {
     const opacity = useSharedValue(0.3);
@@ -69,6 +103,8 @@ export function ProfileStats({ userId }: { userId?: string }) {
     // Even when loading, we show counters with 0.
     const ratingCount = data?.totalRatings ?? 0;
     const { data: followData } = useFollowCounts(userId);
+    const { data: streakData } = useStreak(userId);
+    const streakDays = streakData?.streakDays ?? 0;
     const followersCount = followData?.followersCount ?? 0;
     const followingCount = followData?.followingCount ?? 0;
 
@@ -94,6 +130,7 @@ export function ProfileStats({ userId }: { userId?: string }) {
                 <Text style={styles.counterNumber}>{followingCount}</Text>
                 <Text style={styles.counterLabel}>Siguiendo</Text>
             </TouchableOpacity>
+            {streakDays > 0 && <StreakStat streakDays={streakDays} />}
         </View>
     );
 

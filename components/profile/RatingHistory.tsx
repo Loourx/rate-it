@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
@@ -14,6 +14,7 @@ import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
 import { COLORS, FONT_SIZE, SPACING, formatScore } from '@/lib/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import type { ContentType } from '@/lib/types/content';
+import { PosterGrid } from '@/components/profile/PosterGrid';
 
 const CATEGORY_META: Record<string, { label: string; color: string }> = {
     movie: { label: 'Cine', color: COLORS.categoryMovie },
@@ -82,6 +83,7 @@ function HistoryItem({ item, onPress }: { item: RatingHistoryItem; onPress: () =
 
 export function RatingHistory({ userId }: { userId?: string }) {
     const router = useRouter();
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
     const {
         data, isLoading, isError, refetch,
         fetchNextPage, hasNextPage, isFetchingNextPage,
@@ -148,28 +150,66 @@ export function RatingHistory({ userId }: { userId?: string }) {
     }
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.sectionTitle}>Recientes</Text>
-            <FlatList
-                data={allItems}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <HistoryItem item={item} onPress={() => handlePress(item)} />
-                )}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
-                onEndReached={handleEndReached}
-                onEndReachedThreshold={0.5}
-                scrollEnabled={false}
-                ListFooterComponent={
-                    isFetchingNextPage ? <SkeletonCard /> : null
-                }
-            />
+        <View style={[styles.container, viewMode === 'grid' && styles.containerGrid]}>
+            <View style={[styles.sectionHeader, viewMode === 'grid' && styles.sectionHeaderPadded]}>
+                <Text style={styles.sectionTitle}>Recientes</Text>
+                <View style={styles.toggleRow}>
+                    <TouchableOpacity
+                        onPress={() => setViewMode('list')}
+                        style={styles.toggleButton}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name="list-outline"
+                            size={22}
+                            color={viewMode === 'list' ? COLORS.link : COLORS.textTertiary}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setViewMode('grid')}
+                        style={styles.toggleButton}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name="grid-outline"
+                            size={22}
+                            color={viewMode === 'grid' ? COLORS.link : COLORS.textTertiary}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {viewMode === 'grid' ? (
+                <PosterGrid
+                    ratings={allItems}
+                    onPressItem={handlePress}
+                    onEndReached={handleEndReached}
+                    isFetchingNextPage={isFetchingNextPage}
+                />
+            ) : (
+                <FlatList
+                    data={allItems}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <HistoryItem item={item} onPress={() => handlePress(item)} />
+                    )}
+                    ItemSeparatorComponent={() => <View style={styles.separator} />}
+                    onEndReached={handleEndReached}
+                    onEndReachedThreshold={0.5}
+                    scrollEnabled={false}
+                    ListFooterComponent={
+                        isFetchingNextPage ? <SkeletonCard /> : null
+                    }
+                />
+            )}
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: { paddingHorizontal: 24, paddingBottom: 24 },
+    containerGrid: { paddingHorizontal: 0 },
+    sectionHeaderPadded: { paddingHorizontal: 24 },
     sectionTitle: { fontSize: FONT_SIZE.headlineSmall, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 12 },
     item: { flexDirection: 'row', paddingVertical: 16, alignItems: 'center' },
     separator: { height: 1, backgroundColor: COLORS.divider },
@@ -199,4 +239,7 @@ const styles = StyleSheet.create({
     skeletonLines: { flex: 1, justifyContent: 'center', gap: 8 },
     skeletonLine1: { height: 14, width: '70%', backgroundColor: COLORS.surfaceElevated, borderRadius: 4 },
     skeletonLine2: { height: 10, width: '45%', backgroundColor: COLORS.surfaceElevated, borderRadius: 4 },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    toggleRow: { flexDirection: 'row', gap: 4 },
+    toggleButton: { padding: 4 },
 });

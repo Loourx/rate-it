@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -9,6 +9,7 @@ import {
     Platform,
     StyleSheet,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ContentType } from '@/lib/types/content';
@@ -33,6 +34,7 @@ const CATEGORY_COLORS: Record<ContentType, string> = {
 };
 
 const MAX_REVIEW_LENGTH = 2000;
+const MAX_PRIVATE_NOTE_LENGTH = 500;
 
 export default function RateScreen() {
     const { type, id, isAlbum: _isAlbum } = useLocalSearchParams<{ type: string; id: string; isAlbum?: string }>();
@@ -43,6 +45,28 @@ export default function RateScreen() {
         contentType,
         contentId: id,
     });
+    const [privateNoteExpanded, setPrivateNoteExpanded] = useState(false);
+    const privateNoteHeight = useSharedValue(0);
+    const privateNoteStyle = useAnimatedStyle(() => ({
+        height: privateNoteHeight.value,
+        overflow: 'hidden',
+    }));
+
+    // Auto-expand when editing a rating that already has a private note
+    const didAutoExpand = React.useRef(false);
+    React.useEffect(() => {
+        if (!didAutoExpand.current && !state.isLoading && formData.privateNote) {
+            didAutoExpand.current = true;
+            setPrivateNoteExpanded(true);
+            privateNoteHeight.value = 160;
+        }
+    }, [state.isLoading, formData.privateNote]);
+
+    const togglePrivateNote = () => {
+        const next = !privateNoteExpanded;
+        setPrivateNoteExpanded(next);
+        privateNoteHeight.value = withTiming(next ? 160 : 0, { duration: 200 });
+    };
 
     if (state.isLoading) return <LoadingSkeleton />;
     if (state.isError || !content) return <ErrorState onRetry={() => actions.refetch()} />;
@@ -99,6 +123,31 @@ export default function RateScreen() {
                         />
                         <Text style={styles.charCount}>{formData.review.length}/{MAX_REVIEW_LENGTH}</Text>
                     </View>
+                    {/* Private note — owner-only, never rendered in feed or public profile */}
+                    <TouchableOpacity
+                        onPress={togglePrivateNote}
+                        style={styles.privateNoteToggle}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.privateNoteToggleText}>Nota privada 🔒 solo tú la ves</Text>
+                        <Ionicons
+                            name={privateNoteExpanded ? 'chevron-up' : 'chevron-down'}
+                            size={18}
+                            color={COLORS.textSecondary}
+                        />
+                    </TouchableOpacity>
+                    <Animated.View style={[styles.privateNoteContainer, privateNoteStyle]}>
+                        <TextInput
+                            style={styles.privateNoteInput}
+                            multiline
+                            maxLength={MAX_PRIVATE_NOTE_LENGTH}
+                            placeholder="Tu reflexión privada..."
+                            placeholderTextColor={COLORS.textTertiary}
+                            value={formData.privateNote}
+                            onChangeText={actions.setPrivateNote}
+                        />
+                        <Text style={styles.charCount}>{formData.privateNote.length}/{MAX_PRIVATE_NOTE_LENGTH}</Text>
+                    </Animated.View>
                     <TouchableOpacity
                         onPress={() => actions.setHasSpoiler((p) => !p)}
                         style={styles.spoilerRow}
@@ -183,6 +232,31 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.md,
     },
     spoilerText: { color: COLORS.textPrimary, fontSize: FONT_SIZE.bodyLarge, marginLeft: SPACING.md },
+    privateNoteToggle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: SPACING.base,
+        paddingVertical: SPACING.md,
+        paddingHorizontal: SPACING.base,
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: RADIUS.md,
+    },
+    privateNoteToggleText: { color: COLORS.textSecondary, fontSize: FONT_SIZE.bodyMedium, fontWeight: '500' },
+    privateNoteContainer: {
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: RADIUS.md,
+        marginTop: 2,
+        paddingHorizontal: SPACING.base,
+        paddingBottom: SPACING.xs,
+    },
+    privateNoteInput: {
+        color: COLORS.textPrimary,
+        fontSize: FONT_SIZE.bodyLarge,
+        minHeight: 100,
+        textAlignVertical: 'top',
+        paddingTop: SPACING.base,
+    },
     bottomBar: {
         position: 'absolute',
         bottom: 0,

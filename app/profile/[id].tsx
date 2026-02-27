@@ -138,7 +138,11 @@ export default function UserProfileScreen() {
                 </View>
             ) : (
                 <>
-                    <PinnedItemsGrid userId={id} isOwnProfile={false} />
+                    <PinnedItemsGrid
+                        userId={id}
+                        isOwnProfile={false}
+                        pinnedMode={profile?.pinnedMode ?? 'manual'}
+                    />
                     <ProfileStats userId={id} />
                     <ScoreDistribution userId={id} />
                     <RatingHistory userId={id} />

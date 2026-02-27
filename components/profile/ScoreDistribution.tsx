@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useScoreDistribution } from '@/lib/hooks/useScoreDistribution';
 import { COLORS, FONT_SIZE, SPACING } from '@/lib/utils/constants';
@@ -13,8 +13,36 @@ const MIN_RATINGS = 3;     // mostrar solo si hay suficientes datos
 // Enteros que se muestran como etiqueta en el eje X
 const X_LABEL_SET = new Set([0, 2, 4, 6, 8, 10]);
 
+const CATEGORY_LABELS: Record<string, string> = {
+    movie: 'Cine',
+    series: 'Series',
+    book: 'Libros',
+    game: 'Juegos',
+    music: 'Música',
+    podcast: 'Podcasts',
+    anything: 'Anything',
+};
+
 export function ScoreDistribution({ userId }: ScoreDistributionProps) {
     const { data, isLoading } = useScoreDistribution(userId);
+
+    // Categorías presentes en los datos (para la leyenda)
+    const presentCategories = useMemo(() => {
+        if (!data) return [];
+        const seen = new Map<string, string>(); // contentType → color
+        for (const bucket of data.buckets) {
+            for (const seg of bucket.segments) {
+                if (!seen.has(seg.contentType)) {
+                    seen.set(seg.contentType, seg.color);
+                }
+            }
+        }
+        return Array.from(seen.entries()).map(([type, color]) => ({
+            type,
+            color,
+            label: CATEGORY_LABELS[type] ?? type,
+        }));
+    }, [data]);
 
     // No mostrar durante carga ni con pocos datos
     if (isLoading || !data || data.totalRatings < MIN_RATINGS) return null;
@@ -71,6 +99,18 @@ export function ScoreDistribution({ userId }: ScoreDistributionProps) {
                     );
                 })}
             </View>
+
+            {/* Leyenda de categorías */}
+            {presentCategories.length > 1 && (
+                <View style={S.legend}>
+                    {presentCategories.map((cat) => (
+                        <View key={cat.type} style={S.legendItem}>
+                            <View style={[S.legendDot, { backgroundColor: cat.color }]} />
+                            <Text style={S.legendLabel}>{cat.label}</Text>
+                        </View>
+                    ))}
+                </View>
+            )}
         </View>
     );
 }
@@ -127,5 +167,27 @@ const S = StyleSheet.create({
     },
     xLabelHidden: {
         opacity: 0, // ocupa espacio pero no se ve — mantiene alineación
+    },
+    legend: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        marginTop: SPACING.sm,
+        justifyContent: 'center',
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    legendDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    legendLabel: {
+        fontSize: 10,
+        color: COLORS.textSecondary,
+        fontFamily: 'SpaceGrotesk_500Medium',
     },
 });

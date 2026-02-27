@@ -11,6 +11,7 @@ export const MOCK_PROFILE: Profile = {
     avatarUrl: 'https://i.pravatar.cc/150?u=dev_tester',
     bio: 'I am a mock user for development testing.',
     isPrivate: false,
+    pinnedMode: 'manual' as const,
     createdAt: '2026-02-16T12:00:00Z',
     updatedAt: '2026-02-16T12:00:00Z',
 };

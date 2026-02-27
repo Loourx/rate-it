@@ -74,7 +74,13 @@ export default function ProfileScreen() {
                 </View>
 
                 {/* Pinned Favorites */}
-                {myUserId && <PinnedItemsGrid userId={myUserId} isOwnProfile />}
+                {myUserId && (
+                    <PinnedItemsGrid
+                        userId={myUserId}
+                        isOwnProfile
+                        pinnedMode={profile?.pinnedMode ?? 'manual'}
+                    />
+                )}
 
                 {/* Stats */}
                 <ProfileStats userId={myUserId} />
