@@ -98,3 +98,13 @@ export interface Report {
     reason: string; // text
     createdAt: string; // timestamptz
 }
+
+export interface AnnualChallenge {
+    id: string; // uuid
+    userId: string; // uuid references profiles
+    year: number; // integer
+    targetCount: number; // integer > 0
+    categoryFilter: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything' | 'all';
+    createdAt: string; // timestamptz
+    updatedAt: string; // timestamptz
+}
