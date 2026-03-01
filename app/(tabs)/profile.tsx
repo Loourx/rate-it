@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProfile } from '@/lib/hooks/useProfile';
@@ -15,6 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useSocialFeed } from '@/lib/hooks/useSocialFeed';
+import { useProfileStats } from '@/lib/hooks/useProfileStats';
+import { useStreak } from '@/lib/hooks/useStreak';
+import { usePinnedItems } from '@/lib/hooks/usePinnedItems';
+import { useAnnualChallenges } from '@/lib/hooks/useAnnualChallenges';
+import { useShareProfile } from '@/lib/hooks/useShareProfile';
+import { ShareableProfileCard } from '@/components/sharing/ShareableProfileCard';
+import type { ShareableProfileCardProps } from '@/components/sharing';
+import { Toast } from '@/components/ui/Toast';
 
 export default function ProfileScreen() {
     const { signOut } = useAuth();
@@ -46,6 +54,39 @@ export default function ProfileScreen() {
         markCelebratedRef.current = null;
         setShowConfetti(false);
     }, []);
+
+    // ── Sharing hooks ────────────────────────────────────────────────────────
+    const { data: statsData } = useProfileStats(myUserId);
+    const { data: streakData } = useStreak(myUserId);
+    const { data: pinnedData } = usePinnedItems(myUserId);
+    const { challenges, getProgress } = useAnnualChallenges();
+    const { shareProfile, isCapturing, profileCardRef, toastVisible, toastMessage, toastType, dismissToast } =
+        useShareProfile();
+
+    const firstChallenge = challenges[0] ?? null;
+    const profileCardProps: ShareableProfileCardProps = {
+        username: profile?.username ?? '',
+        avatarUrl: profile?.avatarUrl ?? null,
+        totalRatings: statsData?.totalRatings ?? 0,
+        averageScore: (statsData?.averageScore && statsData.averageScore > 0)
+            ? statsData.averageScore
+            : null,
+        currentStreak: streakData?.streakDays ?? 0,
+        pinnedItems: (pinnedData ?? []).slice(0, 5).map((p) => ({
+            title: p.contentTitle,
+            imageUrl: p.contentImageUrl ?? null,
+            contentType: p.contentType,
+        })),
+        challenge: firstChallenge
+            ? {
+                target: firstChallenge.targetCount,
+                current: getProgress(firstChallenge.id),
+                categoryFilter: firstChallenge.categoryFilter ?? null,
+            }
+            : null,
+    };
+    // void suppresses TS warning for unused feedItems
+    void feedItems;
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ position: 'relative' }}>
@@ -79,6 +120,19 @@ export default function ProfileScreen() {
                         >
                             <Ionicons name="pencil" size={16} color={COLORS.textPrimary} />
                             <Text className="text-primary font-medium">Editar perfil</Text>
+                        </TouchableOpacity>
+                        {/* Share profile button — secondary style, own profile only */}
+                        <TouchableOpacity
+                            onPress={shareProfile}
+                            disabled={isCapturing}
+                            style={styles.shareBtn}
+                        >
+                            {isCapturing ? (
+                                <ActivityIndicator size="small" color={COLORS.textSecondary} />
+                            ) : (
+                                <Ionicons name="share-outline" size={16} color={COLORS.textSecondary} />
+                            )}
+                            <Text style={styles.shareBtnText}>Compartir perfil</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => router.push('/profile/challenge')}
@@ -130,6 +184,44 @@ export default function ProfileScreen() {
             {showConfetti && (
                 <ConfettiCelebration onFinish={handleConfettiFinish} />
             )}
+
+            {/* Off-screen portal for ShareableProfileCard capture */}
+            <View style={styles.offscreen} pointerEvents="none">
+                <View ref={profileCardRef} collapsable={false}>
+                    <ShareableProfileCard {...profileCardProps} />
+                </View>
+            </View>
+
+            {/* Toast feedback */}
+            <Toast
+                visible={toastVisible}
+                message={toastMessage}
+                type={toastType}
+                onDismiss={dismissToast}
+            />
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    offscreen: {
+        position: 'absolute',
+        left: -9999,
+        top: 0,
+    },
+    shareBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: COLORS.textSecondary,
+    },
+    shareBtnText: {
+        fontSize: 14,
+        fontFamily: 'SpaceGrotesk-Medium',
+        color: COLORS.textSecondary,
+    },
+});
