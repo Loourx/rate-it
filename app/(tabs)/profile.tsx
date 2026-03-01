@@ -20,7 +20,9 @@ import { useStreak } from '@/lib/hooks/useStreak';
 import { usePinnedItems } from '@/lib/hooks/usePinnedItems';
 import { useAnnualChallenges } from '@/lib/hooks/useAnnualChallenges';
 import { useShareProfile } from '@/lib/hooks/useShareProfile';
+import { useShareChallenge } from '@/lib/hooks/useShareChallenge';
 import { ShareableProfileCard } from '@/components/sharing/ShareableProfileCard';
+import { ShareableChallengeCard } from '@/components/sharing/ShareableChallengeCard';
 import type { ShareableProfileCardProps } from '@/components/sharing';
 import { Toast } from '@/components/ui/Toast';
 
@@ -59,9 +61,19 @@ export default function ProfileScreen() {
     const { data: statsData } = useProfileStats(myUserId);
     const { data: streakData } = useStreak(myUserId);
     const { data: pinnedData } = usePinnedItems(myUserId);
-    const { challenges, getProgress } = useAnnualChallenges();
+    const { challenges, getProgress, getPercentage } = useAnnualChallenges();
+
     const { shareProfile, isCapturing, profileCardRef, toastVisible, toastMessage, toastType, dismissToast } =
         useShareProfile();
+    const {
+        shareChallenge,
+        isCapturingChallenge,
+        challengeCardRef,
+        toastVisible: challengeToastVisible,
+        toastMessage: challengeToastMessage,
+        toastType: challengeToastType,
+        dismissToast: dismissChallengeToast,
+    } = useShareChallenge();
 
     const firstChallenge = challenges[0] ?? null;
     const profileCardProps: ShareableProfileCardProps = {
@@ -169,6 +181,18 @@ export default function ProfileScreen() {
 
                 {/* Challenge Progress */}
                 <ChallengeProgress userId={myUserId} isOwnProfile onCelebrate={handleCelebrate} />
+                {firstChallenge !== null && (
+                    <TouchableOpacity
+                        onPress={shareChallenge}
+                        disabled={isCapturingChallenge}
+                        style={[
+                            styles.shareChallengeBtn,
+                            isCapturingChallenge && styles.shareBtnDisabled,
+                        ]}
+                    >
+                        <Text style={styles.shareChallengeText}>Compartir reto</Text>
+                    </TouchableOpacity>
+                )}
 
                 {/* Score Distribution Histogram */}
                 <ScoreDistribution userId={myUserId} />
@@ -190,6 +214,18 @@ export default function ProfileScreen() {
                 <View ref={profileCardRef} collapsable={false}>
                     <ShareableProfileCard {...profileCardProps} />
                 </View>
+                {firstChallenge !== null && (
+                    <View ref={challengeCardRef} collapsable={false}>
+                        <ShareableChallengeCard
+                            username={profile?.username ?? ''}
+                            target={firstChallenge.targetCount}
+                            current={getProgress(firstChallenge.id)}
+                            percentage={getPercentage(firstChallenge.id)}
+                            categoryFilter={firstChallenge.categoryFilter === 'all' ? null : firstChallenge.categoryFilter}
+                            year={firstChallenge.year}
+                        />
+                    </View>
+                )}
             </View>
 
             {/* Toast feedback */}
@@ -198,6 +234,12 @@ export default function ProfileScreen() {
                 message={toastMessage}
                 type={toastType}
                 onDismiss={dismissToast}
+            />
+            <Toast
+                visible={challengeToastVisible}
+                message={challengeToastMessage}
+                type={challengeToastType}
+                onDismiss={dismissChallengeToast}
             />
         </SafeAreaView>
     );
@@ -223,5 +265,22 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'SpaceGrotesk-Medium',
         color: COLORS.textSecondary,
+    },
+    shareChallengeBtn: {
+        marginHorizontal: 16,
+        marginBottom: 8,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: COLORS.textSecondary,
+        alignItems: 'center',
+    },
+    shareChallengeText: {
+        fontSize: 14,
+        fontFamily: 'SpaceGrotesk-Medium',
+        color: COLORS.textSecondary,
+    },
+    shareBtnDisabled: {
+        opacity: 0.5,
     },
 });
