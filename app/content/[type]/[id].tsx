@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Share } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import Animated, {
     FadeInDown,
@@ -11,6 +11,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useIsBookmarked, useToggleBookmark } from '@/lib/hooks/useBookmark';
 import { useIsPinned, usePinItem, useUnpinItem } from '@/lib/hooks/usePinnedItems';
 import { useContentDetails } from '@/lib/hooks/useContentDetails';
+import { useExistingRating } from '@/lib/hooks/useCreateRating';
+import { useProfile } from '@/lib/hooks/useProfile';
+import { useShareRating } from '@/lib/hooks/useShareRating';
 import { ContentType, Movie, Series, Anything, Music } from '@/lib/types/content';
 import { AlbumTrackList } from '@/components/content/AlbumTrackList';
 import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
@@ -21,9 +24,12 @@ import { ContentMetadataBadges } from '@/components/content/ContentMetadataBadge
 import { ContentDetailSkeleton } from '@/components/content/ContentDetailSkeleton';
 import { CommunityScore } from '@/components/content/CommunityScore';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { Toast } from '@/components/ui/Toast';
 import { ReportModal } from '@/components/anything/ReportModal';
 import { RecommendModal } from '@/components/content/RecommendModal';
+import { ShareableRatingCardPortal } from '@/components/sharing';
 import { useHasReported } from '@/lib/hooks/useReportAnything';
+import type { ShareableRatingCardProps } from '@/components/sharing';
 
 const TYPE_LABELS: Record<ContentType, string> = {
     movie: '🎬 Película',
@@ -43,6 +49,8 @@ export default function ContentDetailsScreen() {
 
     const { data: item, isLoading, isError, refetch } = useContentDetails(type as ContentType, id);
     const { data: hasReported } = useHasReported(type === 'anything' ? id : '');
+    const { data: userRating } = useExistingRating(type as ContentType, id);
+    const { data: profile } = useProfile();
 
     const contentType = type as ContentType;
     const color = getCategoryColor(contentType);
@@ -113,17 +121,46 @@ export default function ContentDetailsScreen() {
         }
     }, [pinnedItem, pinItem, unpinItem, contentType, id, item, pinScale]);
 
-    const handleShare = useCallback(async () => {
-        if (!item) return;
-        try {
-            await Share.share({
-                title: item.title,
-                message: `🎯 "${item.title}" en Rate-it\n\nDescúbrelo en la app: https://rateit.app/content/${type}/${id}`, // TODO F11e: reemplazar con deep link real
-            });
-        } catch {
-            // El usuario canceló el share — no hacer nada
-        }
-    }, [item, type, id]);
+    // Build card props from item + user data (only used when userRating exists)
+    const cardProps: Omit<ShareableRatingCardProps, 'format'> = {
+        contentTitle: item?.title ?? '',
+        contentImageUrl: item?.imageUrl ?? null,
+        contentType: contentType as ShareableRatingCardProps['contentType'],
+        score: userRating?.score ?? 0,
+        review: userRating?.review_text ?? null,
+        username: profile?.username ?? 'usuario',
+        userAvatarUrl: profile?.avatarUrl ?? null,
+    };
+
+    const {
+        shareAsStory,
+        shareAsFeed,
+        isCapturing,
+        storiesRef,
+        feedRef,
+        toastVisible,
+        toastMessage,
+        toastType,
+        dismissToast,
+    } = useShareRating({ cardProps });
+
+    const handleShare = useCallback(() => {
+        Alert.alert(
+            'Compartir valoración',
+            'Elige el formato de la tarjeta:',
+            [
+                {
+                    text: 'Formato Stories (9:16)',
+                    onPress: () => { void shareAsStory(); },
+                },
+                {
+                    text: 'Formato Feed (4:5)',
+                    onPress: () => { void shareAsFeed(); },
+                },
+                { text: 'Cancelar', style: 'cancel' },
+            ],
+        );
+    }, [shareAsStory, shareAsFeed]);
 
     if (isLoading) {
         return (
@@ -223,9 +260,20 @@ export default function ContentDetailsScreen() {
                                 </TouchableOpacity>
                             </Animated.View>
 
-                            <TouchableOpacity style={S.iconBtn} onPress={handleShare} activeOpacity={0.7}>
-                                <Ionicons name="share-social-outline" size={22} color={COLORS.textSecondary} />
-                            </TouchableOpacity>
+                            {userRating && (
+                                <TouchableOpacity
+                                    style={[S.iconBtn, isCapturing && S.iconBtnDisabled, { borderColor: isCapturing ? COLORS.divider : color }]}
+                                    onPress={handleShare}
+                                    activeOpacity={0.7}
+                                    disabled={isCapturing}
+                                >
+                                    <Ionicons
+                                        name="share-social-outline"
+                                        size={22}
+                                        color={isCapturing ? COLORS.textSecondary : color}
+                                    />
+                                </TouchableOpacity>
+                            )}
 
                             <TouchableOpacity
                                 style={S.iconBtn}
@@ -281,6 +329,22 @@ export default function ContentDetailsScreen() {
                 contentTitle={item?.title ?? ''}
                 contentImageUrl={item?.imageUrl ?? null}
             />
+
+            {/* Off-screen portal for share card capture */}
+            {userRating && (
+                <ShareableRatingCardPortal
+                    cardProps={cardProps}
+                    storiesRef={storiesRef}
+                    feedRef={feedRef}
+                />
+            )}
+
+            <Toast
+                visible={toastVisible}
+                message={toastMessage}
+                type={toastType}
+                onDismiss={dismissToast}
+            />
         </>
     );
 }
@@ -305,6 +369,7 @@ const S = StyleSheet.create({
     rateTxt: { fontSize: 16, fontFamily: FONT.bold, color: '#FFF' },
     secondaryActions: { flexDirection: 'row', justifyContent: 'space-evenly' },
     iconBtn: { width: 52, height: 52, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.surface, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.divider },
+    iconBtnDisabled: { opacity: 0.5 },
     synWrap: { marginTop: SPACING['2xl'] },
     synTitle: { fontSize: 20, fontFamily: FONT.bold, color: COLORS.textPrimary, marginBottom: SPACING.sm },
     synBody: { fontSize: 16, fontFamily: FONT.medium, color: COLORS.textSecondary, lineHeight: 24 },
