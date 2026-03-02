@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    Image, StyleSheet, ActivityIndicator,
+    Image, StyleSheet,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,9 @@ import { useFollowing } from '@/lib/hooks/useFollowing';
 import { useFollow } from '@/lib/hooks/useFollow';
 import { useIsFollowing } from '@/lib/hooks/useIsFollowing';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { COLORS, SPACING } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import type { FollowingProfile } from '@/lib/types/social';
@@ -65,7 +68,50 @@ function UserRow({ profile }: { profile: FollowingProfile }) {
 export default function FollowingScreen() {
     const { userId } = useLocalSearchParams<{ userId: string }>();
     const insets = useSafeAreaInsets();
-    const { data: following, isLoading, isError } = useFollowing(userId);
+    const { data: following, isLoading, isError, refetch } = useFollowing(userId);
+
+    if (isLoading) {
+        return (
+            <View style={[styles.container, { paddingTop: insets.top }]}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+                    </TouchableOpacity>
+                    <Text style={styles.title}>Siguiendo</Text>
+                    <View style={styles.backBtn} />
+                </View>
+                <View style={{ padding: 16, gap: 16 }}>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                            <Skeleton width={44} height={44} borderRadius={22} />
+                            <View style={{ flex: 1, gap: 8 }}>
+                                <Skeleton width="60%" height={16} borderRadius={4} />
+                                <Skeleton width="40%" height={12} borderRadius={4} />
+                            </View>
+                        </View>
+                    ))}
+                </View>
+            </View>
+        );
+    }
+
+    if (isError) {
+        return (
+            <View style={[styles.container, { paddingTop: insets.top }]}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+                    </TouchableOpacity>
+                    <Text style={styles.title}>Siguiendo</Text>
+                    <View style={styles.backBtn} />
+                </View>
+                <ErrorState
+                    message="No pudimos cargar los seguidos"
+                    onRetry={refetch}
+                />
+            </View>
+        );
+    }
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -77,30 +123,21 @@ export default function FollowingScreen() {
                 <Text style={styles.title}>Siguiendo</Text>
                 <View style={styles.backBtn} />
             </View>
-
-            {isLoading && (
-                <ActivityIndicator color={COLORS.textSecondary} style={styles.centered} />
-            )}
-
-            {isError && (
-                <Text style={[styles.emptyText, styles.centered]}>
-                    Error al cargar siguiendo
-                </Text>
-            )}
-
-            {!isLoading && !isError && (
-                <FlatList
-                    data={following ?? []}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => <UserRow profile={item} />}
-                    ListEmptyComponent={
-                        <Text style={[styles.emptyText, styles.centered]}>
-                            No sigue a nadie aún
-                        </Text>
-                    }
-                    contentContainerStyle={following?.length === 0 ? styles.emptyContainer : undefined}
-                />
-            )}
+            <FlatList
+                data={following ?? []}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => <UserRow profile={item} />}
+                ListEmptyComponent={
+                    <EmptyState
+                        icon="people-outline"
+                        title="¿A quién admiras?"
+                        description="Busca amigos o personas con buen gusto y síguelos para ver sus opiniones."
+                        actionLabel="Buscar personas"
+                        onAction={() => router.push('/(tabs)/search')}
+                    />
+                }
+                contentContainerStyle={following?.length === 0 ? { flex: 1 } : undefined}
+            />
         </View>
     );
 }
