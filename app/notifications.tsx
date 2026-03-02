@@ -25,8 +25,8 @@ export default function NotificationsScreen() {
         }
     }, [notifications, markAllAsRead]);
 
-    const handleGoToFeed = useCallback(() => {
-        router.push('/(tabs)/feed');
+    const handleGoToSearch = useCallback(() => {
+        router.push('/(tabs)/search');
     }, []);
 
     if (isLoading) {
@@ -55,11 +55,11 @@ export default function NotificationsScreen() {
             <Screen edges={['top']}>
                 <Stack.Screen options={{ title: 'Notificaciones' }} />
                 <EmptyState
-                    icon="notifications-outline"
-                    title="Sin notificaciones"
-                    description="Te avisaremos cuando alguien interactúe con tu contenido"
-                    actionLabel="Ir al feed"
-                    onAction={handleGoToFeed}
+                    icon="notifications-off-outline"
+                    title="Todo tranquilo por aquí"
+                    description="Cuando alguien interactúe contigo, lo verás aquí. ¡Comparte una opinión para empezar!"
+                    actionLabel="Puntuar algo"
+                    onAction={handleGoToSearch}
                 />
             </Screen>
         );
