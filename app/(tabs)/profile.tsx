@@ -13,6 +13,8 @@ import { ConfettiCelebration } from '@/components/profile/ConfettiCelebration';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useSocialFeed } from '@/lib/hooks/useSocialFeed';
 import { useProfileStats } from '@/lib/hooks/useProfileStats';
@@ -28,7 +30,7 @@ import { Toast } from '@/components/ui/Toast';
 
 export default function ProfileScreen() {
     const { signOut } = useAuth();
-    const { data: profile } = useProfile();
+    const { data: profile, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useProfile();
     const router = useRouter();
 
     const handleSignOut = async () => {
@@ -99,6 +101,35 @@ export default function ProfileScreen() {
     };
     // void suppresses TS warning for unused feedItems
     void feedItems;
+
+    // ESTADO 1: Loading
+    if (profileLoading) {
+        return (
+            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+                <View className="px-6 py-6 items-center gap-4">
+                    <Skeleton width={96} height={96} borderRadius={48} />
+                    <Skeleton width={160} height={24} borderRadius={8} />
+                    <Skeleton width={240} height={16} borderRadius={8} />
+                </View>
+                <View className="px-6 gap-4">
+                    <Skeleton width="100%" height={80} borderRadius={16} />
+                    <Skeleton width="100%" height={200} borderRadius={16} />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    // ESTADO 2: Error
+    if (profileError) {
+        return (
+            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+                <ErrorState
+                    message="No pudimos cargar tu perfil"
+                    onRetry={refetchProfile}
+                />
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ position: 'relative' }}>
