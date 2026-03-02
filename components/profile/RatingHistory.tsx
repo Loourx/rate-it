@@ -130,21 +130,23 @@ export function RatingHistory({ userId }: { userId?: string }) {
         const isOwnProfile = !userId;
         return (
             <View style={styles.emptyContainer}>
-                <Ionicons name="star-outline" size={48} color={COLORS.textTertiary} />
+                <Ionicons name="film-outline" size={48} color={COLORS.textTertiary} />
                 <Text style={styles.emptyTitle}>
-                    {isOwnProfile ? 'Aún no has valorado nada' : 'Este usuario aún no ha valorado nada'}
+                    {isOwnProfile ? 'Tu perfil crece con cada opinión' : 'Aún no ha puntuado nada'}
+                </Text>
+                <Text style={styles.emptySubtitle}>
+                    {isOwnProfile
+                        ? 'Puntuú tu primera película o serie y verás cómo cobra vida.'
+                        : 'Dale tiempo... seguro que pronto comparte su primera opinión.'}
                 </Text>
                 {isOwnProfile && (
-                    <>
-                        <Text style={styles.emptySubtitle}>¡Busca algo para empezar!</Text>
-                        <TouchableOpacity
-                            onPress={() => router.push('/(tabs)/search')}
-                            style={styles.ctaButton}
-                        >
-                            <Ionicons name="search" size={18} color={COLORS.textPrimary} />
-                            <Text style={styles.ctaText}>Ir a buscar</Text>
-                        </TouchableOpacity>
-                    </>
+                    <TouchableOpacity
+                        onPress={() => router.push('/(tabs)/search')}
+                        style={styles.ctaButton}
+                    >
+                        <Ionicons name="search" size={18} color={COLORS.textPrimary} />
+                        <Text style={styles.ctaText}>Puntuar algo</Text>
+                    </TouchableOpacity>
                 )}
             </View>
         );
