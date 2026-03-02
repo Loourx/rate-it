@@ -13,8 +13,8 @@ export const CATEGORY_FILTERS: Array<{ value: ContentType | 'all'; label: string
     { value: 'book',     label: '📚 Libros' },
     { value: 'game',     label: '🎮 Juegos' },
     { value: 'music',    label: '🎵 Música' },
-    { value: 'podcast',  label: '🎙️ Podcasts' },
-    { value: 'anything', label: '✨ Anything' },
+    /* MVP_DISABLED: { value: 'podcast',  label: '🎙️ Podcasts' }, */
+    /* MVP_DISABLED: { value: 'anything', label: '✨ Anything' }, */
 ];
 
 export const ACTIVITY_FILTERS: Array<{ value: ActivityFilter; label: string }> = [

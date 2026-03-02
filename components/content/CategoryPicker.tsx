@@ -14,8 +14,8 @@ const categories: { type: ContentType; label: string; colorClass: string; textCl
     { type: 'book', label: 'Libros', colorClass: 'bg-category-book', textClass: 'text-category-book', borderClass: 'border-category-book' },
     { type: 'game', label: 'Juegos', colorClass: 'bg-category-game', textClass: 'text-category-game', borderClass: 'border-category-game' },
     { type: 'music', label: 'Música', colorClass: 'bg-category-music', textClass: 'text-category-music', borderClass: 'border-category-music' },
-    { type: 'podcast', label: 'Podcasts', colorClass: 'bg-category-podcast', textClass: 'text-category-podcast', borderClass: 'border-category-podcast' },
-    { type: 'anything', label: 'Anything', colorClass: 'bg-category-anything', textClass: 'text-category-anything', borderClass: 'border-category-anything' },
+    /* MVP_DISABLED: { type: 'podcast', label: 'Podcasts', colorClass: 'bg-category-podcast', textClass: 'text-category-podcast', borderClass: 'border-category-podcast' }, */
+    /* MVP_DISABLED: { type: 'anything', label: 'Anything', colorClass: 'bg-category-anything', textClass: 'text-category-anything', borderClass: 'border-category-anything' }, */
 ];
 
 export function CategoryPicker({ selectedCategory, onSelectCategory }: CategoryPickerProps) {

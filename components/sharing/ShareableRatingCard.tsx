@@ -5,7 +5,7 @@ import { Image } from 'expo-image';
 export interface ShareableRatingCardProps {
     contentTitle: string;
     contentImageUrl: string | null;
-    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
+    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' /* MVP_DISABLED: | 'podcast' | 'anything' */;
     score: number;
     review: string | null;
     username: string;
@@ -15,22 +15,22 @@ export interface ShareableRatingCardProps {
 
 const CATEGORY_COLORS: Record<ShareableRatingCardProps['contentType'], string> = {
     movie: '#FF595E',
-    series: '#8939F7',
-    book: '#8AC926',
-    game: '#1982C4',
-    music: '#FFCA3A',
-    podcast: '#5BC0EB',
-    anything: '#FFFBFF',
+    series: '#1982C4',
+    book: '#FFCA3A',
+    game: '#8939F7',
+    music: '#8AC926',
+    /* MVP_DISABLED: podcast: '#5BC0EB', */
+    /* MVP_DISABLED: anything: '#FFFBFF', */
 };
 
 const CATEGORY_COLORS_FADED: Record<ShareableRatingCardProps['contentType'], string> = {
     movie: 'rgba(255, 89, 94, 0.2)',
-    series: 'rgba(137, 57, 247, 0.2)',
-    book: 'rgba(138, 201, 38, 0.2)',
-    game: 'rgba(25, 130, 196, 0.2)',
-    music: 'rgba(255, 202, 58, 0.2)',
-    podcast: 'rgba(91, 192, 235, 0.2)',
-    anything: 'rgba(255, 251, 255, 0.2)',
+    series: 'rgba(25, 130, 196, 0.2)',
+    book: 'rgba(255, 202, 58, 0.2)',
+    game: 'rgba(137, 57, 247, 0.2)',
+    music: 'rgba(138, 201, 38, 0.2)',
+    /* MVP_DISABLED: podcast: 'rgba(91, 192, 235, 0.2)', */
+    /* MVP_DISABLED: anything: 'rgba(255, 251, 255, 0.2)', */
 };
 
 const CATEGORY_EMOJI: Record<ShareableRatingCardProps['contentType'], string> = {
@@ -39,8 +39,8 @@ const CATEGORY_EMOJI: Record<ShareableRatingCardProps['contentType'], string> = 
     book: '📚',
     game: '🎮',
     music: '🎵',
-    podcast: '🎙️',
-    anything: '✨',
+    /* MVP_DISABLED: podcast: '🎙️', */
+    /* MVP_DISABLED: anything: '✨', */
 };
 
 const CATEGORY_LABEL: Record<ShareableRatingCardProps['contentType'], string> = {
@@ -49,8 +49,8 @@ const CATEGORY_LABEL: Record<ShareableRatingCardProps['contentType'], string> = 
     book: 'Libro',
     game: 'Juego',
     music: 'Música',
-    podcast: 'Podcast',
-    anything: 'Anything',
+    /* MVP_DISABLED: podcast: 'Podcast', */
+    /* MVP_DISABLED: anything: 'Anything', */
 };
 
 const SURFACE = {

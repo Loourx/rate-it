@@ -3,9 +3,9 @@ import { getMovieDetails, getSeriesDetails } from '../api/tmdb';
 import { getBookDetails } from '../api/googleBooks';
 import { getGameDetails } from '../api/rawg';
 import { getMusicDetails } from '../api/itunes';
-import { getPodcastDetails } from '../api/podcasts';
+/* MVP_DISABLED: import { getPodcastDetails } from '../api/podcasts'; */
 import { supabase } from '../supabase';
-import { ContentType, Movie, Series, Book, Game, Music, Podcast, Anything } from '../types/content';
+import { ContentType, Movie, Series, Book, Game, Music /* MVP_DISABLED: , Podcast, Anything */ } from '../types/content';
 
 export function useContentDetails(type: ContentType, id: string, isAlbum?: boolean) {
     return useQuery({
@@ -23,6 +23,8 @@ export function useContentDetails(type: ContentType, id: string, isAlbum?: boole
                 return getGameDetails(id);
             } else if (type === 'music') {
                 return getMusicDetails(id, isAlbum ?? true);
+            }
+            /* MVP_DISABLED: podcast + anything branches
             } else if (type === 'podcast') {
                 return getPodcastDetails(id);
             } else if (type === 'anything') {
@@ -48,8 +50,9 @@ export function useContentDetails(type: ContentType, id: string, isAlbum?: boole
                     categoryTag: data.category_tag || undefined,
                 } as Anything;
             }
+            */
             throw new Error(`Content type ${type} is not supported by the current APIs`);
         },
-        enabled: !!id && (type === 'movie' || type === 'series' || type === 'book' || type === 'game' || type === 'music' || type === 'podcast' || type === 'anything'),
+        enabled: !!id && (type === 'movie' || type === 'series' || type === 'book' || type === 'game' || type === 'music' /* MVP_DISABLED: || type === 'podcast' || type === 'anything' */),
     });
 }

@@ -22,8 +22,8 @@ const CATEGORY_META: Record<string, { emoji: string; label: string; color: strin
     book: { emoji: '📚', label: 'Libros', color: COLORS.categoryBook },
     game: { emoji: '🎮', label: 'Juegos', color: COLORS.categoryGame },
     music: { emoji: '🎵', label: 'Música', color: COLORS.categoryMusic },
-    podcast: { emoji: '🎙', label: 'Podcasts', color: COLORS.categoryPodcast },
-    anything: { emoji: '✨', label: 'Anything', color: COLORS.categoryAnything },
+    /* MVP_DISABLED: podcast: { emoji: '🎙', label: 'Podcasts', color: COLORS.categoryPodcast }, */
+    /* MVP_DISABLED: anything: { emoji: '✨', label: 'Anything', color: COLORS.categoryAnything }, */
 };
 
 /** Renders the streak counter with an optional pulse animation for ≥7 days. */

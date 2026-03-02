@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { View } from 'react-native';
-import { captureRef } from 'react-native-view-shot';
+import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
 import type { ShareableRatingCardProps } from '@/components/sharing';
@@ -13,8 +13,8 @@ export interface UseShareRatingReturn {
     shareAsStory: () => Promise<void>;
     shareAsFeed: () => Promise<void>;
     isCapturing: boolean;
-    storiesRef: React.RefObject<View>;
-    feedRef: React.RefObject<View>;
+    storiesRef: React.RefObject<ViewShot>;
+    feedRef: React.RefObject<ViewShot>;
     toastVisible: boolean;
     toastMessage: string;
     toastType: 'success' | 'error' | 'info';
@@ -27,10 +27,8 @@ export function useShareRating({ cardProps }: UseShareRatingParams): UseShareRat
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const storiesRef = useRef<View>(null as any);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const feedRef = useRef<View>(null as any);
+    const storiesRef = useRef<ViewShot>(null);
+    const feedRef = useRef<ViewShot>(null);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
         setToastMessage(message);
@@ -41,7 +39,7 @@ export function useShareRating({ cardProps }: UseShareRatingParams): UseShareRat
     const dismissToast = () => setToastVisible(false);
 
     const captureAndShare = async (
-        ref: React.RefObject<View>,
+        ref: React.RefObject<ViewShot>,
         _format: 'stories' | 'feed',
     ): Promise<void> => {
         if (!ref.current) {

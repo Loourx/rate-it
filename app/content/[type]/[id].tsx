@@ -15,7 +15,7 @@ import { useContentDetails } from '@/lib/hooks/useContentDetails';
 import { useExistingRating } from '@/lib/hooks/useCreateRating';
 import { useProfile } from '@/lib/hooks/useProfile';
 import { useShareRating } from '@/lib/hooks/useShareRating';
-import { ContentType, Movie, Series, Anything, Music } from '@/lib/types/content';
+import { ContentType, Movie, Series, /* MVP_DISABLED: Anything, */ Music } from '@/lib/types/content';
 import { AlbumTrackList } from '@/components/content/AlbumTrackList';
 import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
 import { COLORS, SPACING, RADIUS, getCategoryColor, getCategoryFadedColor } from '@/lib/utils/constants';
@@ -26,10 +26,10 @@ import { ContentDetailSkeleton } from '@/components/content/ContentDetailSkeleto
 import { CommunityScore } from '@/components/content/CommunityScore';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Toast } from '@/components/ui/Toast';
-import { ReportModal } from '@/components/anything/ReportModal';
+/* MVP_DISABLED: import { ReportModal } from '@/components/anything/ReportModal'; */
 import { RecommendModal } from '@/components/content/RecommendModal';
 import { ShareableRatingCardPortal } from '@/components/sharing';
-import { useHasReported } from '@/lib/hooks/useReportAnything';
+/* MVP_DISABLED: import { useHasReported } from '@/lib/hooks/useReportAnything'; */
 import type { ShareableRatingCardProps } from '@/components/sharing';
 
 const TYPE_LABELS: Record<ContentType, string> = {
@@ -38,18 +38,18 @@ const TYPE_LABELS: Record<ContentType, string> = {
     book: '📚 Libro',
     game: '🎮 Videojuego',
     music: '🎵 Música',
-    podcast: '🎙️ Podcast',
-    anything: '✨ Anything',
+    /* MVP_DISABLED: podcast: '🎙️ Podcast', */
+    /* MVP_DISABLED: anything: '✨ Anything', */
 };
 
 export default function ContentDetailsScreen() {
     const { type, id, isAlbum } = useLocalSearchParams<{ type: ContentType; id: string; isAlbum?: string }>();
     const router = useRouter();
-    const [showReportModal, setShowReportModal] = useState(false);
+    /* MVP_DISABLED: const [showReportModal, setShowReportModal] = useState(false); */
     const [showRecommendModal, setShowRecommendModal] = useState(false);
 
     const { data: item, isLoading, isError, refetch } = useContentDetails(type as ContentType, id);
-    const { data: hasReported } = useHasReported(type === 'anything' ? id : '');
+    /* MVP_DISABLED: const { data: hasReported } = useHasReported(type === 'anything' ? id : ''); */
     const { data: userRating } = useExistingRating(type as ContentType, id);
     const { data: profile } = useProfile();
 
@@ -293,6 +293,8 @@ export default function ContentDetailsScreen() {
                         </Animated.View>
                     ) : null}
 
+                    {/*
+                    MVP_DISABLED: item.type === 'anything' report button
                     {item.type === 'anything' && (
                         <TouchableOpacity
                             onPress={() => setShowReportModal(true)}
@@ -309,9 +311,12 @@ export default function ContentDetailsScreen() {
                             </Text>
                         </TouchableOpacity>
                     )}
+                    */}
                 </View>
             </ScrollView>
 
+            {/*
+            MVP_DISABLED: ReportModal (anything-exclusive)
             {item.type === 'anything' && (
                 <ReportModal
                     visible={showReportModal}
@@ -320,6 +325,7 @@ export default function ContentDetailsScreen() {
                     itemTitle={item.title}
                 />
             )}
+            */}
 
             <RecommendModal
                 visible={showRecommendModal}

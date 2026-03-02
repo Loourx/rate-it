@@ -23,8 +23,8 @@ const FOLDERS: { type: ContentType; label: string }[] = [
     { type: 'book', label: 'Libros' },
     { type: 'game', label: 'Juegos' },
     { type: 'music', label: 'Música' },
-    { type: 'podcast', label: 'Podcasts' },
-    { type: 'anything', label: 'Anything' },
+    /* MVP_DISABLED: { type: 'podcast', label: 'Podcasts' }, */
+    /* MVP_DISABLED: { type: 'anything', label: 'Anything' }, */
 ];
 
 function FolderCard({
@@ -92,7 +92,7 @@ const S = StyleSheet.create({
         width: CARD_W,
     },
     lastCard: {
-        // Center the 7th (odd) card
+        // Center the 5th (odd) card — Music
         alignSelf: 'center',
         marginLeft: (CARD_W + GRID_GAP) / 2,
     },

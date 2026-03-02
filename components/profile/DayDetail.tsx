@@ -20,8 +20,8 @@ const CATEGORY_LABEL: Record<ContentType, string> = {
     book: 'Libros',
     game: 'Juegos',
     music: 'Música',
-    podcast: 'Podcasts',
-    anything: 'Anything',
+    /* MVP_DISABLED: podcast: 'Podcasts', */
+    /* MVP_DISABLED: anything: 'Anything', */
 };
 
 interface Props {

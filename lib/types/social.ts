@@ -29,7 +29,7 @@ export interface FeedItem {
     userAvatarUrl: string | null;
     userDisplayName: string | null;
     contentId: string;
-    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
+    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' /* MVP_DISABLED: | 'podcast' | 'anything' */;
     contentTitle: string;
     contentImageUrl: string | null;
     score: number;

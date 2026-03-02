@@ -11,8 +11,8 @@ const CATEGORY_COLORS: Record<ContentType, string> = {
     book: COLORS.categoryBook,
     game: COLORS.categoryGame,
     music: COLORS.categoryMusic,
-    podcast: COLORS.categoryPodcast,
-    anything: COLORS.categoryAnything,
+    /* MVP_DISABLED: podcast: COLORS.categoryPodcast, */
+    /* MVP_DISABLED: anything: COLORS.categoryAnything, */
 };
 
 const CATEGORY_FADED: Record<ContentType, string> = {
@@ -21,8 +21,8 @@ const CATEGORY_FADED: Record<ContentType, string> = {
     book: COLORS.categoryBookFaded,
     game: COLORS.categoryGameFaded,
     music: COLORS.categoryMusicFaded,
-    podcast: COLORS.categoryPodcastFaded,
-    anything: COLORS.categoryAnythingFaded,
+    /* MVP_DISABLED: podcast: COLORS.categoryPodcastFaded, */
+    /* MVP_DISABLED: anything: COLORS.categoryAnythingFaded, */
 };
 
 const CATEGORY_LABELS: Record<ContentType, string> = {
@@ -31,8 +31,8 @@ const CATEGORY_LABELS: Record<ContentType, string> = {
     book: 'Libro',
     game: 'Videojuego',
     music: 'Música',
-    podcast: 'Podcast',
-    anything: 'Anything',
+    /* MVP_DISABLED: podcast: 'Podcast', */
+    /* MVP_DISABLED: anything: 'Anything', */
 };
 
 function getSubtitle(content: AllContent): string | undefined {
@@ -47,10 +47,8 @@ function getSubtitle(content: AllContent): string | undefined {
             return content.year ?? content.developer;
         case 'music':
             return content.artist;
-        case 'podcast':
-            return content.publisher;
-        case 'anything':
-            return content.categoryTag;
+        /* MVP_DISABLED: case 'podcast': return content.publisher; */
+        /* MVP_DISABLED: case 'anything': return content.categoryTag; */
     }
 }
 

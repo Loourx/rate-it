@@ -37,6 +37,7 @@ const STATUS_OPTIONS: Record<ContentType, StatusOption[]> = {
         { value: 'done', label: 'Escuchada' },
         { value: 'want', label: 'Quiero escuchar' },
     ],
+    /* MVP_DISABLED:
     podcast: [
         { value: 'doing', label: 'Escuchando' },
         { value: 'done', label: 'Escuchado' },
@@ -48,6 +49,7 @@ const STATUS_OPTIONS: Record<ContentType, StatusOption[]> = {
         { value: 'want', label: 'Quiero probar' },
         { value: 'doing', label: 'Usando' },
     ],
+    */
 };
 
 interface StatusPickerProps {

@@ -24,8 +24,8 @@ const CATEGORY_META: {
     { type: 'book', label: 'Libros', emoji: '📚' },
     { type: 'game', label: 'Juegos', emoji: '🎮' },
     { type: 'music', label: 'Música', emoji: '🎵' },
-    { type: 'podcast', label: 'Podcasts', emoji: '🎙️' },
-    { type: 'anything', label: 'Anything', emoji: '✨' },
+    /* MVP_DISABLED: { type: 'podcast', label: 'Podcasts', emoji: '🎙️' }, */
+    /* MVP_DISABLED: { type: 'anything', label: 'Anything', emoji: '✨' }, */
 ];
 
 /* -------------------------------------------------- */

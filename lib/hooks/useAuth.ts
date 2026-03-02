@@ -1,9 +1,11 @@
 import { supabase } from '../supabase';
 import { useAuthStore } from '../stores/authStore';
 import { makeRedirectUri } from 'expo-auth-session';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function useAuth() {
     const { session, user, isLoading } = useAuthStore();
+    const queryClient = useQueryClient();
 
     const signInWithGoogle = async () => {
         try {
@@ -41,6 +43,7 @@ export function useAuth() {
 
     const signOut = async () => {
         try {
+            queryClient.clear();
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
             useAuthStore.getState().setSession(null);

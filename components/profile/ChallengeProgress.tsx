@@ -9,6 +9,7 @@ import { fetchChallenges, countProgress } from '@/lib/api/challenges';
 import { useCelebration } from '@/lib/hooks/useCelebration';
 import { ActivityRing } from './ActivityRing';
 import type { AnnualChallenge } from '@/lib/types/database';
+import type { ContentType } from '@/lib/types/content';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -67,7 +68,7 @@ export function ChallengeProgress({ userId, isOwnProfile = false, onCelebrate }:
     const progressResults = useQueries({
         queries: challenges.map((c) => ({
             queryKey: ['challenge-progress', userId, YEAR, c.categoryFilter] as const,
-            queryFn: () => countProgress(userId!, YEAR, c.categoryFilter),
+            queryFn: () => countProgress(userId!, YEAR, c.categoryFilter as (ContentType | 'all')),
             enabled: !!userId,
             staleTime: 1000 * 60 * 5,
         })),

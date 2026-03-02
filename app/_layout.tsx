@@ -44,10 +44,20 @@ function RootLayoutNav() {
     useEffect(() => {
 
         // Check active session on mount
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-            setLoading(false);
-        });
+        const initSession = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                setSession(session);
+            } catch (err) {
+                // Sesión no recuperable — tratar como usuario no autenticado
+                console.error('[Auth] Error recovering session:', err);
+                setSession(null);
+            } finally {
+                setLoading(false);  // SIEMPRE se ejecuta
+            }
+        };
+        initSession();
 
         // Listen for auth changes
         const {

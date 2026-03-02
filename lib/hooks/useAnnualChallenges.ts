@@ -1,6 +1,7 @@
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { AnnualChallenge } from '@/lib/types/database';
+import type { ContentType } from '@/lib/types/content';
 import {
     fetchChallenges,
     createChallenge as apiCreateChallenge,
@@ -28,7 +29,7 @@ export function useAnnualChallenges(year: number = new Date().getFullYear()) {
     const progressResults = useQueries({
         queries: challenges.map((c) => ({
             queryKey: ['challenge-progress', userId, year, c.categoryFilter] as const,
-            queryFn: () => countProgress(userId, year, c.categoryFilter),
+            queryFn: () => countProgress(userId, year, c.categoryFilter as (ContentType | 'all')),
             enabled: !!userId,
         })),
     });

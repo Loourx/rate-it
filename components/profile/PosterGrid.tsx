@@ -17,7 +17,7 @@ interface PosterCellProps {
 }
 
 function PosterCell({ item, cellWidth, cellHeight, onPress }: PosterCellProps) {
-    const categoryColor = getCategoryColor(item.contentType);
+    const categoryColor = getCategoryColor(item.contentType as ContentType);
 
     return (
         <TouchableOpacity

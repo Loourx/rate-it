@@ -8,14 +8,14 @@ import type { ContentType } from '@/lib/types/content';
 
 type CategoryFilter = AnnualChallenge['categoryFilter'];
 
-const CATEGORY_META: Record<CategoryFilter, { emoji: string; label: string }> = {
+const CATEGORY_META: Partial<Record<CategoryFilter, { emoji: string; label: string }>> = {
     movie: { emoji: '🎬', label: 'Películas' },
     series: { emoji: '📺', label: 'Series' },
     book: { emoji: '📚', label: 'Libros' },
     game: { emoji: '🎮', label: 'Videojuegos' },
     music: { emoji: '🎵', label: 'Música' },
-    podcast: { emoji: '🎙️', label: 'Podcasts' },
-    anything: { emoji: '✨', label: 'Cualquier cosa' },
+    /* MVP_DISABLED: podcast: { emoji: '🎙️', label: 'Podcasts' }, */
+    /* MVP_DISABLED: anything: { emoji: '✨', label: 'Cualquier cosa' }, */
     all: { emoji: '🌟', label: 'Todas' },
 };
 
@@ -49,7 +49,7 @@ export function ChallengeList({
     return (
         <View style={{ gap: SPACING.sm }}>
             {challenges.map((c) => {
-                const meta = CATEGORY_META[c.categoryFilter];
+                const meta = CATEGORY_META[c.categoryFilter] ?? { emoji: '📋', label: c.categoryFilter };
                 const color = getColor(c.categoryFilter);
                 const faded = getFaded(c.categoryFilter);
                 const progress = getProgress(c.id);

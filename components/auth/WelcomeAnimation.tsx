@@ -29,8 +29,8 @@ const CATEGORY_SHAPES: { emoji: string; color: string }[] = [
     { emoji: '📚', color: COLORS.categoryBook },
     { emoji: '🎮', color: COLORS.categoryGame },
     { emoji: '🎵', color: COLORS.categoryMusic },
-    { emoji: '🎙️', color: COLORS.categoryPodcast },
-    { emoji: '✨', color: COLORS.categoryAnything },
+    /* MVP_DISABLED: { emoji: '🎙️', color: COLORS.categoryPodcast }, */
+    /* MVP_DISABLED: { emoji: '✨', color: COLORS.categoryAnything }, */
 ];
 
 function seededRandom(seed: number): number {

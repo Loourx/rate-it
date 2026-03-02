@@ -24,8 +24,8 @@ const CATEGORY_META: Record<string, { label: string; color: string }> = {
     book: { label: 'Libros', color: COLORS.categoryBook },
     game: { label: 'Juegos', color: COLORS.categoryGame },
     music: { label: 'Música', color: COLORS.categoryMusic },
-    podcast: { label: 'Podcasts', color: COLORS.categoryPodcast },
-    anything: { label: 'Anything', color: COLORS.categoryAnything },
+    /* MVP_DISABLED: podcast: { label: 'Podcasts', color: COLORS.categoryPodcast }, */
+    /* MVP_DISABLED: anything: { label: 'Anything', color: COLORS.categoryAnything }, */
 };
 
 function SkeletonCard() {

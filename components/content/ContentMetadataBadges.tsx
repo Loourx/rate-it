@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Movie, Series, Book, Game, Music, Podcast, Anything, AllContent } from '@/lib/types/content';
+import { Movie, Series, Book, Game, Music /* MVP_DISABLED: , Podcast, Anything */, AllContent } from '@/lib/types/content';
 import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
 import { FONT } from '@/lib/utils/typography';
 import { Ionicons } from '@expo/vector-icons';
@@ -208,21 +208,21 @@ function getLayeredMetadata(item: AllContent): LayeredMetadata {
             }
             return { identityParts: parts, platforms: [], genres: [] };
         }
-        case 'podcast': {
+        /* MVP_DISABLED: case 'podcast': {
             const pod = item as Podcast;
             const parts: string[] = [];
             if (pod.publisher) parts.push(pod.publisher);
             if (pod.genre) parts.push(pod.genre);
             if (pod.episodeCount) parts.push(`${pod.episodeCount} episodios`);
             return { identityParts: parts, platforms: [], genres: [] };
-        }
-        case 'anything': {
+        } */
+        /* MVP_DISABLED: case 'anything': {
             const a = item as Anything;
             const parts: string[] = [];
             if (a.categoryTag) parts.push(a.categoryTag);
             if (a.creatorUsername) parts.push(`@${a.creatorUsername}`);
             return { identityParts: parts, platforms: [], genres: [] };
-        }
+        } */
         default:
             return { identityParts: [], platforms: [], genres: [] };
     }

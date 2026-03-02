@@ -25,12 +25,12 @@ const FALL_DURATION  = 3000; // ms total window
 
 const PALETTE = [
     COLORS.categoryMovie,    // #FF595E coral
-    COLORS.categorySeries,   // #8939F7 purple
-    COLORS.categoryBook,     // #8AC926 green
-    COLORS.categoryGame,     // #1982C4 blue
-    COLORS.categoryMusic,    // #FFCA3A yellow
-    COLORS.categoryPodcast,  // #5BC0EB sky
-    '#FF9F1C',               // orange accent (replaces near-white anything)
+    COLORS.categorySeries,   // #1982C4 blue
+    COLORS.categoryBook,     // #FFCA3A yellow
+    COLORS.categoryGame,     // #8939F7 purple
+    COLORS.categoryMusic,    // #8AC926 green
+    /* MVP_DISABLED: COLORS.categoryPodcast, */  // was sky blue
+    '#FF9F1C',               // orange accent
 ];
 
 // ─── Particle ─────────────────────────────────────────────────────────────────

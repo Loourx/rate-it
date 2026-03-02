@@ -1,4 +1,5 @@
-export type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
+export type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music';
+/* MVP_DISABLED: | 'podcast' | 'anything' */
 
 export type ContentStatus = 'want' | 'doing' | 'done' | 'dropped';
 
@@ -93,4 +94,4 @@ export interface Anything extends BaseContent {
     categoryTag?: string;
 }
 
-export type AllContent = Movie | Series | Book | Game | Music | Podcast | Anything;
+export type AllContent = Movie | Series | Book | Game | Music /* MVP_DISABLED: | Podcast | Anything */;

@@ -1,7 +1,7 @@
 /**
  * Utility functions for deriving display-ready metadata from BaseContent.
  */
-import type { BaseContent, Movie, Series, Book, Game, Music, Podcast, Anything } from '@/lib/types/content';
+import type { BaseContent, Movie, Series, Book, Game, Music /* MVP_DISABLED: , Podcast, Anything */ } from '@/lib/types/content';
 
 export function formatRuntime(minutes: number): string {
     const h = Math.floor(minutes / 60);
@@ -38,8 +38,8 @@ export function getSubtitle(item: BaseContent): string {
         case 'book': return (item as Book).author || 'Libro';
         case 'game': return (item as Game).year ?? 'Videojuego';
         case 'music': return (item as Music).artist || 'Música';
-        case 'podcast': return (item as Podcast).publisher || 'Podcast';
-        case 'anything': return (item as Anything).categoryTag ?? 'Anything';
+        /* MVP_DISABLED: case 'podcast': return (item as Podcast).publisher || 'Podcast'; */
+        /* MVP_DISABLED: case 'anything': return (item as Anything).categoryTag ?? 'Anything'; */
         default: return 'Contenido';
     }
 }
