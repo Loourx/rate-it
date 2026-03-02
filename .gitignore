@@ -41,3 +41,7 @@ yarn-error.log*
 # generated native folders
 /ios
 /android
+
+# custom exclusions
+*.log
+audit_raw.txt
