@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -6,6 +6,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { ChallengeList } from '@/components/challenges/ChallengeList';
 import { ChallengeForm } from '@/components/challenges/ChallengeForm';
 import { useAnnualChallenges } from '@/lib/hooks/useAnnualChallenges';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
 import { TYPO } from '@/lib/utils/typography';
 import type { AnnualChallenge } from '@/lib/types/database';
@@ -22,6 +23,7 @@ export default function ChallengeScreen() {
     } = useAnnualChallenges(YEAR);
 
     const usedCategories = new Set(challenges.map((c) => c.categoryFilter));
+    const scrollRef = useRef<ScrollView>(null);
 
     const handleCreate = (category: CategoryFilter, target: number, onSuccess: () => void) => {
         createChallenge({ targetCount: target, categoryFilter: category }, { onSuccess });
@@ -57,18 +59,29 @@ export default function ChallengeScreen() {
                 }}
             />
             <ScrollView
+                ref={scrollRef}
                 style={S.root}
                 contentContainerStyle={S.content}
                 keyboardShouldPersistTaps="handled"
             >
                 <Text style={S.sectionTitle}>Retos activos</Text>
-                <ChallengeList
-                    challenges={challenges}
-                    getProgress={getProgress}
-                    getPercentage={getPercentage}
-                    isCompleted={isCompleted}
-                    onDelete={deleteChallenge}
-                />
+                {challenges.length === 0 ? (
+                    <EmptyState
+                        icon="trophy-outline"
+                        title="¿Cuánto puedes consumir este año?"
+                        description="Crea un reto personal: 50 películas, 20 libros, 100 de todo... tú decides la meta."
+                        actionLabel="Crear mi reto"
+                        onAction={() => scrollRef.current?.scrollToEnd({ animated: true })}
+                    />
+                ) : (
+                    <ChallengeList
+                        challenges={challenges}
+                        getProgress={getProgress}
+                        getPercentage={getPercentage}
+                        isCompleted={isCompleted}
+                        onDelete={deleteChallenge}
+                    />
+                )}
                 <ChallengeForm
                     usedCategories={usedCategories}
                     isCreating={isCreating}
