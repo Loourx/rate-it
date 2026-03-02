@@ -13,6 +13,7 @@ import { GlobalTrendingCard } from '@/components/content/GlobalTrendingCard';
 import { SuggestionCard } from '@/components/content/SuggestionCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { ContentType, BaseContent } from '@/lib/types/content';
 import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
@@ -20,7 +21,7 @@ import { TYPO, FONT } from '@/lib/utils/typography';
 
 export default function HomeScreen() {
     const router = useRouter();
-    const { data: ratings, isLoading, refetch } = useRatings();
+    const { data: ratings, isLoading, error, refetch } = useRatings();
     const { data: trending, isLoading: loadingTrending } = useFriendsTrending();
     const hasTrending = trending && trending.length > 0;
     const isFollowingNobody = trending !== undefined && trending.length === 0;
@@ -75,14 +76,25 @@ export default function HomeScreen() {
         );
     }
 
+    if (error) {
+        return (
+            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+                <ErrorState
+                    message="No pudimos cargar tu biblioteca"
+                    onRetry={refetch}
+                />
+            </SafeAreaView>
+        );
+    }
+
     if (!hasRatings) {
         return (
             <SafeAreaView className="flex-1 bg-background" edges={['top']}>
                 <EmptyState
-                    icon="star-outline"
-                    title="¡Bienvenido a Rate-it!"
-                    description="Empieza a valorar contenido para ver tu colección aquí."
-                    actionLabel="Buscar contenido"
+                    icon="compass-outline"
+                    title="Tu aventura cultural empieza aquí"
+                    description="Busca una película, serie o libro y dile al mundo qué te pareció."
+                    actionLabel="Explorar contenido"
                     onAction={() => router.push('/(tabs)/search')}
                 />
             </SafeAreaView>
