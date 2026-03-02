@@ -36,5 +36,7 @@ export function useRatings() {
             return data as Rating[];
         },
         enabled: !!userId,
+        staleTime: 2 * 60 * 1000, // 2 min
+        gcTime: 5 * 60 * 1000, // 5 min
     });
 }

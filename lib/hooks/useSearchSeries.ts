@@ -7,5 +7,6 @@ export function useSearchSeries(query: string) {
         queryFn: () => searchSeries(query),
         enabled: query.length >= 3,
         staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 min
     });
 }

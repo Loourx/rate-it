@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import DraggableFlatList, {
     RenderItemParams,
     ScaleDecorator,
@@ -72,9 +73,10 @@ export function PinnedItemsManager({ items, pinnedMode }: PinnedItemsManagerProp
                                 <View>
                                     {item.contentImageUrl ? (
                                         <Image
-                                            source={{ uri: item.contentImageUrl }}
+                                            source={item.contentImageUrl}
                                             style={S.poster}
-                                            resizeMode="cover"
+                                            contentFit="cover"
+                                            cachePolicy="memory-disk"
                                         />
                                     ) : (
                                         <View style={[S.poster, S.placeholder]}>
@@ -89,9 +91,10 @@ export function PinnedItemsManager({ items, pinnedMode }: PinnedItemsManagerProp
                             <View>
                                 {item.contentImageUrl ? (
                                     <Image
-                                        source={{ uri: item.contentImageUrl }}
+                                        source={item.contentImageUrl}
                                         style={S.poster}
-                                        resizeMode="cover"
+                                        contentFit="cover"
+                                        cachePolicy="memory-disk"
                                     />
                                 ) : (
                                     <View style={[S.poster, S.placeholder]}>

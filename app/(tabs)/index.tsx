@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, RefreshControl, Image, Pressable, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, Pressable, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';

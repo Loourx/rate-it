@@ -9,6 +9,8 @@ export function useDiary(userId: string | undefined, year: number, month: number
         queryKey: ['diary', userId, year, month],
         queryFn: () => fetchDiaryMonth(userId!, year, month),
         enabled: !!userId,
+        staleTime: 2 * 60 * 1000, // 2 min
+        gcTime: 5 * 60 * 1000, // 5 min
         // Keep previous month's data while new month loads
         placeholderData: (prev) => prev,
     });

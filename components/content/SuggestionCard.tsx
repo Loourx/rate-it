@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { getCategoryColor, COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
@@ -17,7 +18,7 @@ export function SuggestionCard({
     return (
         <TouchableOpacity style={S.card} onPress={onPress} activeOpacity={0.8}>
             {item.contentImageUrl ? (
-                <Image source={{ uri: item.contentImageUrl }} style={S.poster} />
+                <Image source={item.contentImageUrl} style={S.poster} contentFit="cover" cachePolicy="memory-disk" />
             ) : (
                 <View style={[S.poster, S.posterFallback]}>
                     <Text style={S.posterLetter}>{item.contentTitle.charAt(0)}</Text>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import { AllContent, ContentType } from '@/lib/types/content';
 import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
@@ -66,7 +67,7 @@ export function RatingHeader({ content }: RatingHeaderProps) {
     return (
         <View style={styles.container}>
             {content.imageUrl ? (
-                <Image source={{ uri: content.imageUrl }} style={styles.poster} />
+                <Image source={content.imageUrl} style={styles.poster} contentFit="cover" cachePolicy="memory-disk" />
             ) : (
                 <View style={[styles.poster, styles.posterFallback]}>
                     <Text style={styles.posterFallbackText}>

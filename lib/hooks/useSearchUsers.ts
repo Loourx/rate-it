@@ -6,6 +6,7 @@ export function useSearchUsers(query: string) {
         queryKey: ['search', 'users', query],
         queryFn: () => searchUsers(query),
         enabled: query.length >= 2, // 2 chars mínimo (usernames cortos)
-        staleTime: 1000 * 60 * 2,  // 2 minutos
+        staleTime: 1000 * 60 * 5, // 5 minutos
+        gcTime: 10 * 60 * 1000, // 10 min
     });
 }

@@ -31,6 +31,7 @@ export function useCommunityScore(contentType: ContentType, contentId: string) {
             return { averageScore: avg, totalRatings: rows.length };
         },
         staleTime: 1000 * 60 * 5, // 5 minutos — los scores comunitarios no cambian al segundo
+        gcTime: 10 * 60 * 1000, // 10 min
         enabled: !!contentType && !!contentId,
     });
 }

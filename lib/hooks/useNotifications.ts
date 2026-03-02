@@ -11,7 +11,8 @@ export function useNotifications() {
         queryKey: ['notifications', userId],
         queryFn: () => getNotifications(userId!),
         enabled: !!userId,
-        staleTime: 1 * 60 * 1000, // 1 minuto
+        staleTime: 30 * 1000, // 30 sec
+        gcTime: 2 * 60 * 1000, // 2 min
     });
 
     const markAsReadMutation = useMutation({

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, Pressable, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -79,9 +80,10 @@ export function BookmarkBoxExpanded({
                         >
                             {item.contentImageUrl ? (
                                 <Image
-                                    source={{ uri: item.contentImageUrl }}
+                                    source={item.contentImageUrl}
                                     style={[S.poster, { borderColor: color + '40' }]}
-                                    resizeMode="cover"
+                                    contentFit="cover"
+                                    cachePolicy="memory-disk"
                                 />
                             ) : (
                                 <View style={[S.poster, S.posterPlaceholder, { borderColor: color + '40' }]}>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, Pressable } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import type { Notification } from '@/lib/types/notifications';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
@@ -8,7 +9,7 @@ interface NotificationItemProps {
     notification: Notification;
 }
 
-export default function NotificationItem({ notification }: NotificationItemProps) {
+export default React.memo(function NotificationItem({ notification }: NotificationItemProps) {
     const handlePress = () => {
         if (notification.type === 'follow') {
             router.push(`/profile/${notification.actorId}`);
@@ -64,9 +65,8 @@ export default function NotificationItem({ notification }: NotificationItemProps
             } active:opacity-70`}
         >
             <Image
-                source={{
-                    uri: notification.actorAvatarUrl || 'https://i.pravatar.cc/150',
-                }}
+                source={notification.actorAvatarUrl || 'https://i.pravatar.cc/150'}
+                cachePolicy="memory-disk"
                 className="w-12 h-12 rounded-full"
             />
 
@@ -82,4 +82,4 @@ export default function NotificationItem({ notification }: NotificationItemProps
             )}
         </Pressable>
     );
-}
+});

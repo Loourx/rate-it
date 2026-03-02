@@ -64,6 +64,8 @@ export function usePinnedItems(userId: string | undefined) {
             }));
         },
         enabled: !!userId,
+        staleTime: 5 * 60 * 1000, // 5 min
+        gcTime: 10 * 60 * 1000, // 10 min
     });
 }
 
@@ -99,6 +101,8 @@ export function useIsPinned(contentType: ContentType, contentId: string) {
             };
         },
         enabled: !!userId && !!contentId,
+        staleTime: 5 * 60 * 1000, // 5 min
+        gcTime: 10 * 60 * 1000, // 10 min
     });
 }
 
@@ -192,6 +196,8 @@ export function useTopRatedItems(userId: string | undefined) {
             }));
         },
         enabled: !!userId,
+        staleTime: 5 * 60 * 1000, // 5 min
+        gcTime: 10 * 60 * 1000, // 10 min
     });
 }
 

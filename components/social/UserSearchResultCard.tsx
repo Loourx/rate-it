@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -36,7 +37,7 @@ export function UserSearchResultCard({ user, currentUserId }: Props) {
         >
             {/* Avatar */}
             {user.avatarUrl ? (
-                <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+                <Image source={user.avatarUrl} style={styles.avatar} cachePolicy="memory-disk" />
             ) : (
                 <View style={[styles.avatar, styles.avatarFallback]}>
                     <Text style={styles.avatarInitial}>{initials}</Text>

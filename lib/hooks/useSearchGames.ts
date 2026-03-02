@@ -7,5 +7,6 @@ export function useSearchGames(query: string) {
         queryFn: () => searchGames(query),
         enabled: query.trim().length >= 3,
         staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 min
     });
 }

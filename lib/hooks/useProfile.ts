@@ -39,6 +39,8 @@ export function useProfile() {
             } as Profile;
         },
         enabled: !!userId,
+        staleTime: 10 * 60 * 1000, // 10 min — user's own profile
+        gcTime: 15 * 60 * 1000, // 15 min
     });
 }
 

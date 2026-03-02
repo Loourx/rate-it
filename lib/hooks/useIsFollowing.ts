@@ -13,5 +13,6 @@ export function useIsFollowing(targetUserId: string | undefined) {
         queryFn: () => checkIfFollowing(currentUserId!, targetUserId!),
         enabled: !!currentUserId && !!targetUserId,
         staleTime: STALE_TIME,
+        gcTime: 5 * 60 * 1000, // 5 min
     });
 }

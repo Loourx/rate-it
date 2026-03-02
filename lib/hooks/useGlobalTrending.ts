@@ -14,6 +14,8 @@ export interface GlobalTrendingItem {
 export function useGlobalTrending() {
     return useQuery<GlobalTrendingItem[]>({
         queryKey: ['global-trending'],
+        staleTime: 5 * 60 * 1000, // 5 min
+        gcTime: 10 * 60 * 1000, // 10 min
         queryFn: async () => {
             const thirtyDaysAgo = new Date(
                 Date.now() - 30 * 24 * 60 * 60 * 1000,
@@ -74,6 +76,5 @@ export function useGlobalTrending() {
                 .sort((a, b) => b.ratingCount - a.ratingCount)
                 .slice(0, 15);
         },
-        staleTime: 1000 * 60 * 10, // 10 minutos — cambia menos que el trending de amigos
     });
 }

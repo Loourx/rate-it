@@ -1,6 +1,7 @@
 import React from 'react';
 import type { DimensionValue } from 'react-native';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 
 export interface ShareableProfileCardProps {
     username: string;
@@ -86,7 +87,7 @@ export function ShareableProfileCard(props: ShareableProfileCardProps): React.Re
             {/* ── 1. HEADER ── */}
             <View style={styles.header}>
                 {props.avatarUrl ? (
-                    <Image source={{ uri: props.avatarUrl }} style={styles.avatar} />
+                    <Image source={props.avatarUrl} style={styles.avatar} contentFit="cover" cachePolicy="memory-disk" />
                 ) : (
                     <View style={styles.avatarFallback}>
                         <Text style={styles.avatarLetter}>{initial}</Text>
@@ -125,9 +126,10 @@ export function ShareableProfileCard(props: ShareableProfileCardProps): React.Re
                             <View key={i} style={styles.poster}>
                                 {item.imageUrl ? (
                                     <Image
-                                        source={{ uri: item.imageUrl }}
+                                        source={item.imageUrl}
                                         style={styles.posterImage}
-                                        resizeMode="cover"
+                                        contentFit="cover"
+                                        cachePolicy="memory-disk"
                                     />
                                 ) : (
                                     <View style={[

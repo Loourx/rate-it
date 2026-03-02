@@ -26,6 +26,8 @@ export function useProfileStats(overrideUserId?: string) {
 
     return useQuery<ProfileStats>({
         queryKey: ['profile-stats', userId],
+        staleTime: 5 * 60 * 1000, // 5 min
+        gcTime: 10 * 60 * 1000, // 10 min
         queryFn: async () => {
             if (!userId) {
                 return { totalRatings: 0, averageScore: 0, byCategory: [] };

@@ -68,7 +68,7 @@ export default function ChallengeScreen() {
                 {challenges.length === 0 ? (
                     <EmptyState
                         icon="trophy-outline"
-                        title="¿Cuánto puedes consumir este año?"
+                        title="¿Cuánto puedes disfrutar este año?"
                         description="Crea un reto personal: 50 películas, 20 libros, 100 de todo... tú decides la meta."
                         actionLabel="Crear mi reto"
                         onAction={() => scrollRef.current?.scrollToEnd({ animated: true })}

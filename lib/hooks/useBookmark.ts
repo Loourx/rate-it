@@ -55,6 +55,8 @@ export function useIsBookmarked(contentType: ContentType, contentId: string) {
             return (count ?? 0) > 0;
         },
         enabled: !!userId,
+        staleTime: 2 * 60 * 1000, // 2 min
+        gcTime: 5 * 60 * 1000, // 5 min
     });
 }
 

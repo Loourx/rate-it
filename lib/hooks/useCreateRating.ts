@@ -93,6 +93,8 @@ export function useExistingRating(contentType: ContentType, contentId: string) {
             return data;
         },
         enabled: !!userId,
+        staleTime: 2 * 60 * 1000, // 2 min
+        gcTime: 5 * 60 * 1000, // 5 min
     });
 }
 

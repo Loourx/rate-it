@@ -1,8 +1,9 @@
 import React from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    Image, StyleSheet,
+    StyleSheet,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +17,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { COLORS, SPACING } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import type { FollowerProfile } from '@/lib/types/social';
+
+// Fixed height for user row items: 44px avatar + 16px padding (top/bottom) + 1px border
+const USER_ROW_HEIGHT = 72;
 
 function UserRow({ profile }: { profile: FollowerProfile }) {
     const { session } = useAuthStore();
@@ -34,7 +38,7 @@ function UserRow({ profile }: { profile: FollowerProfile }) {
             activeOpacity={0.7}
         >
             {profile.avatarUrl ? (
-                <Image source={{ uri: profile.avatarUrl }} style={styles.avatar} />
+                <Image source={profile.avatarUrl} style={styles.avatar} cachePolicy="memory-disk" />
             ) : (
                 <View style={[styles.avatar, styles.avatarFallback]}>
                     <Text style={styles.avatarInitial}>{initials}</Text>
@@ -69,6 +73,14 @@ export default function FollowersScreen() {
     const { userId } = useLocalSearchParams<{ userId: string }>();
     const insets = useSafeAreaInsets();
     const { data: followers, isLoading, isError, refetch } = useFollowers(userId);
+
+    const renderItem = ({ item }: { item: FollowerProfile }) => <UserRow profile={item} />;
+
+    const getItemLayout = (_data: unknown, index: number) => ({
+        length: USER_ROW_HEIGHT,
+        offset: USER_ROW_HEIGHT * index,
+        index,
+    });
 
     if (isLoading) {
         return (
@@ -123,10 +135,12 @@ export default function FollowersScreen() {
                 <Text style={styles.title}>Seguidores</Text>
                 <View style={styles.backBtn} />
             </View>
+
+            {/* Followers List */}
             <FlatList
                 data={followers ?? []}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <UserRow profile={item} />}
+                renderItem={renderItem}
                 ListEmptyComponent={
                     <EmptyState
                         icon="person-add-outline"
@@ -137,6 +151,11 @@ export default function FollowersScreen() {
                     />
                 }
                 contentContainerStyle={followers?.length === 0 ? { flex: 1 } : undefined}
+                windowSize={5}
+                maxToRenderPerBatch={10}
+                initialNumToRender={8}
+                removeClippedSubviews
+                getItemLayout={getItemLayout}
             />
         </View>
     );

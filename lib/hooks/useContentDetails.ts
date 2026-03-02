@@ -10,6 +10,8 @@ import { ContentType, Movie, Series, Book, Game, Music, Podcast, Anything } from
 export function useContentDetails(type: ContentType, id: string, isAlbum?: boolean) {
     return useQuery({
         queryKey: ['content', type, id, isAlbum],
+        staleTime: 10 * 60 * 1000, // 10 min
+        gcTime: 20 * 60 * 1000, // 20 min
         queryFn: async () => {
             if (type === 'movie') {
                 return getMovieDetails(id);
@@ -49,6 +51,5 @@ export function useContentDetails(type: ContentType, id: string, isAlbum?: boole
             throw new Error(`Content type ${type} is not supported by the current APIs`);
         },
         enabled: !!id && (type === 'movie' || type === 'series' || type === 'book' || type === 'game' || type === 'music' || type === 'podcast' || type === 'anything'),
-        staleTime: 1000 * 60 * 30, // 30 minutes
     });
 }

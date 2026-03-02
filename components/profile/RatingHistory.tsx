@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -55,7 +56,7 @@ function HistoryItem({ item, onPress }: { item: RatingHistoryItem; onPress: () =
         <TouchableOpacity onPress={onPress} style={styles.item} activeOpacity={0.7}>
             <View style={styles.thumbContainer}>
                 {item.contentImageUrl ? (
-                    <Image source={{ uri: item.contentImageUrl }} style={styles.thumb} resizeMode="cover" />
+                    <Image source={item.contentImageUrl} style={styles.thumb} contentFit="cover" cachePolicy="memory-disk" />
                 ) : (
                     <View style={[styles.thumb, styles.thumbPlaceholder]}>
                         <Text style={styles.thumbLetter}>{item.contentTitle.charAt(0)}</Text>

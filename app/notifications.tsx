@@ -8,6 +8,9 @@ import { NotificationSkeletonList } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 
+// Fixed height for notification items: padding (12px top + 12px bottom) + content height (~48px)
+const NOTIFICATION_ITEM_HEIGHT = 72;
+
 export default function NotificationsScreen() {
     const {
         data: notifications,
@@ -73,6 +76,15 @@ export default function NotificationsScreen() {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => <NotificationItem notification={item} />}
                 contentContainerStyle={{ paddingVertical: 8 }}
+                windowSize={5}
+                maxToRenderPerBatch={10}
+                initialNumToRender={8}
+                removeClippedSubviews
+                getItemLayout={(_data, index) => ({
+                    length: NOTIFICATION_ITEM_HEIGHT,
+                    offset: NOTIFICATION_ITEM_HEIGHT * index,
+                    index,
+                })}
             />
         </Screen>
     );

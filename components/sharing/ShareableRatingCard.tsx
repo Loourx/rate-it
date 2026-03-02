@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 
 export interface ShareableRatingCardProps {
     contentTitle: string;
@@ -84,8 +85,10 @@ export function ShareableRatingCard(props: ShareableRatingCardProps): React.Reac
             <View style={[styles.header, { height: headerH, backgroundColor: fadedColor }]}>
                 {props.userAvatarUrl ? (
                     <Image
-                        source={{ uri: props.userAvatarUrl }}
+                        source={props.userAvatarUrl}
                         style={styles.avatar}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
                     />
                 ) : (
                     <View style={[styles.avatarFallback, { backgroundColor: accentColor }]}>
@@ -108,9 +111,10 @@ export function ShareableRatingCard(props: ShareableRatingCardProps): React.Reac
             <View style={[styles.poster, { height: posterH }]}>
                 {props.contentImageUrl ? (
                     <Image
-                        source={{ uri: props.contentImageUrl }}
+                        source={props.contentImageUrl}
                         style={styles.posterImage}
-                        resizeMode="cover"
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
                     />
                 ) : (
                     <View style={[styles.posterFallback, { backgroundColor: fadedColor }]}>

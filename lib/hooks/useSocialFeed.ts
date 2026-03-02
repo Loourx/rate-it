@@ -19,6 +19,7 @@ export function useSocialFeed() {
             return allPages.length;
         },
         enabled: !!userId,
-        staleTime: 2 * 60 * 1000, // 2 minutos (feed dinámico)
+        staleTime: 60 * 1000, // 1 min (feed dinámico)
+        gcTime: 5 * 60 * 1000, // 5 min
     });
 }

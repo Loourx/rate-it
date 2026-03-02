@@ -72,6 +72,10 @@ export function ContentList({
             )}
             contentContainerClassName="p-4 pb-24"
             showsVerticalScrollIndicator={false}
+            windowSize={5}
+            maxToRenderPerBatch={10}
+            initialNumToRender={8}
+            removeClippedSubviews
         />
     );
 }

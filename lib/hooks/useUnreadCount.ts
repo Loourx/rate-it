@@ -11,6 +11,7 @@ export function useUnreadCount() {
         queryFn: () => getUnreadCount(userId!),
         enabled: !!userId,
         staleTime: 30 * 1000, // 30 segundos
+        gcTime: 2 * 60 * 1000, // 2 min
         refetchInterval: 60 * 1000, // Refetch cada 60 segundos
     });
 }

@@ -97,5 +97,6 @@ export function useFriendsTrending() {
         },
         enabled: !!userId,
         staleTime: 1000 * 60 * 5,
+        gcTime: 10 * 60 * 1000, // 10 min
     });
 }

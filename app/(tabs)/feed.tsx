@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, FlatList, RefreshControl, ActivityIndicator, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSocialFeed } from '@/lib/hooks/useSocialFeed';
@@ -11,6 +11,7 @@ import { COLORS, SPACING } from '@/lib/utils/constants';
 import { TYPO } from '@/lib/utils/typography';
 import { FilterBar, type ActivityFilter } from '@/components/feed/FilterBar';
 import type { ContentType } from '@/lib/types/content';
+import type { FeedItem } from '@/lib/types/social';
 
 export default function FeedScreen() {
     const insets = useSafeAreaInsets();
@@ -34,6 +35,20 @@ export default function FeedScreen() {
         if (activityFilter === 'reviewed' && !item.reviewText) return false;
         return true;
     });
+
+    const handleRefresh = useCallback(() => {
+        refetch();
+    }, [refetch]);
+
+    const handleEndReached = useCallback(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    const renderItem = useCallback(({ item, index }: { item: FeedItem; index: number }) => (
+        <FeedCard item={item} index={index} />
+    ), []);
 
     // ESTADO 1: Loading inicial
     if (isLoading) {
@@ -83,14 +98,8 @@ export default function FeedScreen() {
             <FlatList
                 data={filteredItems}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item, index }) => (
-                    <FeedCard item={item} index={index} />
-                )}
-                onEndReached={() => {
-                    if (hasNextPage && !isFetchingNextPage) {
-                        fetchNextPage();
-                    }
-                }}
+                renderItem={renderItem}
+                onEndReached={handleEndReached}
                 onEndReachedThreshold={0.5}
                 ListEmptyComponent={
                     <View style={{ padding: SPACING.xl, alignItems: 'center' }}>
@@ -112,11 +121,15 @@ export default function FeedScreen() {
                 refreshControl={
                     <RefreshControl
                         refreshing={false}
-                        onRefresh={refetch}
+                        onRefresh={handleRefresh}
                         tintColor={COLORS.textPrimary}
                     />
                 }
                 contentContainerStyle={{ paddingVertical: 16 }}
+                windowSize={5}
+                maxToRenderPerBatch={10}
+                initialNumToRender={8}
+                removeClippedSubviews
             />
         </View>
     );

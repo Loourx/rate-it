@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { FeedItem } from '@/lib/types/social';
@@ -16,7 +17,7 @@ interface FeedCardProps {
     index: number;
 }
 
-export default function FeedCard({ item, index }: FeedCardProps) {
+export default React.memo(function FeedCard({ item, index }: FeedCardProps) {
     const categoryColor = getCategoryColor(item.contentType);
     const animationDelay = index < 8 ? index * 50 : 0;
     const { isLiked, toggle, isMutating } = useRatingLike(item.id);
@@ -82,9 +83,9 @@ export default function FeedCard({ item, index }: FeedCardProps) {
             </Card.Container>
         </Animated.View>
     );
-}
+});
 
-function FeedHeader({ item }: { item: FeedItem }) {
+const FeedHeader = React.memo(function FeedHeader({ item }: { item: FeedItem }) {
     const navigateToProfile = useCallback(
         () => router.push(`/profile/${item.userId}`),
         [item.userId],
@@ -107,9 +108,9 @@ function FeedHeader({ item }: { item: FeedItem }) {
             </View>
         </View>
     );
-}
+});
 
-function ReviewSection({ text, hasSpoiler }: { text: string; hasSpoiler?: boolean }) {
+const ReviewSection = React.memo(function ReviewSection({ text, hasSpoiler }: { text: string; hasSpoiler?: boolean }) {
     return (
         <View style={S.review}>
             {hasSpoiler && (
@@ -120,7 +121,7 @@ function ReviewSection({ text, hasSpoiler }: { text: string; hasSpoiler?: boolea
             <Text style={S.reviewText} numberOfLines={3}>{text}</Text>
         </View>
     );
-}
+});
 
 const S = StyleSheet.create({
     wrapper: { marginHorizontal: 16, marginBottom: 12 },

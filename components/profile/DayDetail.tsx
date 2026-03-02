@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -41,9 +42,10 @@ function MiniCard({ item }: { item: DiaryDay }) {
         <TouchableOpacity onPress={handlePress} activeOpacity={0.75} style={styles.card}>
             {item.contentImageUrl ? (
                 <Image
-                    source={{ uri: item.contentImageUrl }}
+                    source={item.contentImageUrl}
                     style={styles.poster}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
                 />
             ) : (
                 <View style={[styles.poster, styles.posterPlaceholder]}>

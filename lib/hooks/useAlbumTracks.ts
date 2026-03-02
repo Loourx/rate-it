@@ -11,5 +11,6 @@ export function useAlbumTracks(collectionId: string | undefined) {
         queryFn: () => getAlbumTracks(collectionId!),
         enabled: !!collectionId,
         staleTime: 1000 * 60 * 60, // 1 hour — tracklists don't change
+        gcTime: 2 * 60 * 60 * 1000, // 2 hours
     });
 }

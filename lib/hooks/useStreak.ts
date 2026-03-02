@@ -76,6 +76,7 @@ export function useStreak(userId: string | undefined) {
             return { streakDays: calcStreak(timestamps) };
         },
         staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000, // 10 min
         // Return 0 immediately while fetching so the profile never stalls.
         placeholderData: { streakDays: 0 },
     });

@@ -69,5 +69,7 @@ export function useRatingHistory(overrideUserId?: string) {
         initialPageParam: 0,
         getNextPageParam: (lastPage) => lastPage.nextOffset,
         enabled: !!userId,
+        staleTime: 2 * 60 * 1000, // 2 min
+        gcTime: 5 * 60 * 1000, // 5 min
     });
 }

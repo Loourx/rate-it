@@ -27,5 +27,6 @@ export function useFollowCounts(userId: string | undefined) {
         },
         enabled: !!userId,
         staleTime: 1000 * 30, // 30s — los conteos de follow cambian con frecuencia
+        gcTime: 2 * 60 * 1000, // 2 min
     });
 }

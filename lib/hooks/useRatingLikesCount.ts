@@ -6,5 +6,6 @@ export function useRatingLikesCount(ratingId: string) {
         queryKey: ['ratingLikesCount', ratingId],
         queryFn: () => getRatingLikesCount(ratingId),
         staleTime: 3 * 60 * 1000, // 3 minutos
+        gcTime: 5 * 60 * 1000, // 5 min
     });
 }
