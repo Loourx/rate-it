@@ -11,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useOnboardingFlag } from '@/lib/hooks/useOnboardingFlag';
 import {
     SpaceGrotesk_300Light,
     SpaceGrotesk_400Regular,
@@ -27,6 +28,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
     const { session, isLoading, setSession, setLoading } = useAuthStore();
+    const { isLoaded: onboardingLoaded, hasCompleted: onboardingDone } = useOnboardingFlag();
     const segments = useSegments();
     const router = useRouter();
 
@@ -59,26 +61,33 @@ function RootLayoutNav() {
     }, []);
 
     useEffect(() => {
-        if (fontsLoaded && !isLoading) {
+        if (fontsLoaded && !isLoading && onboardingLoaded) {
             SplashScreen.hideAsync();
         }
-    }, [fontsLoaded, isLoading]);
+    }, [fontsLoaded, isLoading, onboardingLoaded]);
 
     useEffect(() => {
-        if (isLoading || !fontsLoaded) return;
+        if (isLoading || !fontsLoaded || !onboardingLoaded) return;
 
-        const inAuthGroup = segments[0] === "(auth)";
+        const inUnauthGroup =
+            segments[0] === '(auth)' || segments[0] === '(onboarding)';
 
-        if (!session && !inAuthGroup) {
-            // Redirect to the login page if not signed in and not inside the auth group
-            router.replace("/(auth)/login");
-        } else if (session && inAuthGroup) {
-            // Redirect to the home page if signed in and trying to access the login page
-            router.replace("/(tabs)");
+        if (session) {
+            // Authenticated — always go to tabs (covers auth + onboarding redirects)
+            if (inUnauthGroup) router.replace('/(tabs)');
+        } else {
+            // Not authenticated
+            if (!inUnauthGroup) {
+                if (!onboardingDone) {
+                    router.replace('/(onboarding)');
+                } else {
+                    router.replace('/(auth)/login');
+                }
+            }
         }
-    }, [session, isLoading, segments, fontsLoaded]);
+    }, [session, isLoading, segments, fontsLoaded, onboardingLoaded, onboardingDone]);
 
-    if (!fontsLoaded || isLoading) {
+    if (!fontsLoaded || isLoading || !onboardingLoaded) {
         return (
             <View className="flex-1 items-center justify-center bg-[#121212]">
                 <ActivityIndicator size="large" color="#64D2FF" />
@@ -102,6 +111,7 @@ function RootLayoutNav() {
             >
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
                 <Stack.Screen name="profile/edit" options={{ headerShown: true, title: 'Editar perfil' }} />
                 <Stack.Screen name="+not-found" />
             </Stack>
