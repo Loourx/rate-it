@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import { View } from 'react-native';
-import ViewShot, { captureRef } from 'react-native-view-shot';
+import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
 export interface UseShareProfileReturn {
     shareProfile: () => Promise<void>;
     isCapturing: boolean;
-    profileCardRef: React.RefObject<ViewShot>;
+    profileCardRef: React.RefObject<View | null>;
     toastVisible: boolean;
     toastMessage: string;
     toastType: 'success' | 'error' | 'info';
@@ -19,7 +19,7 @@ export function useShareProfile(): UseShareProfileReturn {
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
 
-    const profileCardRef = useRef<ViewShot>(null);
+    const profileCardRef = useRef<View>(null);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
         setToastMessage(message);

@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import { View } from 'react-native';
-import ViewShot, { captureRef } from 'react-native-view-shot';
+import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
 export interface UseShareChallengeReturn {
     shareChallenge: () => Promise<void>;
     isCapturingChallenge: boolean;
-    challengeCardRef: React.RefObject<ViewShot>;
+    challengeCardRef: React.RefObject<View | null>;
     toastVisible: boolean;
     toastMessage: string;
     toastType: 'success' | 'error' | 'info';
@@ -19,7 +19,7 @@ export function useShareChallenge(): UseShareChallengeReturn {
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
 
-    const challengeCardRef = useRef<ViewShot>(null);
+    const challengeCardRef = useRef<View>(null);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
         setToastMessage(message);

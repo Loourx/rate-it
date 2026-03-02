@@ -7,9 +7,9 @@ import { COLORS, SPACING } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import { fetchChallenges, countProgress } from '@/lib/api/challenges';
 import { useCelebration } from '@/lib/hooks/useCelebration';
+import type { ContentType } from '@/lib/types/content';
 import { ActivityRing } from './ActivityRing';
 import type { AnnualChallenge } from '@/lib/types/database';
-import type { ContentType } from '@/lib/types/content';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -5,8 +5,8 @@ import type { ShareableRatingCardProps } from './ShareableRatingCard';
 
 interface ShareableRatingCardPortalProps {
     cardProps: Omit<ShareableRatingCardProps, 'format'>;
-    storiesRef: React.RefObject<View>;
-    feedRef: React.RefObject<View>;
+    storiesRef: React.RefObject<View | null>;
+    feedRef: React.RefObject<View | null>;
 }
 
 /**

@@ -78,7 +78,11 @@ export interface TrackRating {
     score: number;
 }
 
-export interface Podcast extends BaseContent {
+/* MVP_DISABLED: Podcast and Anything interfaces kept for future reactivation */
+export interface Podcast /* MVP_DISABLED: extends BaseContent */ {
+    id: string;
+    title: string;
+    imageUrl: string | null;
     type: 'podcast';
     publisher?: string;
     description?: string;
@@ -86,7 +90,10 @@ export interface Podcast extends BaseContent {
     episodeCount?: number;
 }
 
-export interface Anything extends BaseContent {
+export interface Anything /* MVP_DISABLED: extends BaseContent */ {
+    id: string;
+    title: string;
+    imageUrl: string | null;
     type: 'anything';
     createdBy: string;
     creatorUsername?: string; // Resolved from profiles join

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions } from '
 import { Image } from 'expo-image';
 import { COLORS, SPACING, RADIUS, formatScore, getCategoryColor } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
+import type { ContentType } from '@/lib/types/content';
 import type { RatingHistoryItem } from '@/lib/hooks/useRatingHistory';
 
 const SCREEN_W = Dimensions.get('window').width;

@@ -152,7 +152,7 @@ export default function RateHubScreen() {
                     )}
                 </View>
 
-                {/* CTA Crear Anything */}
+                {/* MVP_DISABLED: CTA Crear Anything
                 <TouchableOpacity
                     style={S.anythingCta}
                     onPress={() => router.push('/anything/create')}
@@ -166,6 +166,7 @@ export default function RateHubScreen() {
                     <Text style={S.anythingCtaText}>Crear un Anything</Text>
                     <Ionicons name="chevron-forward" size={18} color={COLORS.textTertiary} />
                 </TouchableOpacity>
+                */}
             </ScrollView>
         </SafeAreaView>
     );
@@ -255,6 +256,7 @@ const S = StyleSheet.create({
         ...TYPO.h4,
         fontFamily: FONT.bold,
     },
+    /* MVP_DISABLED: anythingCta styles
     anythingCta: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -273,4 +275,5 @@ const S = StyleSheet.create({
         fontFamily: FONT.bold,
         color: COLORS.categoryAnything,
     },
+    */
 });

@@ -1,3 +1,4 @@
+/* MVP_DISABLED: This screen is frozen for MVP — Anything feature disabled. */
 import React, { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity,
@@ -12,6 +13,10 @@ import { Toast } from '@/components/ui/Toast';
 import { COLORS, SPACING, RADIUS, RATING } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import { useCreateAnythingItem } from '@/lib/hooks/useCreateAnythingItem';
+import type { ContentType } from '@/lib/types/content';
+
+/* MVP_DISABLED: fallback color for Anything (was COLORS.categoryAnything = '#FFFBFF') */
+const ANYTHING_COLOR = '#FFFBFF';
 
 const MAX_TITLE = 200;
 const MAX_TAG = 50;
@@ -96,7 +101,7 @@ export default function CreateAnythingScreen() {
                             </>
                         ) : (
                             <View style={s.imagePlaceholder}>
-                                <Ionicons name="camera-outline" size={36} color={COLORS.categoryAnything} />
+                                <Ionicons name="camera-outline" size={36} color={ANYTHING_COLOR} />
                                 <Text style={s.imagePlaceholderText}>Añadir foto</Text>
                                 <Text style={s.imagePlaceholderHint}>Opcional</Text>
                             </View>
@@ -162,7 +167,7 @@ export default function CreateAnythingScreen() {
                                     style={s.addRatingBtn}
                                     activeOpacity={0.7}
                                 >
-                                    <Ionicons name="star-outline" size={20} color={COLORS.categoryAnything} />
+                                    <Ionicons name="star-outline" size={20} color={ANYTHING_COLOR} />
                                     <Text style={s.addRatingText}>Añadir valoración</Text>
                                 </TouchableOpacity>
                             ) : (
@@ -170,7 +175,7 @@ export default function CreateAnythingScreen() {
                                     <RatingSlider
                                         value={score ?? RATING.DEFAULT}
                                         onValueChange={setScore}
-                                        category="anything"
+                                        category={'music' as ContentType /* MVP_DISABLED: was 'anything' */}
                                         size="interactive"
                                     />
                                     <TouchableOpacity
@@ -193,7 +198,7 @@ export default function CreateAnythingScreen() {
                     <TouchableOpacity
                         onPress={handleCreate}
                         disabled={!isValid || isPending}
-                        style={[s.submitBtn, { backgroundColor: isValid ? COLORS.categoryAnything : COLORS.surfaceElevated, opacity: isPending ? 0.7 : 1 }]}
+                        style={[s.submitBtn, { backgroundColor: isValid ? ANYTHING_COLOR : COLORS.surfaceElevated, opacity: isPending ? 0.7 : 1 }]}
                         activeOpacity={0.85}
                     >
                         {isPending ? (
@@ -235,7 +240,7 @@ const s = StyleSheet.create({
     },
     imageOverlayText: { color: COLORS.textPrimary, ...TYPO.caption, fontFamily: FONT.semibold },
     imagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 },
-    imagePlaceholderText: { color: COLORS.categoryAnything, ...TYPO.bodySmall, fontFamily: FONT.semibold },
+    imagePlaceholderText: { color: ANYTHING_COLOR, ...TYPO.bodySmall, fontFamily: FONT.semibold },
     imagePlaceholderHint: { color: COLORS.textTertiary, ...TYPO.caption },
     removeBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
@@ -260,10 +265,10 @@ const s = StyleSheet.create({
         padding: SPACING.base,
         marginTop: SPACING.sm,
         borderWidth: 1,
-        borderColor: 'rgba(255, 251, 255, 0.1)',
+        borderColor: 'rgba(255, 251, 255, 0.1)' /* MVP_DISABLED: was ANYTHING_COLOR + opacity */,
     },
     addRatingText: {
-        color: COLORS.categoryAnything,
+        color: ANYTHING_COLOR,
         ...TYPO.body,
         fontWeight: '600',
         marginLeft: SPACING.sm,

@@ -24,8 +24,8 @@ const CATEGORY_LABELS: Record<ContentType, string> = {
     book: 'Libros',
     game: 'Juegos',
     music: 'Música',
-    podcast: 'Podcasts',
-    anything: 'Anything',
+    /* MVP_DISABLED: podcast: 'Podcasts', */
+    /* MVP_DISABLED: anything: 'Anything', */
 };
 
 export default function SearchScreen() {
@@ -42,8 +42,8 @@ export default function SearchScreen() {
     const gameQuery = useSearchGames(activeFolder === 'game' ? query : '');
     const musicAlbumsQuery = useSearchMusic(activeFolder === 'music' && musicSearchType === 'albums' ? query : '');
     const musicTracksQuery = useSearchMusicTracks(activeFolder === 'music' && musicSearchType === 'tracks' ? query : '');
-    const podcastQuery = useSearchPodcasts(activeFolder === 'podcast' ? query : '');
-    const anythingQuery = useSearchAnything(activeFolder === 'anything' ? query : '');
+    /* MVP_DISABLED: const podcastQuery = useSearchPodcasts(activeFolder === 'podcast' ? query : ''); */
+    /* MVP_DISABLED: const anythingQuery = useSearchAnything(activeFolder === 'anything' ? query : ''); */
 
     const getCurrentQuery = () => {
         if (!activeFolder) return { data: undefined, isLoading: false, isError: false };
@@ -53,8 +53,8 @@ export default function SearchScreen() {
             case 'book': return bookQuery;
             case 'game': return gameQuery;
             case 'music': return musicSearchType === 'albums' ? musicAlbumsQuery : musicTracksQuery;
-            case 'podcast': return podcastQuery;
-            case 'anything': return anythingQuery;
+            /* MVP_DISABLED: case 'podcast': return podcastQuery; */
+            /* MVP_DISABLED: case 'anything': return anythingQuery; */
             default: return movieQuery;
         }
     };
@@ -90,7 +90,8 @@ export default function SearchScreen() {
         Keyboard.dismiss();
     };
 
-    const showCreateAnythingButton = activeFolder === 'anything' && query.length >= 3 && (!data || data.length === 0);
+    /* MVP_DISABLED: const showCreateAnythingButton = activeFolder === 'anything' && query.length >= 3 && (!data || data.length === 0); */
+    const showCreateAnythingButton = false;
 
     // ── Folder grid view (no folder selected) ──
     if (!activeFolder) {
@@ -187,10 +188,11 @@ export default function SearchScreen() {
                             }
                             emptyMessage={
                                 query.length < 3
-                                    ? 'Busca películas, series, libros, juegos, música o podcasts.'
-                                    : activeFolder === 'anything'
-                                        ? '¿No existe? ¡Créalo tú mismo!'
-                                        : 'Prueba con otro título o revisa la ortografía.'
+                                    ? 'Busca películas, series, libros, juegos o música.'
+                                    : 'Prueba con otro título o revisa la ortografía.'
+                                /* MVP_DISABLED: : activeFolder === 'anything'
+                                    ? '¿No existe? ¡Créalo tú mismo!'
+                                    : 'Prueba con otro título o revisa la ortografía.' */
                             }
                             emptyActionLabel={showCreateAnythingButton ? 'Crear Anything' : undefined}
                             onEmptyAction={showCreateAnythingButton ? handleCreateAnything : undefined}

@@ -360,7 +360,7 @@ function getDescription(item: ReturnType<typeof useContentDetails>['data']): str
     switch (item.type) {
         case 'movie': return (item as Movie).overview;
         case 'series': return (item as Series).overview;
-        case 'anything': return (item as Anything).description;
+        /* MVP_DISABLED: case 'anything': return (item as Anything).description; */
         default:
             return (item as { description?: string }).description;
     }

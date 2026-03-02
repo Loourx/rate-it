@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, useWindowDimensions, StyleProp, ViewStyle } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, StyleProp, ViewStyle, DimensionValue } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -11,8 +11,8 @@ import Animated, {
 import { COLORS } from '@/lib/utils/constants';
 
 interface SkeletonProps {
-    width?: number | string;
-    height?: number | string;
+    width?: DimensionValue;
+    height?: DimensionValue;
     borderRadius?: number;
     className?: string; // tailwind classes
     style?: StyleProp<ViewStyle>;

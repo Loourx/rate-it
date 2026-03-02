@@ -7,7 +7,7 @@ const ALL_BUCKETS = Array.from({ length: 21 }, (_, i) =>
     Math.round(i * 0.5 * 10) / 10,
 ); // [0, 0.5, 1, 1.5, ..., 10]
 
-type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
+type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' /* MVP_DISABLED: | 'podcast' | 'anything' */;
 
 const CATEGORY_COLORS: Record<DbContentType, string> = {
     movie:    COLORS.categoryMovie,
@@ -15,8 +15,8 @@ const CATEGORY_COLORS: Record<DbContentType, string> = {
     book:     COLORS.categoryBook,
     game:     COLORS.categoryGame,
     music:    COLORS.categoryMusic,
-    podcast:  COLORS.categoryPodcast,
-    anything: COLORS.categoryAnything,
+    /* MVP_DISABLED: podcast:  COLORS.categoryPodcast, */
+    /* MVP_DISABLED: anything: COLORS.categoryAnything, */
 };
 
 export interface CategorySegment {
