@@ -177,12 +177,20 @@ export default function SearchScreen() {
                             isLoading={isLoading && query.length >= 3}
                             isError={isError}
                             onItemPress={handleItemPress}
+                            emptyIcon={
+                                query.length < 3 ? 'sparkles-outline' : 'search-outline'
+                            }
+                            emptyTitle={
+                                query.length < 3
+                                    ? '¿Qué has visto últimamente?'
+                                    : 'Nada por aquí...'
+                            }
                             emptyMessage={
                                 query.length < 3
-                                    ? 'Escribe al menos 3 caracteres'
+                                    ? 'Busca películas, series, libros, juegos, música o podcasts.'
                                     : activeFolder === 'anything'
                                         ? '¿No existe? ¡Créalo tú mismo!'
-                                        : 'No se encontraron resultados'
+                                        : 'Prueba con otro título o revisa la ortografía.'
                             }
                             emptyActionLabel={showCreateAnythingButton ? 'Crear Anything' : undefined}
                             onEmptyAction={showCreateAnythingButton ? handleCreateAnything : undefined}

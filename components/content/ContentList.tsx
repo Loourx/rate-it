@@ -5,12 +5,15 @@ import { ContentCard } from './ContentCard';
 import { Skeleton } from '../ui/Skeleton';
 import { ErrorState } from '../ui/ErrorState';
 import { EmptyState } from '../ui/EmptyState';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ContentListProps {
     data: BaseContent[] | undefined;
     isLoading: boolean;
     isError: boolean;
     onItemPress: (content: BaseContent) => void;
+    emptyIcon?: keyof typeof Ionicons.glyphMap;
+    emptyTitle?: string;
     emptyMessage?: string;
     emptyActionLabel?: string;
     onEmptyAction?: () => void;
@@ -21,6 +24,8 @@ export function ContentList({
     isLoading,
     isError,
     onItemPress,
+    emptyIcon = 'search-outline',
+    emptyTitle = 'Sin resultados',
     emptyMessage = 'No se encontraron resultados',
     emptyActionLabel,
     onEmptyAction,
@@ -49,8 +54,8 @@ export function ContentList({
     if (!data || data.length === 0) {
         return (
             <EmptyState
-                icon="search-outline"
-                title="Sin resultados"
+                icon={emptyIcon}
+                title={emptyTitle}
                 description={emptyMessage}
                 actionLabel={emptyActionLabel}
                 onAction={onEmptyAction}
