@@ -62,9 +62,9 @@ export default function FeedScreen() {
             <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
                 <EmptyState
                     icon="people-outline"
-                    title="Tu feed está vacío"
-                    description="Sigue a otros usuarios para ver su actividad aquí"
-                    actionLabel="Buscar usuarios"
+                    title="Aquí aparecerá lo que opinan tus amigos"
+                    description="Sigue a personas que admiras y descubre qué están viendo, leyendo y jugando."
+                    actionLabel="Buscar personas"
                     onAction={() => router.push('/(tabs)/search')}
                 />
             </View>
@@ -95,7 +95,7 @@ export default function FeedScreen() {
                 ListEmptyComponent={
                     <View style={{ padding: SPACING.xl, alignItems: 'center' }}>
                         <Text style={{ color: COLORS.textSecondary, ...TYPO.bodySmall }}>
-                            Sin resultados con estos filtros
+                            Ningún amigo coincide con estos filtros. Prueba otra combinación.
                         </Text>
                     </View>
                 }
