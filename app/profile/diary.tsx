@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useDiary } from '@/lib/hooks/useDiary';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { CalendarDay } from '@/components/profile/CalendarDay';
 import { DayDetail } from '@/components/profile/DayDetail';
 import { COLORS, SPACING } from '@/lib/utils/constants';
@@ -68,7 +70,7 @@ export default function DiaryScreen() {
     const [month, setMonth] = useState(today.getMonth() + 1); // 1-based
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-    const { data: diaryMap, isLoading } = useDiary(userId, year, month);
+    const { data: diaryMap, isLoading, isError, refetch } = useDiary(userId, year, month);
 
     const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -100,6 +102,24 @@ export default function DiaryScreen() {
     const selectedRatings: DiaryDay[] = selectedDate
         ? (diaryMap?.get(selectedDate) ?? [])
         : [];
+
+    if (isError) {
+        return (
+            <SafeAreaView style={styles.safe} edges={['top']}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Mi Diario 📅</Text>
+                    <View style={styles.backBtn} />
+                </View>
+                <ErrorState
+                    message="No pudimos cargar tu diario"
+                    onRetry={refetch}
+                />
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.safe} edges={['top']}>
@@ -173,9 +193,14 @@ export default function DiaryScreen() {
 
                 {/* Empty month message */}
                 {!isLoading && diaryMap?.size === 0 && (
-                    <View style={styles.emptyContainer}>
-                        <Ionicons name="calendar-outline" size={40} color={COLORS.textTertiary} />
-                        <Text style={styles.emptyText}>Sin ratings este mes</Text>
+                    <View style={{ minHeight: 280 }}>
+                        <EmptyState
+                            icon="calendar-outline"
+                            title="Tu diario cultural empieza hoy"
+                            description="Cada vez que puntúes algo, aparecerá aquí como un recuerdo."
+                            actionLabel="Puntuar algo"
+                            onAction={() => router.push('/(tabs)/search')}
+                        />
                     </View>
                 )}
             </ScrollView>
