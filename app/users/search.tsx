@@ -91,8 +91,8 @@ export default function UserSearchScreen() {
             return (
                 <View style={styles.emptyContainer}>
                     <Ionicons name="person-outline" size={52} color={COLORS.textTertiary} />
-                    <Text style={styles.emptyTitle}>Sin resultados</Text>
-                    <Text style={styles.emptyText}>No encontramos usuarios con ese nombre.</Text>
+                    <Text style={styles.emptyTitle}>No encontramos a nadie con ese nombre</Text>
+                    <Text style={styles.emptyText}>Prueba con otro nombre de usuario.</Text>
                 </View>
             );
         }
