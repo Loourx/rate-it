@@ -2,14 +2,16 @@ import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import type { Notification } from '@/lib/types/notifications';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
 
 interface NotificationItemProps {
     notification: Notification;
+    index?: number;
 }
 
-export default React.memo(function NotificationItem({ notification }: NotificationItemProps) {
+export default React.memo(function NotificationItem({ notification, index = 0 }: NotificationItemProps) {
     const handlePress = () => {
         if (notification.type === 'follow') {
             router.push(`/profile/${notification.actorId}`);
@@ -58,6 +60,13 @@ export default React.memo(function NotificationItem({ notification }: Notificati
     };
 
     return (
+        <Animated.View
+            entering={FadeInDown
+                .delay(Math.min(index, 9) * 40)
+                .duration(250)
+                .reduceMotion(ReduceMotion.System)
+            }
+        >
         <Pressable
             onPress={handlePress}
             className={`flex-row items-center px-4 py-3 ${
@@ -81,5 +90,6 @@ export default React.memo(function NotificationItem({ notification }: Notificati
                 <View className="w-2 h-2 rounded-full bg-link" />
             )}
         </Pressable>
+        </Animated.View>
     );
 });

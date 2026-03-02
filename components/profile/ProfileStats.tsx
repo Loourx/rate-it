@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { useFollowCounts } from '@/lib/hooks/useFollowCounts';
 import Animated, {
+    Easing,
     useAnimatedStyle,
     useReducedMotion,
     useSharedValue,
@@ -82,7 +83,19 @@ function SkeletonBar() {
 
 function CategoryRow({ stat, maxCount }: { stat: CategoryStat; maxCount: number }) {
     const meta = CATEGORY_META[stat.type] ?? { emoji: '❓', label: stat.type, color: COLORS.textTertiary };
-    const barWidth = maxCount > 0 ? (stat.count / maxCount) * 100 : 0;
+    const barTarget = maxCount > 0 ? (stat.count / maxCount) * 100 : 0;
+    const reducedMotion = useReducedMotion();
+    const progress = useSharedValue(0);
+
+    React.useEffect(() => {
+        progress.value = reducedMotion
+            ? withTiming(barTarget, { duration: 0 })
+            : withTiming(barTarget, { duration: 600, easing: Easing.out(Easing.quad) });
+    }, [barTarget, reducedMotion, progress]);
+
+    const barStyle = useAnimatedStyle(() => ({
+        width: `${progress.value}%`,
+    }));
 
     return (
         <View style={styles.categoryRow}>
@@ -90,8 +103,8 @@ function CategoryRow({ stat, maxCount }: { stat: CategoryStat; maxCount: number 
             <Text style={styles.categoryLabel}>{meta.label}</Text>
             <Text style={styles.categoryCount}>{stat.count}</Text>
             <View style={styles.barTrack}>
-                <View
-                    style={[styles.barFill, { width: `${barWidth}%`, backgroundColor: meta.color }]}
+                <Animated.View
+                    style={[styles.barFill, { backgroundColor: meta.color }, barStyle]}
                 />
             </View>
         </View>

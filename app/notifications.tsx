@@ -74,7 +74,9 @@ export default function NotificationsScreen() {
             <FlatList
                 data={notifications}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <NotificationItem notification={item} />}
+                renderItem={({ item, index }) => (
+                    <NotificationItem notification={item} index={index} />
+                )}
                 contentContainerStyle={{ paddingVertical: 8 }}
                 windowSize={5}
                 maxToRenderPerBatch={10}

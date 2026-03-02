@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import Animated, {
     FadeInDown,
@@ -99,9 +100,7 @@ export default function ContentDetailsScreen() {
         pinScale.value = withSpring(1.3, { damping: 6, stiffness: 200 }, () => {
             pinScale.value = withSpring(1);
         });
-        void import('expo-haptics').then(({ impactAsync, ImpactFeedbackStyle }) =>
-            impactAsync(ImpactFeedbackStyle.Light),
-        );
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         if (pinnedItem) {
             unpinItem.mutate(pinnedItem.id);
         } else {
@@ -145,6 +144,7 @@ export default function ContentDetailsScreen() {
     } = useShareRating({ cardProps });
 
     const handleShare = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         Alert.alert(
             'Compartir valoración',
             'Elige el formato de la tarjeta:',

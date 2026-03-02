@@ -3,12 +3,18 @@ import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'rea
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+} from 'react-native-reanimated';
 import { useIsFollowing } from '@/lib/hooks/useIsFollowing';
 import { useFollow } from '@/lib/hooks/useFollow';
 import { COLORS, SPACING } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import type { UserSearchResult } from '@/lib/types/social';
+
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 interface Props {
     user: UserSearchResult;
@@ -20,8 +26,15 @@ export function UserSearchResultCard({ user, currentUserId }: Props) {
     const followMutation = useFollow(user.id);
     const initials = user.username.charAt(0).toUpperCase();
 
-    const handleFollowPress = async () => {
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const followScale = useSharedValue(1);
+    const followAnimStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: followScale.value }],
+    }));
+
+    const handleFollowPress = () => {
+        followScale.value = withSpring(1.1, { damping: 10, stiffness: 300 }, () => {
+            followScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+        });
         followMutation.mutate(isFollowing ?? false);
     };
 
@@ -58,8 +71,8 @@ export function UserSearchResultCard({ user, currentUserId }: Props) {
             </View>
 
             {/* Follow button */}
-            <TouchableOpacity
-                style={[styles.followButton, isFollowing && styles.followingButton]}
+            <AnimatedTouchableOpacity
+                style={[styles.followButton, isFollowing && styles.followingButton, followAnimStyle]}
                 onPress={handleFollowPress}
                 disabled={followMutation.isPending}
                 activeOpacity={0.8}
@@ -71,7 +84,7 @@ export function UserSearchResultCard({ user, currentUserId }: Props) {
                         {isFollowing ? 'Siguiendo' : 'Seguir'}
                     </Text>
                 )}
-            </TouchableOpacity>
+            </AnimatedTouchableOpacity>
         </TouchableOpacity>
     );
 }

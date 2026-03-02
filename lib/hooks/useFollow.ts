@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { followUser, unfollowUser } from '@/lib/api/social';
 
@@ -17,7 +18,12 @@ export function useFollow(targetUserId: string) {
                 await followUser(targetUserId);
             }
         },
-        onSuccess: () => {
+        onSuccess: (_data, isCurrentlyFollowing) => {
+            Haptics.impactAsync(
+                isCurrentlyFollowing
+                    ? Haptics.ImpactFeedbackStyle.Light   // unfollow
+                    : Haptics.ImpactFeedbackStyle.Medium, // follow
+            );
             queryClient.invalidateQueries({ queryKey: ['followers', targetUserId] });
             queryClient.invalidateQueries({ queryKey: ['following', currentUserId] });
             queryClient.invalidateQueries({ queryKey: ['isFollowing', targetUserId] });

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useQueries } from '@tanstack/react-query';
+import * as Haptics from 'expo-haptics';
 import { COLORS, SPACING } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import { fetchChallenges, countProgress } from '@/lib/api/challenges';
@@ -36,6 +37,7 @@ function CelebrationGate({
     useEffect(() => {
         if (shouldCelebrate && !firedRef.current) {
             firedRef.current = true;
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             onCelebrate(markCelebrated);
         }
     }, [shouldCelebrate, markCelebrated, onCelebrate]);

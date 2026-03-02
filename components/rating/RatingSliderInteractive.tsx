@@ -63,6 +63,10 @@ export function RatingSliderInteractive({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }, []);
 
+    const triggerConfirmHaptic = useCallback(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }, []);
+
     const emitValue = useCallback(
         (v: number) => onValueChange(v),
         [onValueChange],
@@ -96,6 +100,7 @@ export function RatingSliderInteractive({
         })
         .onEnd(() => {
             runOnJS(bounceNumber)();
+            runOnJS(triggerConfirmHaptic)();
         });
 
     const fillStyle = useAnimatedStyle(() => ({
