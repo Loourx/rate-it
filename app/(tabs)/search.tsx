@@ -24,8 +24,8 @@ const CATEGORY_LABELS: Record<ContentType, string> = {
     book: 'Libros',
     game: 'Juegos',
     music: 'Música',
-    /* MVP_DISABLED: podcast: 'Podcasts', */
-    /* MVP_DISABLED: anything: 'Anything', */
+    podcast: 'Podcasts',
+    anything: 'Anything',
 };
 
 export default function SearchScreen() {

@@ -38,8 +38,8 @@ const TYPE_LABELS: Record<ContentType, string> = {
     book: '📚 Libro',
     game: '🎮 Videojuego',
     music: '🎵 Música',
-    /* MVP_DISABLED: podcast: '🎙️ Podcast', */
-    /* MVP_DISABLED: anything: '✨ Anything', */
+    podcast: '🎙️ Podcast',
+    anything: '✨ Anything',
 };
 
 export default function ContentDetailsScreen() {

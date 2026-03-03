@@ -30,8 +30,8 @@ const CATEGORY_COLORS: Record<ContentType, string> = {
     book: COLORS.categoryBook,
     game: COLORS.categoryGame,
     music: COLORS.categoryMusic,
-    /* MVP_DISABLED: podcast: COLORS.categoryPodcast, */
-    /* MVP_DISABLED: anything: COLORS.categoryAnything, */
+    podcast: COLORS.categoryPodcast,
+    anything: COLORS.categoryAnything,
 };
 
 const MAX_REVIEW_LENGTH = 2000;

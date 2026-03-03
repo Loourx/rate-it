@@ -79,20 +79,19 @@ function RootLayoutNav() {
     useEffect(() => {
         if (isLoading || !fontsLoaded || !onboardingLoaded) return;
 
-        const inUnauthGroup =
+        // Treat everything outside auth/onboarding as requiring a valid session (standalone screens included)
+        const isPublicRoute =
             segments[0] === '(auth)' || segments[0] === '(onboarding)';
 
         if (session) {
             // Authenticated — always go to tabs (covers auth + onboarding redirects)
-            if (inUnauthGroup) router.replace('/(tabs)');
-        } else {
-            // Not authenticated
-            if (!inUnauthGroup) {
-                if (!onboardingDone) {
-                    router.replace('/(onboarding)');
-                } else {
-                    router.replace('/(auth)/login');
-                }
+            if (isPublicRoute) router.replace('/(tabs)');
+        } else if (!isPublicRoute) {
+            // Not authenticated and currently in a protected route (includes standalone screens)
+            if (!onboardingDone) {
+                router.replace('/(onboarding)');
+            } else {
+                router.replace('/(auth)/login');
             }
         }
     }, [session, isLoading, segments, fontsLoaded, onboardingLoaded, onboardingDone]);

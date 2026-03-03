@@ -11,8 +11,8 @@ const CATEGORY_COLORS: Record<ContentType, string> = {
     book: COLORS.categoryBook,
     game: COLORS.categoryGame,
     music: COLORS.categoryMusic,
-    /* MVP_DISABLED: podcast: COLORS.categoryPodcast, */
-    /* MVP_DISABLED: anything: COLORS.categoryAnything, */
+    podcast: COLORS.categoryPodcast,
+    anything: COLORS.categoryAnything,
 };
 
 const CATEGORY_FADED: Record<ContentType, string> = {
@@ -21,8 +21,8 @@ const CATEGORY_FADED: Record<ContentType, string> = {
     book: COLORS.categoryBookFaded,
     game: COLORS.categoryGameFaded,
     music: COLORS.categoryMusicFaded,
-    /* MVP_DISABLED: podcast: COLORS.categoryPodcastFaded, */
-    /* MVP_DISABLED: anything: COLORS.categoryAnythingFaded, */
+    podcast: COLORS.categoryPodcastFaded,
+    anything: COLORS.categoryAnythingFaded,
 };
 
 const CATEGORY_LABELS: Record<ContentType, string> = {
@@ -31,8 +31,8 @@ const CATEGORY_LABELS: Record<ContentType, string> = {
     book: 'Libro',
     game: 'Videojuego',
     music: 'Música',
-    /* MVP_DISABLED: podcast: 'Podcast', */
-    /* MVP_DISABLED: anything: 'Anything', */
+    podcast: 'Podcast',
+    anything: 'Anything',
 };
 
 function getSubtitle(content: AllContent): string | undefined {

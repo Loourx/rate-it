@@ -10,8 +10,8 @@ const CATEGORY_EMOJI: Record<ContentType, string> = {
     book: '📚',
     game: '🎮',
     music: '🎵',
-    /* MVP_DISABLED: podcast: '🎙️', */
-    /* MVP_DISABLED: anything: '✨', */
+    podcast: '🎙️',
+    anything: '✨',
 };
 
 interface CardMetaProps {
