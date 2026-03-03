@@ -41,6 +41,13 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
         message: '',
         type: 'success',
     });
+    const [showCelebration, setShowCelebration] = useState(false);
+    const [savedContent, setSavedContent] = useState<{
+        score: number;
+        reviewText: string | null;
+        trackAverage: number | null;
+        episodeAverage: number | null;
+    } | null>(null);
 
     useEffect(() => {
         if (prefilled) return;
@@ -170,12 +177,13 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 });
             }
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            setToastConfig({
-                visible: true,
-                message: 'Valoración guardada ✓',
-                type: 'success',
+            setSavedContent({
+                score,
+                reviewText: review.trim() || null,
+                trackAverage,
+                episodeAverage,
             });
-            setTimeout(() => router.back(), 1200);
+            setShowCelebration(true);
         } catch (error) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             setToastConfig({
@@ -184,7 +192,11 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 type: 'error',
             });
         }
-    }, [item, score, review, privateNote, hasSpoiler, status, contentType, contentId, isAlbumContent, trackRatings, isSeriesContent, episodeRatings]);
+    }, [item, score, review, privateNote, hasSpoiler, status, contentType, contentId, isAlbumContent, trackRatings, isSeriesContent, episodeRatings, trackAverage, episodeAverage]);
+
+    const dismissCelebration = useCallback(() => {
+        setShowCelebration(false);
+    }, []);
 
     const isLoading = loadingContent || loadingExisting || loadingStatus;
     const isSaving = createRating.isPending || upsertStatus.isPending;
@@ -213,6 +225,8 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             toastConfig,
             isAlbumContent,
             isSeriesContent,
+            showCelebration,
+            savedContent,
         },
         actions: {
             setScore,
@@ -229,6 +243,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             setEpisodeScore,
             setShowEpisodeRatings,
             initializeEpisodeRatings,
+            dismissCelebration,
         },
     };
 }

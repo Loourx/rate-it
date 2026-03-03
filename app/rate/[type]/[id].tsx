@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,9 +8,10 @@ import {
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
+    Pressable,
 } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, FadeInUp } from 'react-native-reanimated';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ContentType, Series } from '@/lib/types/content';
 import { RatingSlider } from '@/components/rating/RatingSlider';
@@ -24,6 +25,7 @@ import { TYPO, FONT } from '@/lib/utils/typography';
 import { useRatingForm } from '@/lib/hooks/useRatingForm';
 import { AlbumTrackRatingSection } from '@/components/rating/AlbumTrackRatingSection';
 import { SeriesEpisodeRatingSection } from '@/components/rating/SeriesEpisodeRatingSection';
+import { ConfettiCelebration } from '@/components/profile/ConfettiCelebration';
 
 const CATEGORY_COLORS: Record<ContentType, string> = {
     movie: COLORS.categoryMovie,
@@ -47,7 +49,14 @@ export default function RateScreen() {
         contentType,
         contentId: id,
     });
+    const router = useRouter();
     const [privateNoteExpanded, setPrivateNoteExpanded] = useState(false);
+    const [celebrationDone, setCelebrationDone] = useState(false);
+
+    // Reset phase-2 flag when celebration is dismissed
+    useEffect(() => {
+        if (!state.showCelebration) setCelebrationDone(false);
+    }, [state.showCelebration]);
     const privateNoteHeight = useSharedValue(0);
     const privateNoteStyle = useAnimatedStyle(() => ({
         height: privateNoteHeight.value,
@@ -84,6 +93,41 @@ export default function RateScreen() {
                 headerStyle: { backgroundColor: COLORS.background },
                 headerTintColor: COLORS.textPrimary,
             }} />
+
+            {/* ── Celebration overlay ── */}
+            {state.showCelebration && (
+                <View style={overlayStyles.container}>
+                    <ConfettiCelebration
+                        onFinish={() => setCelebrationDone(true)}
+                    />
+                    {celebrationDone && (
+                        <Animated.View
+                            entering={FadeInUp.duration(300)}
+                            style={overlayStyles.promptBox}
+                        >
+                            <Text style={overlayStyles.promptTitle}>
+                                ¿Compartir esta valoración?
+                            </Text>
+                            <TouchableOpacity
+                                style={[overlayStyles.shareBtn, { backgroundColor: categoryColor }]}
+                                activeOpacity={0.85}
+                                onPress={() => router.replace({
+                                    pathname: '/share/[type]/[id]',
+                                    params: { type, id, fromRating: 'true' },
+                                })}
+                            >
+                                <Text style={overlayStyles.shareBtnText}>Compartir</Text>
+                            </TouchableOpacity>
+                            <Pressable
+                                onPress={() => router.back()}
+                                style={overlayStyles.skipBtn}
+                            >
+                                <Text style={overlayStyles.skipText}>Ahora no</Text>
+                            </Pressable>
+                        </Animated.View>
+                    )}
+                </View>
+            )}
             <KeyboardAvoidingView
                 style={styles.flex}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -294,4 +338,45 @@ const styles = StyleSheet.create({
     saveButton: { paddingVertical: SPACING.base, borderRadius: RADIUS.full, alignItems: 'center' },
     saveText: { color: COLORS.background, ...TYPO.h4, fontFamily: FONT.bold },
     trackAverageLabel: { ...TYPO.bodySmall, fontFamily: FONT.semibold, textAlign: 'center', paddingVertical: SPACING.sm },
+});
+
+const overlayStyles = StyleSheet.create({
+    container: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(18,18,18,0.88)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 100,
+    },
+    promptBox: {
+        backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.lg,
+        padding: SPACING.xl,
+        gap: SPACING.md,
+        alignItems: 'center',
+        width: '85%',
+    },
+    promptTitle: {
+        fontFamily: FONT.bold,
+        fontSize: 20,
+        color: COLORS.textPrimary,
+        textAlign: 'center',
+    },
+    shareBtn: {
+        width: '100%',
+        paddingVertical: SPACING.base,
+        borderRadius: RADIUS.full,
+        alignItems: 'center',
+    },
+    shareBtnText: {
+        color: COLORS.background,
+        fontFamily: FONT.bold,
+        fontSize: 16,
+    },
+    skipBtn: { paddingVertical: SPACING.md },
+    skipText: { color: COLORS.textSecondary, fontSize: 14 },
 });

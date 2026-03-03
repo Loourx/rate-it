@@ -16,6 +16,10 @@ interface CreateRatingInput {
     contentSubtype?: 'album' | 'track' | null;
     trackRatings?: TrackRatingEntry[] | null;
     episodeRatings?: EpisodeRatingEntry[] | null;
+    headline?: string | null;
+    sharePlatform?: string | null;
+    favoriteTrack?: string | null;
+    bookFormat?: 'paper' | 'digital' | 'audiobook' | null;
 }
 
 interface UpdateRatingInput {
@@ -54,6 +58,10 @@ export function useCreateRating() {
                         episode_ratings: input.episodeRatings?.length
                             ? input.episodeRatings.filter(er => er.score > 0)
                             : null,
+                        headline: input.headline ?? null,
+                        share_platform: input.sharePlatform ?? null,
+                        favorite_track: input.favoriteTrack ?? null,
+                        book_format: input.bookFormat ?? null,
                     },
                     { onConflict: 'user_id,content_type,content_id' },
                 )

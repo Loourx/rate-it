@@ -259,20 +259,19 @@ export default function ContentDetailsScreen() {
                                 </TouchableOpacity>
                             </Animated.View>
 
-                            {userRating && (
-                                <TouchableOpacity
-                                    style={[S.iconBtn, isCapturing && S.iconBtnDisabled, { borderColor: isCapturing ? COLORS.divider : color }]}
-                                    onPress={handleShare}
-                                    activeOpacity={0.7}
-                                    disabled={isCapturing}
-                                >
-                                    <Ionicons
-                                        name="share-social-outline"
-                                        size={22}
-                                        color={isCapturing ? COLORS.textSecondary : color}
-                                    />
-                                </TouchableOpacity>
-                            )}
+
+                            <TouchableOpacity
+                                style={[S.iconBtn, isCapturing && S.iconBtnDisabled, { borderColor: isCapturing ? COLORS.divider : color }]}
+                                onPress={() => router.push(`/share/${type}/${id}`)}
+                                activeOpacity={0.7}
+                                disabled={isCapturing}
+                            >
+                                <Ionicons
+                                    name="share-social-outline"
+                                    size={22}
+                                    color={isCapturing ? COLORS.textSecondary : color}
+                                />
+                            </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={S.iconBtn}
