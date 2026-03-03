@@ -1,392 +1,263 @@
-import React from 'react';
-import type { DimensionValue } from 'react-native';
+﻿import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS } from '@/lib/utils/constants';
+import { FONT } from '@/lib/utils/typography';
+import { CardFooter } from '@/components/sharing/partials';
+
+const CARD_WIDTH = 360;
+const CARD_HEIGHT = 640;
 
 export interface ShareableProfileCardProps {
-    username: string;
-    avatarUrl: string | null;
-    totalRatings: number;
-    averageScore: number | null;
-    currentStreak: number;
-    pinnedItems: Array<{
-        title: string;
-        imageUrl: string | null;
-        contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
-    }>;
-    challenge: {
-        target: number;
-        current: number;
-        categoryFilter: string | null;
-    } | null;
+  username: string;
+  avatarUrl: string | null;
+  totalRatings: number;
+  globalAverage: number;
+  streak: number;
+  topPosters: string[];
+  categoryBreakdown: {
+    movie: number;
+    series: number;
+    book: number;
+    game: number;
+    music: number;
+  };
 }
 
-type ContentType = ShareableProfileCardProps['pinnedItems'][number]['contentType'];
+// Internal sub-components
 
-const CATEGORY_COLORS: Record<ContentType, string> = {
-    movie: '#FF595E',
-    series: '#8939F7',
-    book: '#8AC926',
-    game: '#1982C4',
-    music: '#FFCA3A',
-    podcast: '#5BC0EB',
-    anything: '#FFFBFF',
-};
-
-const CATEGORY_COLORS_FADED: Record<ContentType, string> = {
-    movie: 'rgba(255, 89, 94, 0.2)',
-    series: 'rgba(137, 57, 247, 0.2)',
-    book: 'rgba(138, 201, 38, 0.2)',
-    game: 'rgba(25, 130, 196, 0.2)',
-    music: 'rgba(255, 202, 58, 0.2)',
-    podcast: 'rgba(91, 192, 235, 0.2)',
-    anything: 'rgba(255, 251, 255, 0.2)',
-};
-
-const CATEGORY_EMOJI: Record<ContentType, string> = {
-    movie: '🎬',
-    series: '📺',
-    book: '📚',
-    game: '🎮',
-    music: '🎵',
-    podcast: '🎙️',
-    anything: '✨',
-};
-
-const SURFACE = {
-    background: '#121212',
-    card: '#1E1E1E',
-    elevated: '#2A2A2A',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#A0A0A0',
-    textTertiary: '#666666',
-};
-
-function getProgressColor(ratio: number): string {
-    if (ratio >= 0.75) return '#FFCA3A';
-    if (ratio >= 0.5) return '#34C759';
-    if (ratio >= 0.25) return '#FFD60A';
-    return '#FF453A';
+function ProfileStatsRow({ totalRatings, globalAverage, streak }: Pick<ShareableProfileCardProps, 'totalRatings' | 'globalAverage' | 'streak'>) {
+  const avg = globalAverage > 0 ? globalAverage.toFixed(1) : '';
+  return (
+    <View style={s.statsRow}>
+      <View style={s.statCol}>
+        <Text style={s.statValue}>{totalRatings}</Text>
+        <Text style={s.statLabel}>RATINGS</Text>
+      </View>
+      <View style={s.divider} />
+      <View style={s.statCol}>
+        <Text style={s.statValue}>{avg}</Text>
+        <Text style={s.statLabel}>MEDIA</Text>
+      </View>
+      <View style={s.divider} />
+      <View style={s.statCol}>
+        <Text style={s.statValue}>{streak}🔥</Text>
+        <Text style={s.statLabel}>RACHA</Text>
+      </View>
+    </View>
+  );
 }
 
-export function ShareableProfileCard(props: ShareableProfileCardProps): React.ReactElement {
-    const initial = props.username.charAt(0).toUpperCase();
-    const avgDisplay = props.averageScore !== null ? props.averageScore.toFixed(1) : '—';
-    const visiblePins = props.pinnedItems.slice(0, 5);
-
-    let challengeRatio = 0;
-    if (props.challenge) {
-        challengeRatio = Math.min(props.challenge.current / props.challenge.target, 1);
-    }
-    const progressPct: DimensionValue = `${Math.round(challengeRatio * 100)}%`;
-    const progressColor = getProgressColor(challengeRatio);
-
-    return (
-        <View style={styles.card}>
-
-            {/* ── 1. HEADER ── */}
-            <View style={styles.header}>
-                {props.avatarUrl ? (
-                    <Image source={props.avatarUrl} style={styles.avatar} contentFit="cover" cachePolicy="memory-disk" />
-                ) : (
-                    <View style={styles.avatarFallback}>
-                        <Text style={styles.avatarLetter}>{initial}</Text>
-                    </View>
-                )}
-                <View style={styles.headerText}>
-                    <Text style={styles.headerUsername} numberOfLines={1}>{props.username}</Text>
-                    <Text style={styles.headerSubtitle}>rate-it</Text>
-                </View>
-            </View>
-
-            {/* ── 2. STATS ROW ── */}
-            <View style={styles.statsRow}>
-                <View style={styles.statCol}>
-                    <Text style={styles.statNumber}>{props.totalRatings}</Text>
-                    <Text style={styles.statLabel}>valoraciones</Text>
-                </View>
-                <View style={styles.divider} />
-                <View style={styles.statCol}>
-                    <Text style={styles.statNumber}>{avgDisplay}</Text>
-                    <Text style={styles.statLabel}>media</Text>
-                </View>
-                <View style={styles.divider} />
-                <View style={styles.statCol}>
-                    <Text style={styles.statNumber}>{props.currentStreak} 🔥</Text>
-                    <Text style={styles.statLabel}>días de racha</Text>
-                </View>
-            </View>
-
-            {/* ── 3. PINNED SECTION ── */}
-            <View style={styles.pinnedSection}>
-                <Text style={styles.sectionLabel}>Favoritos</Text>
-                {visiblePins.length > 0 ? (
-                    <View style={styles.postersRow}>
-                        {visiblePins.map((item, i) => (
-                            <View key={i} style={styles.poster}>
-                                {item.imageUrl ? (
-                                    <Image
-                                        source={item.imageUrl}
-                                        style={styles.posterImage}
-                                        contentFit="cover"
-                                        cachePolicy="memory-disk"
-                                    />
-                                ) : (
-                                    <View style={[
-                                        styles.posterFallback,
-                                        { backgroundColor: CATEGORY_COLORS_FADED[item.contentType] },
-                                    ]}>
-                                        <Text style={styles.posterEmoji}>
-                                            {CATEGORY_EMOJI[item.contentType]}
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
-                        ))}
-                    </View>
-                ) : (
-                    <View style={styles.pinnedEmpty}>
-                        <Text style={styles.pinnedEmptyText}>Sin favoritos aún</Text>
-                    </View>
-                )}
-            </View>
-
-            {/* ── 4. CHALLENGE SECTION ── */}
-            <View style={styles.challengeSection}>
-                {props.challenge ? (
-                    <View style={styles.challengeContent}>
-                        <View style={styles.challengeHeader}>
-                            <View>
-                                <Text style={styles.challengeTitle}>Reto 2026</Text>
-                                <Text style={styles.challengeCategory}>
-                                    {props.challenge.categoryFilter ?? 'Todas las categorías'}
-                                </Text>
-                            </View>
-                            <Text style={styles.challengeRatio}>
-                                {props.challenge.current}/{props.challenge.target}
-                            </Text>
-                        </View>
-                        <View style={styles.progressTrack}>
-                            <View style={[
-                                styles.progressFill,
-                                { width: progressPct, backgroundColor: progressColor },
-                            ]} />
-                        </View>
-                    </View>
-                ) : (
-                    <View style={styles.challengeEmpty}>
-                        <Text style={styles.challengeEmptyText}>Únete al reto anual</Text>
-                    </View>
-                )}
-            </View>
-
-            {/* ── 5. FOOTER ── */}
-            <View style={styles.footer}>
-                <Text style={styles.footerBrand}>rate-it</Text>
-                <Text style={styles.footerCta}>Comparte tu cultura</Text>
-            </View>
-
-        </View>
-    );
+function TopPostersRow({ posters }: { posters: string[] }) {
+  const visible = posters.slice(0, 3);
+  return (
+    <View>
+      <Text style={s.sectionLabel}>TOP VALORADOS</Text>
+      <View style={s.postersRow}>
+        {visible.map((url, i) => (
+          <View key={i} style={s.posterWrap}>
+            <Image source={url} style={s.posterImg} contentFit="cover" cachePolicy="memory-disk" />
+            {i === 0 && (
+              <View style={s.badge1}>
+                <Text style={s.badge1Text}>1</Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
 }
 
-const POSTER_WIDTH = Math.floor((360 - 32 - 4 * 8) / 5); // ≈ 54
+type Breakdown = ShareableProfileCardProps['categoryBreakdown'];
+const CAT_META: Array<{ key: keyof Breakdown; emoji: string; color: string }> = [
+  { key: 'movie',  emoji: '🎬', color: COLORS.categoryMovie  },
+  { key: 'series', emoji: '📺', color: COLORS.categorySeries },
+  { key: 'book',   emoji: '📚', color: COLORS.categoryBook   },
+  { key: 'game',   emoji: '🎮', color: COLORS.categoryGame   },
+  { key: 'music',  emoji: '🎵', color: COLORS.categoryMusic  },
+];
 
-const styles = StyleSheet.create({
-    card: {
-        width: 360,
-        height: 500,
-        borderRadius: 16,
-        overflow: 'hidden',
-        backgroundColor: SURFACE.background,
-    },
+function CategoryBreakdownSection({ breakdown }: { breakdown: Breakdown }) {
+  const total = Math.max(Object.values(breakdown).reduce((a, b) => a + b, 0), 1);
+  return (
+    <View>
+      <Text style={s.sectionLabel}>POR CATEGORÍA</Text>
+      {CAT_META.map(({ key, emoji, color }) => {
+        const pct = Math.round((breakdown[key] / total) * 100);
+        return (
+          <View key={key} style={s.catRow}>
+            <Text style={s.catEmoji}>{emoji}</Text>
+            <View style={s.catTrack}>
+              <View style={[s.catFill, { width: `${pct}%` as `${number}%`, backgroundColor: color }]} />
+            </View>
+            <Text style={s.catCount}>{breakdown[key]}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
 
-    // ── HEADER (100px) ──
-    header: {
-        height: 100,
-        backgroundColor: SURFACE.elevated,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        gap: 12,
-    },
-    avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-    },
-    avatarFallback: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: SURFACE.card,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    avatarLetter: {
-        fontSize: 28,
-        fontFamily: 'SpaceGrotesk-Bold',
-        color: SURFACE.textPrimary,
-    },
-    headerText: {
-        flex: 1,
-        gap: 2,
-    },
-    headerUsername: {
-        fontSize: 20,
-        fontFamily: 'SpaceGrotesk-SemiBold',
-        color: SURFACE.textPrimary,
-    },
-    headerSubtitle: {
-        fontSize: 12,
-        fontFamily: 'SpaceGrotesk-Medium',
-        color: 'rgba(255,255,255,0.6)',
-    },
+// Main component
 
-    // ── STATS ROW (75px) ──
-    statsRow: {
-        height: 75,
-        backgroundColor: SURFACE.card,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    statCol: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 4,
-    },
-    statNumber: {
-        fontSize: 22,
-        fontFamily: 'SpaceGrotesk-Bold',
-        color: SURFACE.textPrimary,
-    },
-    statLabel: {
-        fontSize: 11,
-        fontFamily: 'SpaceGrotesk-SemiBold',
-        color: SURFACE.textSecondary,
-    },
-    divider: {
-        width: 1,
-        height: 40,
-        backgroundColor: SURFACE.elevated,
-    },
+export function ShareableProfileCard({
+  username, avatarUrl, totalRatings, globalAverage, streak, topPosters, categoryBreakdown,
+}: ShareableProfileCardProps): React.ReactElement {
+  const initial = username.charAt(0).toUpperCase();
+  return (
+    <View style={s.card}>
+      <View style={s.headerRow}>
+        {avatarUrl ? (
+          <Image source={avatarUrl} style={s.avatar} contentFit="cover" cachePolicy="memory-disk" />
+        ) : (
+          <LinearGradient colors={[COLORS.categoryMovie, COLORS.categorySeries]} style={s.avatar}>
+            <Text style={s.avatarInitial}>{initial}</Text>
+          </LinearGradient>
+        )}
+        <Text style={s.username} numberOfLines={1}>@{username}</Text>
+      </View>
 
-    // ── PINNED SECTION (175px) ──
-    pinnedSection: {
-        height: 175,
-        backgroundColor: SURFACE.background,
-        paddingTop: 12,
-        paddingHorizontal: 16,
-    },
-    sectionLabel: {
-        fontSize: 14,
-        fontFamily: 'SpaceGrotesk-SemiBold',
-        color: SURFACE.textSecondary,
-        marginBottom: 10,
-    },
-    postersRow: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    poster: {
-        width: POSTER_WIDTH,
-        height: 80,
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    posterImage: {
-        width: '100%',
-        height: '100%',
-    },
-    posterFallback: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    posterEmoji: {
-        fontSize: 20,
-    },
-    pinnedEmpty: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    pinnedEmptyText: {
-        fontSize: 14,
-        fontFamily: 'SpaceGrotesk-Regular',
-        color: SURFACE.textTertiary,
-    },
+      <ProfileStatsRow totalRatings={totalRatings} globalAverage={globalAverage} streak={streak} />
 
-    // ── CHALLENGE SECTION (100px) ──
-    challengeSection: {
-        height: 100,
-        backgroundColor: SURFACE.card,
-    },
-    challengeContent: {
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        gap: 10,
-    },
-    challengeHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    challengeTitle: {
-        fontSize: 14,
-        fontFamily: 'SpaceGrotesk-SemiBold',
-        color: SURFACE.textPrimary,
-    },
-    challengeCategory: {
-        fontSize: 12,
-        fontFamily: 'SpaceGrotesk-Regular',
-        color: SURFACE.textSecondary,
-    },
-    challengeRatio: {
-        fontSize: 20,
-        fontFamily: 'SpaceGrotesk-Bold',
-        color: SURFACE.textPrimary,
-    },
-    progressTrack: {
-        height: 8,
-        borderRadius: 999,
-        backgroundColor: SURFACE.elevated,
-        overflow: 'hidden',
-    },
-    progressFill: {
-        height: 8,
-        borderRadius: 999,
-    },
-    challengeEmpty: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    challengeEmptyText: {
-        fontSize: 14,
-        fontFamily: 'SpaceGrotesk-Regular',
-        color: SURFACE.textTertiary,
-    },
+      <View style={s.content}>
+        <TopPostersRow posters={topPosters} />
+        <CategoryBreakdownSection breakdown={categoryBreakdown} />
+      </View>
 
-    // ── FOOTER (50px) ──
-    footer: {
-        height: 50,
-        backgroundColor: SURFACE.card,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-    },
-    footerBrand: {
-        fontSize: 12,
-        fontFamily: 'SpaceGrotesk-Medium',
-        color: 'rgba(255,255,255,0.6)',
-    },
-    footerCta: {
-        fontSize: 12,
-        fontFamily: 'SpaceGrotesk-Medium',
-        color: SURFACE.textSecondary,
-    },
+      <CardFooter username={username} accentColor="#FFFFFF" />
+    </View>
+  );
+}
+
+// Styles
+
+const s = StyleSheet.create({
+  card: {
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 20,
+    backgroundColor: '#121212',
+    padding: 20,
+    overflow: 'hidden',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginBottom: 16,
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitial: {
+    fontSize: 20,
+    fontFamily: FONT.bold,
+    color: '#FFFFFF',
+  },
+  username: {
+    flex: 1,
+    fontSize: 15,
+    fontFamily: FONT.bold,
+    color: '#FFFFFF',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginBottom: 20,
+  },
+  statCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 3,
+  },
+  statValue: {
+    fontSize: 15,
+    fontFamily: FONT.bold,
+    color: '#FFFFFF',
+  },
+  statLabel: {
+    fontSize: 9,
+    fontFamily: FONT.medium,
+    color: COLORS.textTertiary,
+    letterSpacing: 0.5,
+  },
+  divider: {
+    width: 1,
+    height: 28,
+    backgroundColor: COLORS.divider,
+  },
+  content: {
+    flex: 1,
+    gap: 18,
+  },
+  sectionLabel: {
+    fontSize: 10,
+    fontFamily: FONT.medium,
+    color: COLORS.textTertiary,
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  postersRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  posterWrap: {
+    flex: 1,
+    aspectRatio: 2 / 3,
+    borderRadius: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#ffffff10',
+  },
+  posterImg: {
+    width: '100%',
+    height: '100%',
+  },
+  badge1: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    backgroundColor: '#FFCA3A',
+    borderRadius: 999,
+    width: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badge1Text: {
+    fontSize: 9,
+    fontFamily: FONT.bold,
+    color: '#121212',
+  },
+  catRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 7,
+  },
+  catEmoji: { fontSize: 12, width: 18 },
+  catTrack: {
+    flex: 1,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: COLORS.surfaceElevated,
+    overflow: 'hidden',
+  },
+  catFill: { height: 6, borderRadius: 999 },
+  catCount: {
+    fontSize: 11,
+    fontFamily: FONT.medium,
+    color: COLORS.textSecondary,
+    width: 24,
+    textAlign: 'right',
+  },
 });

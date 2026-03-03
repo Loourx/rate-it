@@ -80,26 +80,25 @@ export default function ProfileScreen() {
     } = useShareChallenge();
 
     const firstChallenge = challenges[0] ?? null;
+    const catBreakdown = (statsData?.byCategory ?? []).reduce(
+        (acc, stat) => {
+            const k = stat.type as keyof typeof acc;
+            if (k in acc) acc[k] = stat.count;
+            return acc;
+        },
+        { movie: 0, series: 0, book: 0, game: 0, music: 0 },
+    );
     const profileCardProps: ShareableProfileCardProps = {
         username: profile?.username ?? '',
         avatarUrl: profile?.avatarUrl ?? null,
         totalRatings: statsData?.totalRatings ?? 0,
-        averageScore: (statsData?.averageScore && statsData.averageScore > 0)
-            ? statsData.averageScore
-            : null,
-        currentStreak: streakData?.streakDays ?? 0,
-        pinnedItems: (pinnedData ?? []).slice(0, 5).map((p) => ({
-            title: p.contentTitle,
-            imageUrl: p.contentImageUrl ?? null,
-            contentType: p.contentType,
-        })),
-        challenge: firstChallenge
-            ? {
-                target: firstChallenge.targetCount,
-                current: getProgress(firstChallenge.id),
-                categoryFilter: firstChallenge.categoryFilter ?? null,
-            }
-            : null,
+        globalAverage: statsData?.averageScore ?? 0,
+        streak: streakData?.streakDays ?? 0,
+        topPosters: (pinnedData ?? [])
+            .slice(0, 3)
+            .map((p) => p.contentImageUrl ?? '')
+            .filter(Boolean),
+        categoryBreakdown: catBreakdown,
     };
     // void suppresses TS warning for unused feedItems
     void feedItems;
@@ -245,9 +244,9 @@ export default function ProfileScreen() {
 
             {/* Off-screen portal for ShareableProfileCard capture */}
             <View style={styles.offscreen} pointerEvents="none">
-                <ViewShot ref={profileCardRef}>
+                <View ref={profileCardRef} collapsable={false}>
                     <ShareableProfileCard {...profileCardProps} />
-                </ViewShot>
+                </View>
                 {firstChallenge !== null && (
                     <ViewShot ref={challengeCardRef as React.RefObject<ViewShot | null>}>
                         <ShareableChallengeCard
