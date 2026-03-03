@@ -19,7 +19,7 @@ export function useShareChallenge(): UseShareChallengeReturn {
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
 
-    const challengeCardRef = useRef<View>(null);
+    const challengeCardRef = useRef<View | null>(null);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
         setToastMessage(message);

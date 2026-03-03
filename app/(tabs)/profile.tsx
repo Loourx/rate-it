@@ -28,7 +28,6 @@ import { ShareableProfileCard } from '@/components/sharing/ShareableProfileCard'
 import { ShareableChallengeCard } from '@/components/sharing/ShareableChallengeCard';
 import type { ShareableProfileCardProps } from '@/components/sharing';
 import { Toast } from '@/components/ui/Toast';
-import ViewShot from 'react-native-view-shot';
 
 export default function ProfileScreen() {
     const { signOut } = useAuth();
@@ -223,6 +222,11 @@ export default function ProfileScreen() {
                             isCapturingChallenge && styles.shareBtnDisabled,
                         ]}
                     >
+                        {isCapturingChallenge ? (
+                            <ActivityIndicator size="small" color={COLORS.textSecondary} />
+                        ) : (
+                            <Ionicons name="share-outline" size={16} color={COLORS.textSecondary} />
+                        )}
                         <Text style={styles.shareChallengeText}>Compartir reto</Text>
                     </TouchableOpacity>
                 )}
@@ -231,7 +235,7 @@ export default function ProfileScreen() {
                 <ScoreDistribution userId={myUserId} />
 
                 {/* Rating History */}
-                <RatingHistory userId={myUserId} />
+                <RatingHistory userId={myUserId} username={profile?.username ?? ''} />
 
                 {/* Bookmarks */}
                 <BookmarksList />
@@ -248,16 +252,22 @@ export default function ProfileScreen() {
                     <ShareableProfileCard {...profileCardProps} />
                 </View>
                 {firstChallenge !== null && (
-                    <ViewShot ref={challengeCardRef as React.RefObject<ViewShot | null>}>
+                    <View ref={challengeCardRef} collapsable={false}>
                         <ShareableChallengeCard
                             username={profile?.username ?? ''}
                             target={firstChallenge.targetCount}
                             current={getProgress(firstChallenge.id)}
-                            percentage={getPercentage(firstChallenge.id)}
-                            categoryFilter={firstChallenge.categoryFilter === 'all' ? null : firstChallenge.categoryFilter}
                             year={firstChallenge.year}
+                            streak={streakData?.streakDays ?? 0}
+                            categoryFilter={
+                                (['movie', 'series', 'book', 'game', 'music', 'all'] as const).some(
+                                    (c) => c === firstChallenge.categoryFilter,
+                                )
+                                    ? (firstChallenge.categoryFilter as 'movie' | 'series' | 'book' | 'game' | 'music' | 'all')
+                                    : 'all'
+                            }
                         />
-                    </ViewShot>
+                    </View>
                 )}
             </View>
 

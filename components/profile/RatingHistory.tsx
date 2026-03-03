@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
     useAnimatedStyle,
@@ -9,14 +9,15 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 import { useRatingHistory, type RatingHistoryItem } from '@/lib/hooks/useRatingHistory';
-import { RatingSlider } from '@/components/rating/RatingSlider';
 import { formatRelativeDate } from '@/lib/utils/formatRelativeDate';
 import { COLORS, SPACING, formatScore } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import { Ionicons } from '@expo/vector-icons';
-import type { ContentType } from '@/lib/types/content';
 import { PosterGrid } from '@/components/profile/PosterGrid';
+import { ShareableRatingCard } from '@/components/sharing/ShareableRatingCard';
 
 const CATEGORY_META: Record<string, { label: string; color: string }> = {
     movie: { label: 'Cine', color: COLORS.categoryMovie },
@@ -49,7 +50,12 @@ function SkeletonCard() {
     );
 }
 
-function HistoryItem({ item, onPress }: { item: RatingHistoryItem; onPress: () => void }) {
+function HistoryItem({ item, onPress, onShare, isSharingThis }: {
+    item: RatingHistoryItem;
+    onPress: () => void;
+    onShare?: () => void;
+    isSharingThis?: boolean;
+}) {
     const meta = CATEGORY_META[item.contentType] ?? { label: item.contentType, color: COLORS.textTertiary };
 
     return (
@@ -79,13 +85,32 @@ function HistoryItem({ item, onPress }: { item: RatingHistoryItem; onPress: () =
                     {formatScore(item.score)}
                 </Text>
             </View>
+            {onShare !== undefined && (
+                <TouchableOpacity
+                    onPress={onShare}
+                    disabled={isSharingThis}
+                    style={styles.shareIconBtn}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                    {isSharingThis ? (
+                        <ActivityIndicator size="small" color={COLORS.textTertiary} />
+                    ) : (
+                        <Ionicons name="share-outline" size={18} color={COLORS.textTertiary} />
+                    )}
+                </TouchableOpacity>
+            )}
         </TouchableOpacity>
     );
 }
 
-export function RatingHistory({ userId }: { userId?: string }) {
+export function RatingHistory({ userId, username }: { userId?: string; username?: string }) {
     const router = useRouter();
     const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+    const [shareItem, setShareItem] = useState<RatingHistoryItem | null>(null);
+    const [isSharingItem, setIsSharingItem] = useState(false);
+    const ratingCardRef = useRef<View | null>(null);
+    const pendingCapture = useRef(false);
+    const isOwnProfile = !userId;
     const {
         data, isLoading, isError, refetch,
         fetchNextPage, hasNextPage, isFetchingNextPage,
@@ -103,6 +128,39 @@ export function RatingHistory({ userId }: { userId?: string }) {
     const handleEndReached = useCallback(() => {
         if (hasNextPage && !isFetchingNextPage) fetchNextPage();
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    // ── Share individual rating ────────────────────────────────────────────
+    const SHAREABLE_TYPES = new Set(['movie', 'series', 'book', 'game', 'music']);
+
+    const handleShareItem = useCallback((item: RatingHistoryItem) => {
+        if (isSharingItem) return;
+        setIsSharingItem(true);
+        pendingCapture.current = true;
+        setShareItem(item);
+    }, [isSharingItem]);
+
+    useEffect(() => {
+        if (!shareItem || !pendingCapture.current) return;
+        pendingCapture.current = false;
+        const timer = setTimeout(async () => {
+            try {
+                const available = await Sharing.isAvailableAsync();
+                if (available && ratingCardRef.current) {
+                    const uri = await captureRef(ratingCardRef, { format: 'png', quality: 1.0 });
+                    await Sharing.shareAsync(uri, {
+                        mimeType: 'image/png',
+                        dialogTitle: `Mi valoración de ${shareItem.contentTitle} en Rate-it`,
+                    });
+                }
+            } catch {
+                // silently ignore share errors
+            } finally {
+                setIsSharingItem(false);
+                setShareItem(null);
+            }
+        }, 120);
+        return () => clearTimeout(timer);
+    }, [shareItem]);
 
     if (isLoading) {
         return (
@@ -195,7 +253,15 @@ export function RatingHistory({ userId }: { userId?: string }) {
                     data={allItems}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <HistoryItem item={item} onPress={() => handlePress(item)} />
+                        <HistoryItem
+                            item={item}
+                            onPress={() => handlePress(item)}
+                            onShare={isOwnProfile && SHAREABLE_TYPES.has(item.contentType)
+                                ? () => handleShareItem(item)
+                                : undefined
+                            }
+                            isSharingThis={isSharingItem && shareItem?.id === item.id}
+                        />
                     )}
                     ItemSeparatorComponent={() => <View style={styles.separator} />}
                     onEndReached={handleEndReached}
@@ -205,6 +271,22 @@ export function RatingHistory({ userId }: { userId?: string }) {
                         isFetchingNextPage ? <SkeletonCard /> : null
                     }
                 />
+            )}
+
+            {/* Off-screen card for image capture — not tappable */}
+            {shareItem !== null && SHAREABLE_TYPES.has(shareItem.contentType) && (
+                <View style={styles.offscreen} pointerEvents="none">
+                    <View ref={ratingCardRef} collapsable={false}>
+                        <ShareableRatingCard
+                            contentType={shareItem.contentType as 'movie' | 'series' | 'book' | 'game' | 'music'}
+                            title={shareItem.contentTitle}
+                            posterUrl={shareItem.contentImageUrl}
+                            score={shareItem.score}
+                            reviewText={null}
+                            username={username ?? ''}
+                        />
+                    </View>
+                </View>
             )}
         </View>
     );
@@ -230,6 +312,8 @@ const styles = StyleSheet.create({
     dateText: { ...TYPO.caption, color: COLORS.textSecondary },
     ratingNumberContainer: { justifyContent: 'center', alignItems: 'flex-end', minWidth: 44 },
     ratingNumber: { ...TYPO.h3 },
+    shareIconBtn: { padding: 4, marginLeft: 8 },
+    offscreen: { position: 'absolute', left: -9999, top: 0 },
     emptyContainer: { alignItems: 'center', paddingVertical: SPACING['3xl'], paddingHorizontal: 24, gap: 8 },
     emptyTitle: { ...TYPO.h4, fontFamily: FONT.bold, color: COLORS.textPrimary, marginTop: 12 },
     emptySubtitle: { ...TYPO.bodySmall, color: COLORS.textSecondary, textAlign: 'center' },

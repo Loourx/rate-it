@@ -27,8 +27,8 @@ export function useShareRating({ cardProps }: UseShareRatingParams): UseShareRat
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
 
-    const storiesRef = useRef<ViewShot>(null);
-    const feedRef = useRef<ViewShot>(null);
+    const storiesRef = useRef<ViewShot | null>(null);
+    const feedRef = useRef<ViewShot | null>(null);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
         setToastMessage(message);
