@@ -6,7 +6,7 @@ import type { ShareableRatingCardProps } from './ShareableRatingCard';
 import ViewShot from 'react-native-view-shot';
 
 interface ShareableRatingCardPortalProps {
-    cardProps: Omit<ShareableRatingCardProps, 'format'>;
+    cardProps: ShareableRatingCardProps;
     storiesRef: React.RefObject<ViewShot | null>;
     feedRef: React.RefObject<ViewShot | null>;
 }
@@ -24,11 +24,11 @@ export function ShareableRatingCardPortal({
     return (
         <View style={styles.offscreen} pointerEvents="none">
             <ViewShot ref={storiesRef}>
-                <ShareableRatingCard {...cardProps} format="stories" />
+                <ShareableRatingCard {...cardProps} />
             </ViewShot>
 
             <ViewShot ref={feedRef}>
-                <ShareableRatingCard {...cardProps} format="feed" />
+                <ShareableRatingCard {...cardProps} />
             </ViewShot>
         </View>
     );

@@ -121,14 +121,13 @@ export default function ContentDetailsScreen() {
     }, [pinnedItem, pinItem, unpinItem, contentType, id, item, pinScale]);
 
     // Build card props from item + user data (only used when userRating exists)
-    const cardProps: Omit<ShareableRatingCardProps, 'format'> = {
-        contentTitle: item?.title ?? '',
-        contentImageUrl: item?.imageUrl ?? null,
+    const cardProps: ShareableRatingCardProps = {
+        title: item?.title ?? '',
+        posterUrl: item?.imageUrl ?? null,
         contentType: contentType as ShareableRatingCardProps['contentType'],
         score: userRating?.score ?? 0,
-        review: userRating?.review_text ?? null,
+        reviewText: userRating?.review_text ?? null,
         username: profile?.username ?? 'usuario',
-        userAvatarUrl: profile?.avatarUrl ?? null,
     };
 
     const {

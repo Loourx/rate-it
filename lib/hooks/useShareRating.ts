@@ -6,7 +6,7 @@ import * as Sharing from 'expo-sharing';
 import type { ShareableRatingCardProps } from '@/components/sharing';
 
 export interface UseShareRatingParams {
-    cardProps: Omit<ShareableRatingCardProps, 'format'>;
+    cardProps: ShareableRatingCardProps;
 }
 
 export interface UseShareRatingReturn {
@@ -66,7 +66,7 @@ export function useShareRating({ cardProps }: UseShareRatingParams): UseShareRat
             // 3. Open native share sheet
             await Sharing.shareAsync(uri, {
                 mimeType: 'image/png',
-                dialogTitle: `Mi valoración de ${cardProps.contentTitle} en Rate-it`,
+                dialogTitle: `Mi valoración de ${cardProps.title} en Rate-it`,
             });
         } catch {
             showToast('Error al compartir la valoración. Inténtalo de nuevo.');

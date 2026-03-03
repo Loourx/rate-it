@@ -1,295 +1,193 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
+import { COLORS, getCategoryColor } from '@/lib/utils/constants';
+import { FONT } from '@/lib/utils/typography';
+import { CardAmbientGlow, CardFooter, CardScoreHero } from '@/components/sharing/partials';
+
+const CARD_WIDTH = 360;
+const CARD_HEIGHT = 640;
+
+type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music';
 
 export interface ShareableRatingCardProps {
-    contentTitle: string;
-    contentImageUrl: string | null;
-    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' /* MVP_DISABLED: | 'podcast' | 'anything' */;
-    score: number;
-    review: string | null;
-    username: string;
-    userAvatarUrl: string | null;
-    format: 'stories' | 'feed';
+  contentType: ContentType;
+  title: string;
+  posterUrl: string | null;
+  score: number;
+  reviewText: string | null;
+  username: string;
+  trackAverage?: number | null;
+  episodeAverage?: number | null;
 }
 
-const CATEGORY_COLORS: Record<ShareableRatingCardProps['contentType'], string> = {
-    movie: '#FF595E',
-    series: '#1982C4',
-    book: '#FFCA3A',
-    game: '#8939F7',
-    music: '#8AC926',
-    /* MVP_DISABLED: podcast: '#5BC0EB', */
-    /* MVP_DISABLED: anything: '#FFFBFF', */
+const EMOJI: Record<ContentType, string> = {
+  movie: '🎬', series: '📺', book: '📚', game: '🎮', music: '🎵',
 };
 
-const CATEGORY_COLORS_FADED: Record<ShareableRatingCardProps['contentType'], string> = {
-    movie: 'rgba(255, 89, 94, 0.2)',
-    series: 'rgba(25, 130, 196, 0.2)',
-    book: 'rgba(255, 202, 58, 0.2)',
-    game: 'rgba(137, 57, 247, 0.2)',
-    music: 'rgba(138, 201, 38, 0.2)',
-    /* MVP_DISABLED: podcast: 'rgba(91, 192, 235, 0.2)', */
-    /* MVP_DISABLED: anything: 'rgba(255, 251, 255, 0.2)', */
+const LABEL: Record<ContentType, string> = {
+  movie: 'PELÍCULA', series: 'SERIE', book: 'LIBRO', game: 'JUEGO', music: 'MÚSICA',
 };
 
-const CATEGORY_EMOJI: Record<ShareableRatingCardProps['contentType'], string> = {
-    movie: '🎬',
-    series: '📺',
-    book: '📚',
-    game: '🎮',
-    music: '🎵',
-    /* MVP_DISABLED: podcast: '🎙️', */
-    /* MVP_DISABLED: anything: '✨', */
-};
+function CategoryBadge({ type, color }: { type: ContentType; color: string }): React.ReactElement {
+  return (
+    <View style={[s.badge, { backgroundColor: color + '22', borderColor: color + '44' }]}>
+      <Text style={s.badgeEmoji}>{EMOJI[type]}</Text>
+      <Text style={[s.badgeLabel, { color }]}>{LABEL[type]}</Text>
+    </View>
+  );
+}
 
-const CATEGORY_LABEL: Record<ShareableRatingCardProps['contentType'], string> = {
-    movie: 'Película',
-    series: 'Serie',
-    book: 'Libro',
-    game: 'Juego',
-    music: 'Música',
-    /* MVP_DISABLED: podcast: 'Podcast', */
-    /* MVP_DISABLED: anything: 'Anything', */
-};
+export function ShareableRatingCard({
+  contentType, title, posterUrl, score, reviewText, username, trackAverage, episodeAverage,
+}: ShareableRatingCardProps): React.ReactElement {
+  const color = getCategoryColor(contentType);
+  const isMusic = contentType === 'music';
+  const posterW = isMusic ? 80 : 64;
+  const posterH = isMusic ? 80 : 96;
+  const fillPct = `${Math.round((score / 10) * 100)}%` as const;
+  const snippet =
+    reviewText && reviewText.length > 5
+      ? reviewText.length > 110 ? reviewText.slice(0, 110) + '…' : reviewText
+      : null;
 
-const SURFACE = {
-    background: '#121212',
-    card: '#1E1E1E',
-    elevated: '#2A2A2A',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#A0A0A0',
-    textTertiary: '#666666',
-};
+  return (
+    <View style={s.card}>
+      <CardAmbientGlow accentColor={color} height={200} />
 
-export function ShareableRatingCard(props: ShareableRatingCardProps): React.ReactElement {
-    const accentColor = CATEGORY_COLORS[props.contentType];
-    const fadedColor = CATEGORY_COLORS_FADED[props.contentType];
-    const emoji = CATEGORY_EMOJI[props.contentType];
-    const label = CATEGORY_LABEL[props.contentType];
-    const cardHeight = props.format === 'stories' ? 640 : 450;
-    const reviewText = props.review ? props.review.slice(0, 150) : null;
+      {/* Row 1 — category badge + score */}
+      <View style={s.topRow}>
+        <CategoryBadge type={contentType} color={color} />
+        <CardScoreHero score={score} accentColor={color} />
+      </View>
 
-    const headerH = Math.round(cardHeight * 0.15);
-    const posterH = Math.round(cardHeight * 0.45);
-    const scoreH = Math.round(cardHeight * 0.15);
-    const reviewH = Math.round(cardHeight * 0.15);
-    const footerH = cardHeight - headerH - posterH - scoreH - reviewH;
-
-    const fillWidth = `${(props.score / 10) * 100}%` as const;
-
-    return (
-        <View style={[styles.card, { height: cardHeight, borderLeftColor: accentColor }]}>
-
-            {/* HEADER */}
-            <View style={[styles.header, { height: headerH, backgroundColor: fadedColor }]}>
-                {props.userAvatarUrl ? (
-                    <Image
-                        source={props.userAvatarUrl}
-                        style={styles.avatar}
-                        contentFit="cover"
-                        cachePolicy="memory-disk"
-                    />
-                ) : (
-                    <View style={[styles.avatarFallback, { backgroundColor: accentColor }]}>
-                        <Text style={styles.avatarLetter} numberOfLines={1}>
-                            {props.username.charAt(0).toUpperCase()}
-                        </Text>
-                    </View>
-                )}
-                <Text style={styles.username} numberOfLines={1} ellipsizeMode="tail">
-                    {props.username}
-                </Text>
-                <View style={[styles.badge, { backgroundColor: accentColor }]}>
-                    <Text style={styles.badgeText} numberOfLines={1}>
-                        {emoji} {label}
-                    </Text>
-                </View>
-            </View>
-
-            {/* POSTER */}
-            <View style={[styles.poster, { height: posterH }]}>
-                {props.contentImageUrl ? (
-                    <Image
-                        source={props.contentImageUrl}
-                        style={styles.posterImage}
-                        contentFit="cover"
-                        cachePolicy="memory-disk"
-                    />
-                ) : (
-                    <View style={[styles.posterFallback, { backgroundColor: fadedColor }]}>
-                        <Text style={styles.posterEmoji}>{emoji}</Text>
-                    </View>
-                )}
-            </View>
-
-            {/* SCORE */}
-            <View style={[styles.scoreSection, { height: scoreH }]}>
-                <View style={styles.scoreRow}>
-                    <Text style={[styles.scoreNumber, { color: accentColor }]}>
-                        {props.score.toFixed(1)}
-                    </Text>
-                    <Text style={styles.scoreDivider}> / 10</Text>
-                </View>
-                <View style={styles.barTrack}>
-                    <View style={[styles.barFill, { width: fillWidth, backgroundColor: accentColor }]} />
-                </View>
-            </View>
-
-            {/* REVIEW */}
-            <View style={[styles.reviewSection, { height: reviewH }]}>
-                {reviewText ? (
-                    <Text
-                        style={styles.reviewText}
-                        numberOfLines={3}
-                        ellipsizeMode="tail"
-                    >
-                        {reviewText}
-                    </Text>
-                ) : (
-                    <Text style={styles.reviewEmpty}>Sin reseña</Text>
-                )}
-            </View>
-
-            {/* FOOTER */}
-            <View style={[styles.footer, { height: footerH }]}>
-                <Text style={styles.footerBrand}>rate-it</Text>
-                <Text style={styles.footerCta} numberOfLines={1}>Descúbrelo en rate-it</Text>
-            </View>
-
+      {/* Row 2 — poster + title/bar/averages */}
+      <View style={s.infoRow}>
+        {posterUrl ? (
+          <Image
+            source={posterUrl}
+            style={[s.poster, { width: posterW, height: posterH }]}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+          />
+        ) : (
+          <View style={[s.posterFallback, { width: posterW, height: posterH, backgroundColor: color + '33' }]}>
+            <Text style={s.posterInitial}>{title.charAt(0).toUpperCase()}</Text>
+          </View>
+        )}
+        <View style={s.infoContent}>
+          <Text style={s.title} numberOfLines={3}>{title}</Text>
+          <View style={s.barTrack}>
+            <View style={[s.barFill, { width: fillPct, backgroundColor: color }]} />
+          </View>
+          {contentType === 'music' && trackAverage != null && (
+            <Text style={[s.avgText, { color }]}>Tracks avg {trackAverage.toFixed(1)}</Text>
+          )}
+          {contentType === 'series' && episodeAverage != null && (
+            <Text style={[s.avgText, { color }]}>Eps avg {episodeAverage.toFixed(1)}</Text>
+          )}
         </View>
-    );
+      </View>
+
+      {/* Review block — only if present and >5 chars */}
+      {snippet && (
+        <View style={[s.review, { borderLeftColor: color }]}>
+          <Text style={s.reviewText}>"{snippet}"</Text>
+        </View>
+      )}
+
+      <CardFooter username={username} accentColor={color} />
+    </View>
+  );
 }
 
-const styles = StyleSheet.create({
-    card: {
-        width: 360,
-        borderRadius: 16,
-        overflow: 'hidden',
-        borderLeftWidth: 4,
-        backgroundColor: SURFACE.background,
-    },
-    // Header
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        gap: 8,
-    },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-    },
-    avatarFallback: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    avatarLetter: {
-        fontSize: 18,
-        fontFamily: 'SpaceGrotesk-Bold',
-        color: SURFACE.textPrimary,
-    },
-    username: {
-        flex: 1,
-        fontSize: 14,
-        fontFamily: 'SpaceGrotesk-Bold',
-        color: SURFACE.textPrimary,
-    },
-    badge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 999,
-    },
-    badgeText: {
-        fontSize: 12,
-        fontFamily: 'SpaceGrotesk-Bold',
-        color: SURFACE.background,
-    },
-    // Poster
-    poster: {
-        width: '100%',
-    },
-    posterImage: {
-        width: '100%',
-        height: '100%',
-    },
-    posterFallback: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    posterEmoji: {
-        fontSize: 64,
-    },
-    // Score
-    scoreSection: {
-        backgroundColor: SURFACE.card,
-        paddingHorizontal: 16,
-        justifyContent: 'center',
-        gap: 6,
-    },
-    scoreRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-    },
-    scoreNumber: {
-        fontSize: 48,
-        fontFamily: 'SpaceGrotesk-Bold',
-        lineHeight: 52,
-    },
-    scoreDivider: {
-        fontSize: 20,
-        fontFamily: 'SpaceGrotesk-Regular',
-        color: SURFACE.textSecondary,
-        marginBottom: 6,
-    },
-    barTrack: {
-        height: 8,
-        borderRadius: 999,
-        backgroundColor: SURFACE.elevated,
-        overflow: 'hidden',
-    },
-    barFill: {
-        height: 8,
-        borderRadius: 999,
-    },
-    // Review
-    reviewSection: {
-        backgroundColor: SURFACE.background,
-        paddingHorizontal: 16,
-        justifyContent: 'center',
-    },
-    reviewText: {
-        fontSize: 16,
-        fontFamily: 'SpaceGrotesk-Regular',
-        color: SURFACE.textPrimary,
-        fontStyle: 'italic',
-    },
-    reviewEmpty: {
-        fontSize: 16,
-        fontFamily: 'SpaceGrotesk-Regular',
-        color: SURFACE.textTertiary,
-    },
-    // Footer
-    footer: {
-        backgroundColor: SURFACE.card,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-    },
-    footerBrand: {
-        fontSize: 12,
-        fontFamily: 'SpaceGrotesk-Bold',
-        color: 'rgba(255,255,255,0.6)',
-    },
-    footerCta: {
-        fontSize: 12,
-        fontFamily: 'SpaceGrotesk-Regular',
-        color: SURFACE.textSecondary,
-    },
+const s = StyleSheet.create({
+  card: {
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 20,
+    backgroundColor: '#121212',
+    padding: 20,
+    overflow: 'hidden',
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    zIndex: 1,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
+    gap: 5,
+  },
+  badgeEmoji: { fontSize: 10 },
+  badgeLabel: { fontSize: 10, fontWeight: '600' },
+  infoRow: {
+    flexDirection: 'row',
+    gap: 14,
+    marginTop: 24,
+    zIndex: 1,
+  },
+  poster: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ffffff10',
+  },
+  posterFallback: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ffffff10',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  posterInitial: {
+    fontSize: 28,
+    fontFamily: FONT.bold,
+    color: '#FFFFFF',
+  },
+  infoContent: { flex: 1 },
+  title: {
+    fontSize: 18,
+    fontFamily: FONT.bold,
+    color: '#FFFFFF',
+    lineHeight: 24,
+  },
+  barTrack: {
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: COLORS.surfaceElevated,
+    marginTop: 8,
+    overflow: 'hidden',
+  },
+  barFill: {
+    height: 4,
+    borderRadius: 999,
+  },
+  avgText: {
+    fontSize: 11,
+    fontFamily: FONT.medium,
+    marginTop: 6,
+  },
+  review: {
+    backgroundColor: '#121212',
+    borderLeftWidth: 3,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 20,
+    zIndex: 1,
+  },
+  reviewText: {
+    fontSize: 12,
+    fontFamily: FONT.regular,
+    fontStyle: 'italic',
+    color: COLORS.textSecondary,
+  },
 });
+
