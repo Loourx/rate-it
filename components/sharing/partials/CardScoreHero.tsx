@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { FONT } from '@/lib/utils/typography';
+import { CARD_DIMENSIONS } from '../ShareableRatingCard';
 
-const CARD_WIDTH = 360; // Standard card width used for bleed calculation
+const CARD_WIDTH = CARD_DIMENSIONS.stories.width; // Standard card width used for bleed calculation
 
 export type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music';
 
@@ -66,8 +67,7 @@ export function CardScoreHero({
 
 const styles = StyleSheet.create({
   topRow: {
-    height: 120,
-    overflow: 'hidden',
+    height: 160,
     position: 'relative',
     marginBottom: 0,
     width: '100%',
