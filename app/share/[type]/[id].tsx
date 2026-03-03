@@ -1,0 +1,299 @@
+import React from 'react';
+import {
+    View,
+    Text,
+    ScrollView,
+    TextInput,
+    StyleSheet,
+    TouchableOpacity,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { ContentType, Music } from '@/lib/types/content';
+import { COLORS, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
+import { TYPO, FONT } from '@/lib/utils/typography';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { Button } from '@/components/ui/Button';
+import { RatingSliderDisplay } from '@/components/rating/RatingSliderDisplay';
+import {
+    SharePreviewMini,
+    PlatformSelector,
+    TrackSelector,
+    BookFormatSelector,
+    AutoInfoSection,
+    ShareableRatingCard,
+} from '@/components/sharing';
+import { useShareForm } from '@/lib/hooks/useShareForm';
+import { useGenerateAndShare } from '@/lib/hooks/useGenerateAndShare';
+
+// ── Sub-components ────────────────────────────────────────
+
+function LoadingSkeleton(): React.ReactElement {
+    return (
+        <View style={[styles.flex, { padding: SPACING.xl }]}>
+            <Skeleton width="100%" height={288} borderRadius={12} style={{ marginBottom: SPACING['2xl'] }} />
+            <Skeleton width="100%" height={16} borderRadius={RADIUS.full} style={{ marginBottom: SPACING.base }} />
+            <Skeleton width="100%" height={80} borderRadius={RADIUS.md} />
+        </View>
+    );
+}
+
+function SectionLabel({ children }: { children: string }): React.ReactElement {
+    return <Text style={styles.sectionLabel}>{children}</Text>;
+}
+
+function HeadlineSection({
+    value,
+    onChange,
+}: {
+    value: string;
+    onChange: (text: string) => void;
+}): React.ReactElement {
+    return (
+        <View style={styles.section}>
+            <SectionLabel>Gancho (máx. 50 caracteres)</SectionLabel>
+            <View>
+                <TextInput
+                    style={styles.textInput}
+                    multiline
+                    maxLength={50}
+                    placeholder="Resúmelo en pocas palabras..."
+                    placeholderTextColor={COLORS.textTertiary}
+                    value={value}
+                    onChangeText={onChange}
+                />
+                <Text style={styles.charCount}>{value.length}/50</Text>
+            </View>
+        </View>
+    );
+}
+
+// ── Main screen ───────────────────────────────────────────
+
+export default function ShareScreen(): React.ReactElement {
+    const { type, id, fromRating } = useLocalSearchParams<{
+        type: string;
+        id: string;
+        fromRating?: string;
+    }>();
+    const router = useRouter();
+    const contentType = type as ContentType;
+
+    const {
+        content,
+        isLoading,
+        isError,
+        formState,
+        existingRating,
+        availablePlatforms,
+        availableTracks,
+        cardProps,
+        cardVariant,
+        actions,
+    } = useShareForm({
+        contentType,
+        contentId: id,
+        fromRating: fromRating === 'true',
+    });
+
+    const { shareRef, handleGenerate, isGenerating } = useGenerateAndShare({
+        contentType,
+        contentId: id,
+        existingRatingId: existingRating?.id ?? null,
+        formState,
+        fromRating: fromRating === 'true',
+        format: 'stories',
+    });
+
+    const accentColor = getCategoryColor(contentType);
+    const isAlbum = contentType === 'music' && !!(content as Music | undefined)?.isAlbum;
+
+    if (isLoading) return <LoadingSkeleton />;
+    if (isError) return <ErrorState onRetry={() => { }} />;
+
+    return (
+        <SafeAreaView style={styles.flex} edges={['top']}>
+            {/* Header */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn} hitSlop={8}>
+                    <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Compartir</Text>
+                <View style={styles.headerBtn} />
+            </View>
+            <View style={styles.divider} />
+
+            <ScrollView
+                style={styles.flex}
+                contentContainerStyle={styles.scroll}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* Preview mini centered */}
+                <View style={styles.previewContainer}>
+                    <SharePreviewMini cardProps={cardProps} />
+                </View>
+
+                {/* Score display */}
+                {cardVariant !== 'minimal' ? (
+                    <View style={styles.section}>
+                        <SectionLabel>Tu valoración</SectionLabel>
+                        <RatingSliderDisplay value={cardProps.score} category={contentType} />
+                    </View>
+                ) : (
+                    <View style={styles.section}>
+                        <Text style={styles.minimalHint}>Sin valoración — card minimalista</Text>
+                    </View>
+                )}
+
+                {/* Headline input */}
+                <HeadlineSection value={formState.headline} onChange={actions.setHeadline} />
+
+                {/* Platform selector — movie / series / game */}
+                {(contentType === 'movie' || contentType === 'series') && (
+                    <View style={styles.section}>
+                        <SectionLabel>¿Dónde lo viste?</SectionLabel>
+                        <PlatformSelector
+                            platforms={availablePlatforms}
+                            selected={formState.selectedPlatform}
+                            onSelect={actions.setSelectedPlatform}
+                            accentColor={accentColor}
+                        />
+                    </View>
+                )}
+                {contentType === 'game' && (
+                    <View style={styles.section}>
+                        <SectionLabel>¿En qué plataforma jugaste?</SectionLabel>
+                        <PlatformSelector
+                            platforms={availablePlatforms}
+                            selected={formState.selectedPlatform}
+                            onSelect={actions.setSelectedPlatform}
+                            accentColor={accentColor}
+                        />
+                    </View>
+                )}
+
+                {/* Track selector — music albums only */}
+                {isAlbum && (
+                    <View style={styles.section}>
+                        <SectionLabel>Track favorito</SectionLabel>
+                        <TrackSelector
+                            tracks={availableTracks}
+                            selected={formState.favoriteTrack}
+                            onSelect={actions.setFavoriteTrack}
+                            accentColor={accentColor}
+                        />
+                    </View>
+                )}
+
+                {/* Book format */}
+                {contentType === 'book' && (
+                    <View style={styles.section}>
+                        <SectionLabel>Formato de lectura</SectionLabel>
+                        <BookFormatSelector
+                            selected={formState.bookFormat}
+                            onSelect={actions.setBookFormat}
+                        />
+                    </View>
+                )}
+
+                {/* Auto info (collapsable) */}
+                <View style={styles.section}>
+                    <AutoInfoSection
+                        trackAverage={cardProps.trackAverage ?? null}
+                        episodeAverage={cardProps.episodeAverage ?? null}
+                        score={cardProps.score}
+                        contentType={contentType}
+                        accentColor={accentColor}
+                    />
+                </View>
+
+                <View style={{ paddingBottom: 100 }} />
+            </ScrollView>
+
+            {/* Fixed bottom bar */}
+            <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
+                <Button
+                    label={isGenerating ? 'Generando...' : 'Generar y compartir'}
+                    onPress={handleGenerate}
+                    variant="primary"
+                    className="w-full"
+                    disabled={isGenerating}
+                />
+            </SafeAreaView>
+
+            {/* Off-screen portal for capture — F11-PI-i */}
+            <View ref={shareRef} style={styles.offScreen} pointerEvents="none">
+                <ShareableRatingCard {...cardProps} />
+            </View>
+        </SafeAreaView>
+    );
+}
+
+// ── Styles ────────────────────────────────────────────────
+
+const styles = StyleSheet.create({
+    flex: { flex: 1, backgroundColor: COLORS.background },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: SPACING.base,
+        paddingVertical: SPACING.md,
+    },
+    headerBtn: { width: 40, alignItems: 'center' },
+    headerTitle: {
+        color: COLORS.textPrimary,
+        fontSize: 17,
+        fontFamily: FONT.bold,
+        textAlign: 'center',
+    },
+    divider: { height: 1, backgroundColor: COLORS.divider },
+    scroll: { padding: SPACING.xl, paddingBottom: 20 },
+    previewContainer: {
+        alignItems: 'center',
+        marginVertical: SPACING['2xl'],
+    },
+    section: { marginTop: SPACING['2xl'] },
+    sectionLabel: {
+        color: COLORS.textSecondary,
+        ...TYPO.bodySmall,
+        fontFamily: FONT.medium,
+        marginBottom: SPACING.md,
+    },
+    textInput: {
+        backgroundColor: COLORS.surfaceElevated,
+        color: COLORS.textPrimary,
+        borderRadius: RADIUS.md,
+        padding: SPACING.base,
+        ...TYPO.body,
+        minHeight: 80,
+        textAlignVertical: 'top',
+    },
+    charCount: {
+        color: COLORS.textTertiary,
+        ...TYPO.caption,
+        textAlign: 'right',
+        marginTop: SPACING.xs,
+    },
+    minimalHint: {
+        color: COLORS.textTertiary,
+        ...TYPO.bodySmall,
+        textAlign: 'center',
+    },
+    bottomBar: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingHorizontal: SPACING.xl,
+        paddingTop: SPACING.base,
+        backgroundColor: COLORS.background,
+    },
+    offScreen: {
+        position: 'absolute',
+        top: -9999,
+        left: -9999,
+    },
+});

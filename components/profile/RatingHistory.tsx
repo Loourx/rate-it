@@ -95,7 +95,7 @@ function HistoryItem({ item, onPress, onShare, isSharingThis }: {
                     {isSharingThis ? (
                         <ActivityIndicator size="small" color={COLORS.textTertiary} />
                     ) : (
-                        <Ionicons name="share-outline" size={18} color={COLORS.textTertiary} />
+                        <Ionicons name="share-outline" size={16} color={COLORS.textTertiary} />
                     )}
                 </TouchableOpacity>
             )}
@@ -110,7 +110,9 @@ export function RatingHistory({ userId, username }: { userId?: string; username?
     const [isSharingItem, setIsSharingItem] = useState(false);
     const ratingCardRef = useRef<View | null>(null);
     const pendingCapture = useRef(false);
-    const isOwnProfile = !userId;
+    // Get current user id from auth store
+    const { session } = require('@/lib/hooks/useAuth').useAuth();
+    const currentUserId = session?.user?.id;
     const {
         data, isLoading, isError, refetch,
         fetchNextPage, hasNextPage, isFetchingNextPage,
@@ -133,11 +135,8 @@ export function RatingHistory({ userId, username }: { userId?: string; username?
     const SHAREABLE_TYPES = new Set(['movie', 'series', 'book', 'game', 'music']);
 
     const handleShareItem = useCallback((item: RatingHistoryItem) => {
-        if (isSharingItem) return;
-        setIsSharingItem(true);
-        pendingCapture.current = true;
-        setShareItem(item);
-    }, [isSharingItem]);
+        router.push(`/share/${item.contentType}/${item.contentId}`);
+    }, [router]);
 
     useEffect(() => {
         if (!shareItem || !pendingCapture.current) return;
@@ -256,7 +255,7 @@ export function RatingHistory({ userId, username }: { userId?: string; username?
                         <HistoryItem
                             item={item}
                             onPress={() => handlePress(item)}
-                            onShare={isOwnProfile && SHAREABLE_TYPES.has(item.contentType)
+                            onShare={currentUserId === item.userId && SHAREABLE_TYPES.has(item.contentType)
                                 ? () => handleShareItem(item)
                                 : undefined
                             }

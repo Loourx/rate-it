@@ -8,6 +8,7 @@ type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' 
 
 export interface RatingHistoryItem {
     id: string;
+    userId: string;
     contentType: DbContentType;
     contentId: string;
     contentTitle: string;
@@ -34,7 +35,7 @@ export function useRatingHistory(overrideUserId?: string) {
 
             const { data, error } = await supabase
                 .from('ratings')
-                .select('id, content_type, content_id, content_title, content_image_url, score, created_at')
+                .select('id, user_id, content_type, content_id, content_title, content_image_url, score, created_at')
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false })
                 .range(offset, offset + PAGE_SIZE - 1);
@@ -43,6 +44,7 @@ export function useRatingHistory(overrideUserId?: string) {
 
             const rows = data as Array<{
                 id: string;
+                user_id: string;
                 content_type: DbContentType;
                 content_id: string;
                 content_title: string;
@@ -53,6 +55,7 @@ export function useRatingHistory(overrideUserId?: string) {
 
             const items: RatingHistoryItem[] = rows.map((r) => ({
                 id: r.id,
+                userId: r.user_id,
                 contentType: r.content_type,
                 contentId: r.content_id,
                 contentTitle: r.content_title,
