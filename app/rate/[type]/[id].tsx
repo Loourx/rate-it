@@ -12,7 +12,7 @@ import {
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ContentType } from '@/lib/types/content';
+import { ContentType, Series } from '@/lib/types/content';
 import { RatingSlider } from '@/components/rating/RatingSlider';
 import { RatingHeader } from '@/components/rating/RatingHeader';
 import { StatusPicker } from '@/components/rating/StatusPicker';
@@ -23,6 +23,7 @@ import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import { useRatingForm } from '@/lib/hooks/useRatingForm';
 import { AlbumTrackRatingSection } from '@/components/rating/AlbumTrackRatingSection';
+import { SeriesEpisodeRatingSection } from '@/components/rating/SeriesEpisodeRatingSection';
 
 const CATEGORY_COLORS: Record<ContentType, string> = {
     movie: COLORS.categoryMovie,
@@ -69,6 +70,10 @@ export default function RateScreen() {
         privateNoteHeight.value = withTiming(next ? 160 : 0, { duration: 200 });
     };
 
+    const seasonCount = state.isSeriesContent
+        ? (content as Series)?.seasons ?? 1
+        : 0;
+
     if (state.isLoading) return <LoadingSkeleton />;
     if (state.isError || !content) return <ErrorState onRetry={() => actions.refetch()} />;
 
@@ -86,7 +91,13 @@ export default function RateScreen() {
                 <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
                     <RatingHeader content={content} />
                     <View style={styles.section}>
-                        <Text style={styles.sectionLabel}>{state.isAlbumContent ? 'Nota del álbum' : 'Desliza para puntuar'}</Text>
+                        <Text style={styles.sectionLabel}>
+                            {state.isAlbumContent
+                                ? 'Nota del álbum'
+                                : state.isSeriesContent
+                                    ? 'Nota global de la serie'
+                                    : 'Desliza para puntuar'}
+                        </Text>
                         <RatingSlider
                             value={formData.score}
                             onValueChange={actions.setScore}
@@ -103,6 +114,19 @@ export default function RateScreen() {
                             expanded={formData.showTrackRatings}
                             onToggleExpanded={actions.setShowTrackRatings}
                             initializeTrackRatings={actions.initializeTrackRatings}
+                            categoryColor={categoryColor}
+                        />
+                    )}
+                    {state.isSeriesContent && (
+                        <SeriesEpisodeRatingSection
+                            seriesId={id}
+                            seasonCount={seasonCount}
+                            episodeRatings={formData.episodeRatings}
+                            onEpisodeScoreChange={actions.setEpisodeScore}
+                            episodeAverage={formData.episodeAverage}
+                            expanded={formData.showEpisodeRatings}
+                            onToggleExpanded={actions.setShowEpisodeRatings}
+                            initializeEpisodeRatings={actions.initializeEpisodeRatings}
                             categoryColor={categoryColor}
                         />
                     )}

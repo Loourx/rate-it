@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { ContentType, ContentStatus, AllContent, AlbumTrack, Music } from '@/lib/types/content';
-import { TrackRatingEntry } from '@/lib/types/database';
+import { ContentType, ContentStatus, AllContent, AlbumTrack, Music, SeriesEpisode, Series } from '@/lib/types/content';
+import { TrackRatingEntry, EpisodeRatingEntry } from '@/lib/types/database';
 import { useContentDetails } from '@/lib/hooks/useContentDetails';
 import { useCreateRating, useExistingRating } from '@/lib/hooks/useCreateRating';
 import { useExistingContentStatus, useUpsertContentStatus } from '@/lib/hooks/useContentStatus';
@@ -30,6 +30,8 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
     const [prefilled, setPrefilled] = useState(false);
     const [trackRatings, setTrackRatings] = useState<TrackRatingEntry[]>([]);
     const [showTrackRatings, setShowTrackRatings] = useState(false);
+    const [episodeRatings, setEpisodeRatings] = useState<EpisodeRatingEntry[]>([]);
+    const [showEpisodeRatings, setShowEpisodeRatings] = useState(false);
     const [toastConfig, setToastConfig] = useState<{
         visible: boolean;
         message: string;
@@ -61,6 +63,17 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                     // track_ratings corrupto, ignorar
                 }
             }
+            if (existing.episode_ratings) {
+                try {
+                    const parsed: EpisodeRatingEntry[] = typeof existing.episode_ratings === 'string'
+                        ? JSON.parse(existing.episode_ratings)
+                        : existing.episode_ratings;
+                    setEpisodeRatings(parsed);
+                    if (parsed.some(er => er.score > 0)) setShowEpisodeRatings(true);
+                } catch {
+                    // episode_ratings corrupto, ignorar
+                }
+            }
         }
         if (existingStatus) {
             setStatus(existingStatus.status as ContentStatus);
@@ -71,6 +84,12 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
     const setTrackScore = useCallback((trackId: string, score: number) => {
         setTrackRatings(prev =>
             prev.map(tr => tr.trackId === trackId ? { ...tr, score } : tr)
+        );
+    }, []);
+
+    const setEpisodeScore = useCallback((episodeId: string, score: number) => {
+        setEpisodeRatings(prev =>
+            prev.map(er => er.episodeId === episodeId ? { ...er, score } : er)
         );
     }, []);
 
@@ -86,6 +105,23 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
         });
     }, []);
 
+    const initializeEpisodeRatings = useCallback((episodes: SeriesEpisode[]) => {
+        setEpisodeRatings(prev => {
+            // Solo añadir episodios nuevos, preservar scores existentes
+            const existingIds = new Set(prev.map(er => er.episodeId));
+            const newEntries = episodes
+                .filter(ep => !existingIds.has(ep.episodeId))
+                .map(ep => ({
+                    episodeId: ep.episodeId,
+                    episodeName: ep.episodeName,
+                    seasonNumber: ep.seasonNumber,
+                    episodeNumber: ep.episodeNumber,
+                    score: 0,
+                }));
+            return [...prev, ...newEntries];
+        });
+    }, []);
+
     const trackAverage = useMemo(() => {
         const rated = trackRatings.filter(tr => tr.score > 0);
         if (rated.length === 0) return null;
@@ -93,7 +129,15 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
         return Math.round((sum / rated.length) * 10) / 10;
     }, [trackRatings]);
 
+    const episodeAverage = useMemo(() => {
+        const rated = episodeRatings.filter(er => er.score > 0);
+        if (rated.length === 0) return null;
+        const sum = rated.reduce((acc, er) => acc + er.score, 0);
+        return Math.round((sum / rated.length) * 10) / 10;
+    }, [episodeRatings]);
+
     const isAlbumContent = contentType === 'music' && (item as Music)?.isAlbum === true;
+    const isSeriesContent = contentType === 'series';
 
     const handleSave = useCallback(async () => {
         if (!item) return;
@@ -111,6 +155,9 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                     : (contentType === 'music' ? 'track' : null),
                 trackRatings: isAlbumContent && trackRatings.some(tr => tr.score > 0)
                     ? trackRatings.filter(tr => tr.score > 0)
+                    : null,
+                episodeRatings: isSeriesContent && episodeRatings.some(er => er.score > 0)
+                    ? episodeRatings.filter(er => er.score > 0)
                     : null,
             });
             if (status) {
@@ -137,7 +184,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
                 type: 'error',
             });
         }
-    }, [item, score, review, privateNote, hasSpoiler, status, contentType, contentId, isAlbumContent, trackRatings]);
+    }, [item, score, review, privateNote, hasSpoiler, status, contentType, contentId, isAlbumContent, trackRatings, isSeriesContent, episodeRatings]);
 
     const isLoading = loadingContent || loadingExisting || loadingStatus;
     const isSaving = createRating.isPending || upsertStatus.isPending;
@@ -154,6 +201,9 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             trackRatings,
             showTrackRatings,
             trackAverage,
+            episodeRatings,
+            showEpisodeRatings,
+            episodeAverage,
         },
         state: {
             isLoading,
@@ -162,6 +212,7 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             isEditing,
             toastConfig,
             isAlbumContent,
+            isSeriesContent,
         },
         actions: {
             setScore,
@@ -175,6 +226,9 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             setTrackScore,
             setShowTrackRatings,
             initializeTrackRatings,
+            setEpisodeScore,
+            setShowEpisodeRatings,
+            initializeEpisodeRatings,
         },
     };
 }

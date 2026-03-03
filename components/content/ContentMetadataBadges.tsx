@@ -36,6 +36,7 @@ export function ContentMetadataBadges({ item, categoryColor, categoryFadedColor 
 
             {/* ── Layer 2 — Platforms (horizontal scroll chips) ── */}
             {hasPlatforms && (
+                <>
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -62,6 +63,8 @@ export function ContentMetadataBadges({ item, categoryColor, categoryFadedColor 
                         );
                     })}
                 </ScrollView>
+                <Text style={styles.justWatchCredit}>Datos de streaming: JustWatch</Text>
+                </>
             )}
 
             {/* ── Layer 3 — Genres (minimal pills) ── */}
@@ -135,6 +138,32 @@ function getPlatformInfo(platform: string): PlatformInfo {
     if (l === 'web')
         return { icon: 'globe-outline', color: '#64D2FF', shortLabel: 'Web' };
 
+    // Streaming services
+    if (l.includes('netflix'))
+        return { icon: 'tv-outline', color: '#E50914', shortLabel: 'Netflix' };
+    if (l.includes('amazon') || l.includes('prime video'))
+        return { icon: 'tv-outline', color: '#00A8E1', shortLabel: 'Prime Video' };
+    if (l.includes('disney'))
+        return { icon: 'tv-outline', color: '#113CCF', shortLabel: 'Disney+' };
+    if (l.includes('hbo') || l.includes('max'))
+        return { icon: 'tv-outline', color: '#5822B4', shortLabel: 'Max' };
+    if (l.includes('apple tv'))
+        return { icon: 'logo-apple', color: '#A2AAAD', shortLabel: 'Apple TV+' };
+    if (l.includes('hulu'))
+        return { icon: 'tv-outline', color: '#1CE783', shortLabel: 'Hulu' };
+    if (l.includes('paramount'))
+        return { icon: 'tv-outline', color: '#0064FF', shortLabel: 'Paramount+' };
+    if (l.includes('peacock'))
+        return { icon: 'tv-outline', color: '#FDB927', shortLabel: 'Peacock' };
+    if (l.includes('crunchyroll'))
+        return { icon: 'tv-outline', color: '#F47521', shortLabel: 'Crunchyroll' };
+    if (l.includes('movistar'))
+        return { icon: 'tv-outline', color: '#019DF4', shortLabel: 'Movistar+' };
+    if (l.includes('filmin'))
+        return { icon: 'tv-outline', color: '#1A1A1A', shortLabel: 'Filmin' };
+    if (l.includes('skyshowtime') || l.includes('sky'))
+        return { icon: 'tv-outline', color: '#0072C6', shortLabel: 'SkyShowtime' };
+
     // Fallback
     return { icon: 'hardware-chip-outline', color: '#A0A0A0' };
 }
@@ -161,7 +190,7 @@ function getLayeredMetadata(item: AllContent): LayeredMetadata {
             if (m.year) parts.push(m.year);
             if (m.director) parts.push(m.director);
             if (m.runtime) parts.push(formatRuntime(m.runtime));
-            return { identityParts: parts, platforms: [], genres: m.genres ?? [] };
+            return { identityParts: parts, platforms: (m.streamingProviders ?? []).map(sp => sp.providerName), genres: m.genres ?? [] };
         }
         case 'series': {
             const s = item as Series;
@@ -172,7 +201,7 @@ function getLayeredMetadata(item: AllContent): LayeredMetadata {
             if (s.seasons) sub.push(`${s.seasons} temporadas`);
             if (s.episodes) sub.push(`${s.episodes} episodios`);
             if (sub.length) parts.push(sub.join(', '));
-            return { identityParts: parts, platforms: [], genres: s.genres ?? [] };
+            return { identityParts: parts, platforms: (s.streamingProviders ?? []).map(sp => sp.providerName), genres: s.genres ?? [] };
         }
         case 'book': {
             const b = item as Book;
@@ -284,5 +313,12 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontFamily: FONT.medium,
         color: COLORS.textTertiary,
+    },
+    justWatchCredit: {
+        fontSize: 10,
+        fontFamily: FONT.regular,
+        color: COLORS.textTertiary,
+        marginTop: SPACING.xs,
+        paddingHorizontal: SPACING.base,
     },
 });

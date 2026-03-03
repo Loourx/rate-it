@@ -9,6 +9,23 @@ export interface BaseContent {
     type: ContentType;
 }
 
+// --- Series episodes and streaming providers ---
+export interface SeriesEpisode {
+    episodeId: string;      // formato "S{season}E{ep}" p.ej. "S01E03"
+    episodeName: string;
+    seasonNumber: number;
+    episodeNumber: number;
+    overview?: string;
+    runtime?: number;       // minutos
+    stillPath?: string | null; // imagen del episodio (TMDB)
+}
+
+export interface StreamingProvider {
+    providerId: number;     // TMDB provider_id
+    providerName: string;   // "Netflix", "Amazon Prime Video", etc.
+    logoPath: string;       // path relativo TMDB, construir URL en el componente
+}
+
 export interface Movie extends BaseContent {
     type: 'movie';
     year?: string;
@@ -17,6 +34,7 @@ export interface Movie extends BaseContent {
     genres?: string[];
     runtime?: number; // minutos
     popularity?: number; // TMDB popularity score (for sorting only)
+    streamingProviders?: StreamingProvider[];
 }
 
 export interface Series extends BaseContent {
@@ -28,6 +46,7 @@ export interface Series extends BaseContent {
     seasons?: number;
     episodes?: number;
     popularity?: number; // TMDB popularity score (for sorting only)
+    streamingProviders?: StreamingProvider[];
 }
 
 export interface Book extends BaseContent {

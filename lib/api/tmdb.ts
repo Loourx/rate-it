@@ -1,4 +1,4 @@
-import { Movie, Series } from '../types/content';
+import { Movie, Series, SeriesEpisode, StreamingProvider } from '../types/content';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY;
@@ -43,6 +43,33 @@ interface TmdbSeriesDetails extends TmdbSeriesResult {
     number_of_episodes?: number;
 }
 
+interface TmdbWatchProviders {
+    results: {
+        ES?: TmdbProviderRegion;
+        US?: TmdbProviderRegion;
+    };
+}
+
+interface TmdbProviderRegion {
+    flatrate?: Array<{
+        provider_id: number;
+        provider_name: string;
+        logo_path: string;
+    }>;
+}
+
+interface TmdbSeasonDetails {
+    episodes: Array<{
+        id: number;
+        name: string;
+        season_number: number;
+        episode_number: number;
+        overview?: string;
+        runtime?: number | null;
+        still_path?: string | null;
+    }>;
+}
+
 const getHeaders = () => {
     return {
         accept: 'application/json',
@@ -59,6 +86,21 @@ const getImageUrl = (path: string | null): string | null => {
 const getYear = (date: string): string | undefined => {
     return date ? date.split('-')[0] : undefined;
 };
+
+// Helper to extract streaming providers from TMDB watch/providers response
+function extractProviders(
+    watchData: TmdbWatchProviders | undefined
+): StreamingProvider[] {
+    if (!watchData) return [];
+    // Prefer ES, fallback to US
+    const region = watchData.results?.ES ?? watchData.results?.US;
+    const flatrate = region?.flatrate ?? [];
+    return flatrate.map(p => ({
+        providerId: p.provider_id,
+        providerName: p.provider_name,
+        logoPath: p.logo_path,
+    }));
+}
 
 // Helper for fetch
 async function fetchTmdb<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
@@ -130,13 +172,17 @@ export async function searchSeries(query: string): Promise<Series[]> {
 }
 
 export async function getMovieDetails(id: string): Promise<Movie> {
-    // append_to_response=credits to get director
-    const data = await fetchTmdb<TmdbMovieDetails>(`/movie/${id}`, { append_to_response: 'credits' });
+    // append_to_response=credits,watch/providers to get director and streaming providers
+    const data = await fetchTmdb<TmdbMovieDetails & { 'watch/providers'?: TmdbWatchProviders }>(
+        `/movie/${id}`,
+        { append_to_response: 'credits,watch/providers' }
+    );
 
     const director = data.credits?.crew.find(c => c.job === 'Director')?.name;
 
     const genres = data.genres?.map(g => g.name);
     const runtime = data.runtime ?? undefined;
+    const streamingProviders = extractProviders(data['watch/providers']);
 
     return {
         id: data.id.toString(),
@@ -148,11 +194,15 @@ export async function getMovieDetails(id: string): Promise<Movie> {
         director,
         genres,
         runtime,
+        streamingProviders,
     };
 }
 
 export async function getSeriesDetails(id: string): Promise<Series> {
-    const data = await fetchTmdb<TmdbSeriesDetails>(`/tv/${id}`);
+    const data = await fetchTmdb<TmdbSeriesDetails & { 'watch/providers'?: TmdbWatchProviders }>(
+        `/tv/${id}`,
+        { append_to_response: 'watch/providers' }
+    );
 
     // TMDB returns created_by array for series details
     const creator = data.created_by && data.created_by.length > 0
@@ -162,6 +212,7 @@ export async function getSeriesDetails(id: string): Promise<Series> {
     const genres = data.genres?.map(g => g.name);
     const seasons = data.number_of_seasons ?? undefined;
     const episodes = data.number_of_episodes ?? undefined;
+    const streamingProviders = extractProviders(data['watch/providers']);
 
     return {
         id: data.id.toString(),
@@ -174,5 +225,25 @@ export async function getSeriesDetails(id: string): Promise<Series> {
         genres,
         seasons,
         episodes,
+        streamingProviders,
     };
+}
+
+export async function getSeriesSeasonEpisodes(
+    seriesId: string,
+    seasonNumber: number
+): Promise<SeriesEpisode[]> {
+    const data = await fetchTmdb<TmdbSeasonDetails>(
+        `/tv/${seriesId}/season/${seasonNumber}`
+    );
+
+    return data.episodes.map(ep => ({
+        episodeId: `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`,
+        episodeName: ep.name,
+        seasonNumber: ep.season_number,
+        episodeNumber: ep.episode_number,
+        overview: ep.overview || undefined,
+        runtime: ep.runtime ?? undefined,
+        stillPath: ep.still_path,
+    }));
 }

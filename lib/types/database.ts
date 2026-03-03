@@ -10,6 +10,14 @@ export interface Profile {
     updatedAt: string; // timestamptz
 }
 
+export interface EpisodeRatingEntry {
+    episodeId: string;      // "S01E03"
+    episodeName: string;
+    seasonNumber: number;
+    episodeNumber: number;
+    score: number;          // 0-10, step 0.5
+}
+
 export interface Rating {
     id: string; // uuid
     userId: string; // uuid references profiles
@@ -25,6 +33,7 @@ export interface Rating {
     trackRatings: TrackRatingEntry[] | null; // jsonb – per-track scores for album ratings
     createdAt: string; // timestamptz
     updatedAt: string; // timestamptz
+    episodeRatings: EpisodeRatingEntry[] | null; // mapea episode_ratings JSONB
 }
 
 export interface TrackRatingEntry {
