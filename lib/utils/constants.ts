@@ -18,8 +18,8 @@ export const COLORS = {
     categoryBook: '#FFCA3A',     // Amarillo
     categoryGame: '#8939F7',     // Morado
     categoryMusic: '#8AC926',    // Verde
-    /* MVP_DISABLED: categoryPodcast: '#5BC0EB', */  // Sky Blue
-    /* MVP_DISABLED: categoryAnything: '#FFFBFF', */ // Soft White
+    categoryPodcast: '#5BC0EB',      // Sky Blue
+    categoryAnything: '#FFFBFF',     // Soft White
 
     // Categories (Faded - 20% opacity)
     categoryMovieFaded: 'rgba(255, 89, 94, 0.2)',
@@ -27,8 +27,8 @@ export const COLORS = {
     categoryBookFaded: 'rgba(255, 202, 58, 0.2)',
     categoryGameFaded: 'rgba(137, 57, 247, 0.2)',
     categoryMusicFaded: 'rgba(138, 201, 38, 0.2)',
-    /* MVP_DISABLED: categoryPodcastFaded: 'rgba(91, 192, 235, 0.2)', */
-    /* MVP_DISABLED: categoryAnythingFaded: 'rgba(255, 251, 255, 0.2)', */
+    categoryPodcastFaded: 'rgba(91, 192, 235, 0.2)',
+    categoryAnythingFaded: 'rgba(255, 251, 255, 0.2)',
 
     // Status
     success: '#34C759',
@@ -101,8 +101,8 @@ const CATEGORY_COLOR_MAP: Record<ContentType, string> = {
     book: COLORS.categoryBook,
     game: COLORS.categoryGame,
     music: COLORS.categoryMusic,
-    /* MVP_DISABLED: podcast: COLORS.categoryPodcast, */
-    /* MVP_DISABLED: anything: COLORS.categoryAnything, */
+    podcast: COLORS.categoryPodcast,
+    anything: COLORS.categoryAnything,
 };
 
 const CATEGORY_FADED_MAP: Record<ContentType, string> = {
@@ -111,8 +111,8 @@ const CATEGORY_FADED_MAP: Record<ContentType, string> = {
     book: COLORS.categoryBookFaded,
     game: COLORS.categoryGameFaded,
     music: COLORS.categoryMusicFaded,
-    /* MVP_DISABLED: podcast: COLORS.categoryPodcastFaded, */
-    /* MVP_DISABLED: anything: COLORS.categoryAnythingFaded, */
+    podcast: COLORS.categoryPodcastFaded,
+    anything: COLORS.categoryAnythingFaded,
 };
 
 /** Get the primary accent color for a content type */

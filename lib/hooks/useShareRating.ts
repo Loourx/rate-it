@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { View } from 'react-native';
-import { captureRef } from 'react-native-view-shot';
+import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
 import type { ShareableRatingCardProps } from '@/components/sharing';
@@ -13,8 +13,8 @@ export interface UseShareRatingReturn {
     shareAsStory: () => Promise<void>;
     shareAsFeed: () => Promise<void>;
     isCapturing: boolean;
-    storiesRef: React.RefObject<View | null>;
-    feedRef: React.RefObject<View | null>;
+    storiesRef: React.RefObject<ViewShot | null>;
+    feedRef: React.RefObject<ViewShot | null>;
     toastVisible: boolean;
     toastMessage: string;
     toastType: 'success' | 'error' | 'info';
@@ -27,8 +27,8 @@ export function useShareRating({ cardProps }: UseShareRatingParams): UseShareRat
     const [toastMessage, setToastMessage] = useState('');
     const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
 
-    const storiesRef = useRef<View>(null);
-    const feedRef = useRef<View>(null);
+    const storiesRef = useRef<ViewShot>(null);
+    const feedRef = useRef<ViewShot>(null);
 
     const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
         setToastMessage(message);
@@ -39,7 +39,7 @@ export function useShareRating({ cardProps }: UseShareRatingParams): UseShareRat
     const dismissToast = () => setToastVisible(false);
 
     const captureAndShare = async (
-        ref: React.RefObject<View | null>,
+        ref: React.RefObject<ViewShot | null>,
         _format: 'stories' | 'feed',
     ): Promise<void> => {
         if (!ref.current) {
@@ -76,8 +76,8 @@ export function useShareRating({ cardProps }: UseShareRatingParams): UseShareRat
     };
 
     return {
-        shareAsStory: () => captureAndShare(storiesRef, 'stories'),
-        shareAsFeed: () => captureAndShare(feedRef, 'feed'),
+        shareAsStory: () => captureAndShare(storiesRef as React.RefObject<ViewShot | null>, 'stories'),
+        shareAsFeed: () => captureAndShare(feedRef as React.RefObject<ViewShot | null>, 'feed'),
         isCapturing,
         storiesRef,
         feedRef,

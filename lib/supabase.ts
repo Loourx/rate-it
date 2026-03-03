@@ -6,14 +6,29 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // Custom storage implementation using Expo SecureStore for better security on mobile
 const ExpoSecureStoreAdapter = {
-  getItem: (key: string) => {
-    return SecureStore.getItemAsync(key);
+  getItem: async (key: string): Promise<string | null> => {
+    try {
+      return await SecureStore.getItemAsync(key);
+    } catch (err) {
+      console.error('[SecureStore] getItem failed:', err);
+      return null;  // Sin sesión guardada — usuario no autenticado
+    }
   },
-  setItem: (key: string, value: string) => {
-    return SecureStore.setItemAsync(key, value);
+  setItem: async (key: string, value: string): Promise<void> => {
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      console.error('[SecureStore] setItem failed:', err);
+      // No lanzar — la sesión puede funcionar en memoria aunque no persista
+    }
   },
-  removeItem: (key: string) => {
-    return SecureStore.deleteItemAsync(key);
+  removeItem: async (key: string): Promise<void> => {
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch (err) {
+      console.error('[SecureStore] removeItem failed:', err);
+      // No lanzar — el signOut debe completarse aunque el storage falle
+    }
   },
 };
 

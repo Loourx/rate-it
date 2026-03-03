@@ -28,6 +28,7 @@ import { ShareableProfileCard } from '@/components/sharing/ShareableProfileCard'
 import { ShareableChallengeCard } from '@/components/sharing/ShareableChallengeCard';
 import type { ShareableProfileCardProps } from '@/components/sharing';
 import { Toast } from '@/components/ui/Toast';
+import ViewShot from 'react-native-view-shot';
 
 export default function ProfileScreen() {
     const { signOut } = useAuth();
@@ -244,11 +245,11 @@ export default function ProfileScreen() {
 
             {/* Off-screen portal for ShareableProfileCard capture */}
             <View style={styles.offscreen} pointerEvents="none">
-                <View ref={profileCardRef} collapsable={false}>
+                <ViewShot ref={profileCardRef}>
                     <ShareableProfileCard {...profileCardProps} />
-                </View>
+                </ViewShot>
                 {firstChallenge !== null && (
-                    <View ref={challengeCardRef} collapsable={false}>
+                    <ViewShot ref={challengeCardRef as React.RefObject<ViewShot | null>}>
                         <ShareableChallengeCard
                             username={profile?.username ?? ''}
                             target={firstChallenge.targetCount}
@@ -257,7 +258,7 @@ export default function ProfileScreen() {
                             categoryFilter={firstChallenge.categoryFilter === 'all' ? null : firstChallenge.categoryFilter}
                             year={firstChallenge.year}
                         />
-                    </View>
+                    </ViewShot>
                 )}
             </View>
 

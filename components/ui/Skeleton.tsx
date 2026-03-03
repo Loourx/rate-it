@@ -46,7 +46,7 @@ export function Skeleton({ width, height, borderRadius = 8, className, style }: 
                     width: width,
                     height: height,
                     borderRadius: borderRadius,
-                },
+                } as ViewStyle,
                 animatedStyle,
                 style
             ]}

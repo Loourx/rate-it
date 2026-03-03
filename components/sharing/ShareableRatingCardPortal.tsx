@@ -3,10 +3,12 @@ import { View, StyleSheet } from 'react-native';
 import { ShareableRatingCard } from './ShareableRatingCard';
 import type { ShareableRatingCardProps } from './ShareableRatingCard';
 
+import ViewShot from 'react-native-view-shot';
+
 interface ShareableRatingCardPortalProps {
     cardProps: Omit<ShareableRatingCardProps, 'format'>;
-    storiesRef: React.RefObject<View | null>;
-    feedRef: React.RefObject<View | null>;
+    storiesRef: React.RefObject<ViewShot | null>;
+    feedRef: React.RefObject<ViewShot | null>;
 }
 
 /**
@@ -21,15 +23,13 @@ export function ShareableRatingCardPortal({
 }: ShareableRatingCardPortalProps): React.ReactElement {
     return (
         <View style={styles.offscreen} pointerEvents="none">
-            {/* Stories format: 9:16 */}
-            <View ref={storiesRef} collapsable={false}>
+            <ViewShot ref={storiesRef}>
                 <ShareableRatingCard {...cardProps} format="stories" />
-            </View>
+            </ViewShot>
 
-            {/* Feed format: 4:5 */}
-            <View ref={feedRef} collapsable={false}>
+            <ViewShot ref={feedRef}>
                 <ShareableRatingCard {...cardProps} format="feed" />
-            </View>
+            </ViewShot>
         </View>
     );
 }

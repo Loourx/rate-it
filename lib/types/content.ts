@@ -1,5 +1,4 @@
-export type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music';
-/* MVP_DISABLED: | 'podcast' | 'anything' */
+export type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
 
 export type ContentStatus = 'want' | 'doing' | 'done' | 'dropped';
 
@@ -78,11 +77,7 @@ export interface TrackRating {
     score: number;
 }
 
-/* MVP_DISABLED: Podcast and Anything interfaces kept for future reactivation */
-export interface Podcast /* MVP_DISABLED: extends BaseContent */ {
-    id: string;
-    title: string;
-    imageUrl: string | null;
+export interface Podcast extends BaseContent {
     type: 'podcast';
     publisher?: string;
     description?: string;
@@ -90,10 +85,7 @@ export interface Podcast /* MVP_DISABLED: extends BaseContent */ {
     episodeCount?: number;
 }
 
-export interface Anything /* MVP_DISABLED: extends BaseContent */ {
-    id: string;
-    title: string;
-    imageUrl: string | null;
+export interface Anything extends BaseContent {
     type: 'anything';
     createdBy: string;
     creatorUsername?: string; // Resolved from profiles join
@@ -101,4 +93,4 @@ export interface Anything /* MVP_DISABLED: extends BaseContent */ {
     categoryTag?: string;
 }
 
-export type AllContent = Movie | Series | Book | Game | Music /* MVP_DISABLED: | Podcast | Anything */;
+export type AllContent = Movie | Series | Book | Game | Music | Podcast | Anything;
