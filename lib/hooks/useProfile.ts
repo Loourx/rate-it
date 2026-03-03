@@ -70,12 +70,19 @@ export function useUpdateProfile() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['profile'] });
+            queryClient.invalidateQueries({ queryKey: ['user-profile'] });
         },
     });
 }
 
-export async function uploadAvatar(userId: string, uri: string): Promise<string> {
+export async function uploadAvatar(userId: string, uri: string, asset?: { mimeType?: string; fileSize?: number; uri: string }): Promise<string> {
     const fileName = `${userId}/${Date.now()}.jpg`;
+
+    // Validate before upload
+    if (asset) {
+        const { validateImageFile } = await import('../utils/imageValidation');
+        validateImageFile(asset);
+    }
 
     // Fetch the image as a blob
     const response = await fetch(uri);
@@ -84,10 +91,12 @@ export async function uploadAvatar(userId: string, uri: string): Promise<string>
     // Convert blob to ArrayBuffer for Supabase upload
     const arrayBuffer = await new Response(blob).arrayBuffer();
 
+    const contentType = asset?.mimeType ?? 'image/jpeg';
+
     const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, arrayBuffer, {
-            contentType: 'image/jpeg',
+            contentType,
             upsert: true,
         });
 

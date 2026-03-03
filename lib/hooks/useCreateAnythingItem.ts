@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { uploadAnythingImage } from '@/lib/api/anythingStorage';
@@ -11,10 +12,20 @@ interface CreateAnythingInput {
     score?: number | null;
 }
 
+
 export function useCreateAnythingItem() {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;
+    // Toast state (pattern from useShareRating)
+    const [toastVisible, setToastVisible] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('error');
+    const showToast = (message: string, type: 'success' | 'error' | 'info' = 'error') => {
+        setToastMessage(message);
+        setToastType(type);
+        setToastVisible(true);
+    };
 
     return useMutation({
         mutationFn: async (input: CreateAnythingInput) => {
@@ -74,7 +85,7 @@ export function useCreateAnythingItem() {
                     });
 
                 if (ratingError) {
-                    console.error('Error creating initial rating:', ratingError);
+                    showToast('No se pudo guardar la valoración inicial. Puedes añadirla desde el perfil.', 'error');
                 }
             }
 

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 
@@ -11,6 +11,7 @@ export function useReportAnything() {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (input: ReportAnythingInput) => {
             if (!userId) throw new Error('No autenticado');
@@ -34,6 +35,10 @@ export function useReportAnything() {
             }
 
             return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['reports'] });
+            queryClient.invalidateQueries({ queryKey: ['has-reported'] });
         },
     });
 }

@@ -21,7 +21,16 @@ import {
 } from '@expo-google-fonts/space-grotesk';
 import '../global.css';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 60_000, // 1 min — datos frescos sin refetch
+            gcTime: 300_000,   // 5 min — caché en memoria
+            retry: 2,          // 2 reintentos en error de red
+            refetchOnWindowFocus: false, // En móvil no hay "window focus"
+        },
+    },
+});
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

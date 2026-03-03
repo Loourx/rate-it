@@ -16,11 +16,6 @@ export interface FollowerProfile {
 
 export type FollowingProfile = FollowerProfile;
 
-export interface FollowStatus {
-    isFollowing: boolean;
-    followersCount: number;
-    followingCount: number;
-}
 
 export interface FeedItem {
     id: string;

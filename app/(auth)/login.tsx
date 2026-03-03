@@ -13,11 +13,6 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [devLoading, setDevLoading] = useState(false);
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            router.replace('/(tabs)');
-        }
-    }, [isAuthenticated, router]);
 
     const handleGoogleLogin = async () => {
         try {

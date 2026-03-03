@@ -3,9 +3,7 @@ import { Book } from '../types/content';
 const GOOGLE_BOOKS_BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_BOOKS_API_KEY;
 
-if (!API_KEY) {
-    console.warn('Google Books API Key is missing. Please add EXPO_PUBLIC_GOOGLE_BOOKS_API_KEY to your .env file.');
-}
+
 
 // Internal interfaces for Google Books responses (not exported as per requirements)
 interface GoogleBooksVolumeInfo {

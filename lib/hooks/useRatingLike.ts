@@ -41,5 +41,6 @@ export function useRatingLike(ratingId: string) {
         isLoading: likedQuery.isLoading,
         toggle: () => mutation.mutate(likedQuery.data ?? false),
         isMutating: mutation.isPending,
+        error: mutation.error as Error | null,
     };
 }

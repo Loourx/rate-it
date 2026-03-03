@@ -25,7 +25,6 @@ export function useAuth() {
 
             return data;
         } catch (error) {
-            console.error('Error signing in with Google:', error);
             throw error;
         }
     };
@@ -48,7 +47,6 @@ export function useAuth() {
             if (error) throw error;
             useAuthStore.getState().setSession(null);
         } catch (error) {
-            console.error('Error signing out:', error);
             throw error;
         }
     };

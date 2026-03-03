@@ -70,12 +70,6 @@ export interface AlbumTrack {
     artistName?: string;
 }
 
-export interface TrackRating {
-    trackId: string;
-    trackName: string;
-    trackNumber: number;
-    score: number;
-}
 
 export interface Podcast extends BaseContent {
     type: 'podcast';

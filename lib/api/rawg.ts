@@ -3,9 +3,7 @@ import { Game } from '../types/content';
 const RAWG_BASE_URL = 'https://api.rawg.io/api';
 const API_KEY = process.env.EXPO_PUBLIC_RAWG_API_KEY;
 
-if (!API_KEY) {
-    console.warn('RAWG API Key is missing. Please add EXPO_PUBLIC_RAWG_API_KEY to only your .env file.');
-}
+
 
 // Internal interfaces for RAWG responses
 interface RawgGameResult {

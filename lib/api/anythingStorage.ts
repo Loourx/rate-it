@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import { validateImageFile } from '../utils/imageValidation';
 
 const BUCKET = 'anything-images';
 
@@ -10,8 +11,12 @@ const BUCKET = 'anything-images';
 export async function uploadAnythingImage(
     userId: string,
     imageUri: string,
+    asset?: { mimeType?: string; fileSize?: number; uri: string },
 ): Promise<string> {
     const fileName = `${userId}/${Date.now()}.jpg`;
+
+    // Validate before upload
+    if (asset) validateImageFile(asset);
 
     // Fetch the local image as a blob
     const response = await fetch(imageUri);
@@ -20,10 +25,12 @@ export async function uploadAnythingImage(
     // Convert blob to ArrayBuffer for Supabase upload
     const arrayBuffer = await new Response(blob).arrayBuffer();
 
+    const contentType = asset?.mimeType ?? 'image/jpeg';
+
     const { error: uploadError } = await supabase.storage
         .from(BUCKET)
         .upload(fileName, arrayBuffer, {
-            contentType: 'image/jpeg',
+            contentType,
             upsert: false,
         });
 
@@ -38,5 +45,10 @@ export async function uploadAnythingImage(
  * Used for rollback if the DB insert fails after upload.
  */
 export async function deleteAnythingImage(storagePath: string): Promise<void> {
-    await supabase.storage.from(BUCKET).remove([storagePath]);
+    const { error } = await supabase.storage.from(BUCKET).remove([storagePath]);
+    if (error) {
+        // No lanzar — la imagen huérfana es problema del admin, no del usuario
+        // (este console se eliminará en F12 junto con el resto)
+        console.error('Error deleting image from storage:', error);
+    }
 }

@@ -67,6 +67,7 @@ export function useUpsertContentStatus() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['content-status'] });
+            queryClient.invalidateQueries({ queryKey: ['pending-ratings'] });
         },
     });
 }

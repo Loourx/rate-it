@@ -3,9 +3,7 @@ import { Movie, Series } from '../types/content';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = process.env.EXPO_PUBLIC_TMDB_API_KEY;
 
-if (!API_KEY) {
-    console.warn('TMDB API Key is missing. Please add EXPO_PUBLIC_TMDB_API_KEY to only your .env file.');
-}
+
 
 // Internal interfaces for TMDB responses
 interface TmdbMovieResult {

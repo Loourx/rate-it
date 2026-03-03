@@ -130,7 +130,6 @@ export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
             });
             setTimeout(() => router.back(), 1200);
         } catch (error) {
-            console.error('[Rate-it] Error saving rating:', error);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             setToastConfig({
                 visible: true,
