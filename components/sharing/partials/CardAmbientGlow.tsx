@@ -7,11 +7,21 @@ export interface CardAmbientGlowProps {
   height?: number;
 }
 
-export function CardAmbientGlow({ accentColor, height = 160 }: CardAmbientGlowProps): React.ReactElement {
+/**
+ * Ambient category-colour glow — the atmospheric signature of every card.
+ * Covers ~50 % of the card height with a diffuse, multi-stop gradient.
+ */
+export function CardAmbientGlow({ accentColor, height = 320 }: CardAmbientGlowProps): React.ReactElement {
   return (
-    <View style={[styles.absolute, { height }]}> 
+    <View style={[styles.absolute, { height }]} pointerEvents="none">
       <LinearGradient
-        colors={[accentColor + '25', 'transparent']}
+        colors={[
+          accentColor + '44',   // ~27 % — visible colour at the top
+          accentColor + '28',   // ~16 %
+          accentColor + '10',   // ~6 %
+          'transparent',
+        ]}
+        locations={[0, 0.3, 0.65, 1]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={[styles.gradient, { height }]}
@@ -31,6 +41,5 @@ const styles = StyleSheet.create({
   },
   gradient: {
     width: '100%',
-    height: 160,
   },
 });

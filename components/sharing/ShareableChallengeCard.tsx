@@ -26,23 +26,34 @@ const CAT_COLORS: [string, string, string, string, string] = [
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 640;
 
-// ─── Ambient multi-colour glow ─────────────────────────────────────────────
+/* ── Ambient multi-colour glow ─────────────────────────────── */
 function MultiGlow(): React.ReactElement {
   return (
     <View style={S.glowWrap} pointerEvents="none">
       <LinearGradient
-        colors={CAT_COLORS.map((c) => c + '26') as [string, string, ...string[]]}
+        colors={[
+          CAT_COLORS[0] + '30',
+          CAT_COLORS[1] + '20',
+          CAT_COLORS[2] + '18',
+          CAT_COLORS[3] + '20',
+          CAT_COLORS[4] + '30',
+        ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={StyleSheet.absoluteFill}
+      />
+      {/* Vertical fade-out */}
+      <LinearGradient
+        colors={['transparent', '#121212']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={[StyleSheet.absoluteFill, { top: '40%' }]}
       />
     </View>
   );
 }
 
-// ─── Hero number with gradient background ──────────────────────────────────
-// React Native has no CSS gradient-text. Alternative: clip a gradient rect to
-// the text bounding box via overflow:'hidden' — visually equivalent on static cards.
+/* ── Hero number with gradient background ──────────────────── */
 function HeroNumber({ value }: { value: number }): React.ReactElement {
   return (
     <View style={S.heroWrap}>
@@ -61,7 +72,7 @@ function HeroNumber({ value }: { value: number }): React.ReactElement {
   );
 }
 
-// ─── Main component ────────────────────────────────────────────────────────
+/* ── Main component ────────────────────────────────────────── */
 export function ShareableChallengeCard({
   username,
   current,
@@ -115,10 +126,11 @@ export function ShareableChallengeCard({
         ))}
       </View>
 
+      {/* ── Spacer pushes footer down ── */}
+      <View style={S.spacer} />
+
       {/* ── Footer ── */}
-      <View style={S.footerWrap}>
-        <CardFooter username={username} accentColor="#FFFFFF" />
-      </View>
+      <CardFooter username={username} accentColor="#FFFFFF" />
     </View>
   );
 }
@@ -131,64 +143,63 @@ const S = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     paddingHorizontal: 24,
+    paddingVertical: 20,
   },
-  // ── glow
+  /* ── glow */
   glowWrap: {
     position: 'absolute',
-    top: -40,
+    top: 0,
     left: 0,
     right: 0,
-    height: 120,
+    height: 280,
     zIndex: 0,
-    opacity: 0.65,
-    borderRadius: 60,
     overflow: 'hidden',
   },
-  // ── header
+  /* ── header */
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: 24,
     zIndex: 1,
   },
   headerLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: FONT.bold,
     color: COLORS.textSecondary,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
   headerStreak: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: FONT.bold,
     color: '#FFD700',
     letterSpacing: 0.3,
   },
   username: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: FONT.medium,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 10,
     zIndex: 1,
   },
-  // ── hero number
+  /* ── hero number */
   heroWrap: {
     alignItems: 'center',
-    marginTop: 40,
+    marginTop: 36,
     zIndex: 1,
   },
   heroGradientBox: {
-    width: 200,
-    height: 108,
-    borderRadius: 20,
+    width: 220,
+    height: 120,
+    borderRadius: 24,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
   },
   heroText: {
-    fontSize: 80,
+    fontSize: 88,
     fontFamily: FONT.bold,
     fontWeight: '700',
     letterSpacing: -4,
@@ -205,7 +216,7 @@ const S = StyleSheet.create({
     marginTop: 14,
     zIndex: 1,
   },
-  // ── progress bar
+  /* ── progress bar */
   progressWrap: {
     marginTop: 40,
     zIndex: 1,
@@ -224,38 +235,34 @@ const S = StyleSheet.create({
   progressInfoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 8,
+    marginTop: 10,
   },
   progressPct: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: FONT.medium,
     color: COLORS.textPrimary,
   },
   progressRemain: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: FONT.medium,
     color: COLORS.textSecondary,
   },
-  // ── dots
+  /* ── dots */
   dotsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 40,
+    gap: 10,
+    marginTop: 36,
     zIndex: 1,
   },
   dot: {
-    width: 28,
-    height: 4,
-    borderRadius: 2,
+    width: 32,
+    height: 5,
+    borderRadius: 3,
   },
-  // ── footer
-  footerWrap: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
-    zIndex: 2,
+  /* ── spacer */
+  spacer: {
+    flex: 1,
   },
 });

@@ -8,6 +8,10 @@ export interface CardScoreHeroProps {
   accentColor: string;
 }
 
+/**
+ * Hero score — the single most prominent element on every rating card.
+ * Deliberately oversized with negative tracking to feel dense & powerful.
+ */
 export function CardScoreHero({ score, accentColor }: CardScoreHeroProps): React.ReactElement {
   return (
     <View style={styles.row}>
@@ -21,17 +25,19 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 2,
+    gap: 1,
   },
   score: {
-    fontSize: 52,
+    fontSize: 76,
     fontFamily: FONT.bold,
-    letterSpacing: -3,
+    letterSpacing: -4,
+    lineHeight: 76,
+    includeFontPadding: false,
   },
   outOf: {
-    fontSize: 12,
+    fontSize: 14,
+    fontFamily: FONT.medium,
     color: COLORS.textTertiary,
-    fontWeight: '500',
-    marginBottom: 2,
+    marginBottom: 6,
   },
 });

@@ -25,10 +25,24 @@ export interface ShareableProfileCardProps {
   };
 }
 
-// Internal sub-components
+/* ── Ambient multi-colour glow for profile cards ──────────── */
+function ProfileGlow(): React.ReactElement {
+  return (
+    <View style={s.glowWrap} pointerEvents="none">
+      <LinearGradient
+        colors={['#FFFFFF18', '#FFFFFF08', 'transparent']}
+        locations={[0, 0.4, 1]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+    </View>
+  );
+}
 
+/* ── Stats row ────────────────────────────────────────────── */
 function ProfileStatsRow({ totalRatings, globalAverage, streak }: Pick<ShareableProfileCardProps, 'totalRatings' | 'globalAverage' | 'streak'>) {
-  const avg = globalAverage > 0 ? globalAverage.toFixed(1) : '';
+  const avg = globalAverage > 0 ? globalAverage.toFixed(1) : '—';
   return (
     <View style={s.statsRow}>
       <View style={s.statCol}>
@@ -49,10 +63,13 @@ function ProfileStatsRow({ totalRatings, globalAverage, streak }: Pick<Shareable
   );
 }
 
+/* ── Top posters ──────────────────────────────────────────── */
 function TopPostersRow({ posters }: { posters: string[] }) {
   const visible = posters.slice(0, 3);
+  if (visible.length === 0) return null;
+
   return (
-    <View>
+    <View style={s.postersSection}>
       <Text style={s.sectionLabel}>TOP VALORADOS</Text>
       <View style={s.postersRow}>
         {visible.map((url, i) => (
@@ -70,6 +87,7 @@ function TopPostersRow({ posters }: { posters: string[] }) {
   );
 }
 
+/* ── Category breakdown bars ──────────────────────────────── */
 type Breakdown = ShareableProfileCardProps['categoryBreakdown'];
 const CAT_META: Array<{ key: keyof Breakdown; emoji: string; color: string }> = [
   { key: 'movie',  emoji: '🎬', color: COLORS.categoryMovie  },
@@ -100,14 +118,18 @@ function CategoryBreakdownSection({ breakdown }: { breakdown: Breakdown }) {
   );
 }
 
-// Main component
-
+/* ── Main component ───────────────────────────────────────── */
 export function ShareableProfileCard({
   username, avatarUrl, totalRatings, globalAverage, streak, topPosters, categoryBreakdown,
 }: ShareableProfileCardProps): React.ReactElement {
   const initial = username.charAt(0).toUpperCase();
+  const hasPosters = topPosters.length > 0;
+
   return (
     <View style={s.card}>
+      <ProfileGlow />
+
+      {/* Header: avatar + username */}
       <View style={s.headerRow}>
         {avatarUrl ? (
           <Image source={avatarUrl} style={s.avatar} contentFit="cover" cachePolicy="memory-disk" />
@@ -119,20 +141,22 @@ export function ShareableProfileCard({
         <Text style={s.username} numberOfLines={1}>@{username}</Text>
       </View>
 
+      {/* Stats */}
       <ProfileStatsRow totalRatings={totalRatings} globalAverage={globalAverage} streak={streak} />
 
+      {/* Content area — flex 1 to fill available space */}
       <View style={s.content}>
-        <TopPostersRow posters={topPosters} />
+        {hasPosters && <TopPostersRow posters={topPosters} />}
         <CategoryBreakdownSection breakdown={categoryBreakdown} />
       </View>
 
+      {/* Footer */}
       <CardFooter username={username} accentColor="#FFFFFF" />
     </View>
   );
 }
 
-// Styles
-
+/* ── Styles ────────────────────────────────────────────────── */
 const s = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
@@ -142,27 +166,39 @@ const s = StyleSheet.create({
     padding: 20,
     overflow: 'hidden',
   },
+  glowWrap: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 240,
+    pointerEvents: 'none',
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
+    marginTop: 8,
     marginBottom: 16,
+    zIndex: 1,
   },
   avatar: {
-    width: 52,
-    height: 52,
+    width: 56,
+    height: 56,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#ffffff18',
   },
   avatarInitial: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: FONT.bold,
     color: '#FFFFFF',
   },
   username: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: FONT.bold,
     color: '#FFFFFF',
   },
@@ -170,17 +206,18 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingVertical: 14,
     marginBottom: 20,
+    zIndex: 1,
   },
   statCol: {
     flex: 1,
     alignItems: 'center',
-    gap: 3,
+    gap: 4,
   },
   statValue: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: FONT.bold,
     color: '#FFFFFF',
   },
@@ -188,32 +225,37 @@ const s = StyleSheet.create({
     fontSize: 9,
     fontFamily: FONT.medium,
     color: COLORS.textTertiary,
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   divider: {
     width: 1,
-    height: 28,
+    height: 30,
     backgroundColor: COLORS.divider,
   },
   content: {
     flex: 1,
-    gap: 18,
+    gap: 20,
+    zIndex: 1,
   },
   sectionLabel: {
     fontSize: 10,
     fontFamily: FONT.medium,
     color: COLORS.textTertiary,
-    letterSpacing: 0.8,
-    marginBottom: 8,
+    letterSpacing: 1,
+    marginBottom: 10,
+  },
+  /* Top Posters */
+  postersSection: {
+    flex: 1,
   },
   postersRow: {
     flexDirection: 'row',
     gap: 8,
+    flex: 1,
   },
   posterWrap: {
     flex: 1,
-    aspectRatio: 2 / 3,
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#ffffff10',
@@ -224,27 +266,28 @@ const s = StyleSheet.create({
   },
   badge1: {
     position: 'absolute',
-    top: 6,
-    left: 6,
+    top: 8,
+    left: 8,
     backgroundColor: '#FFCA3A',
     borderRadius: 999,
-    width: 18,
-    height: 18,
+    width: 22,
+    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
   badge1Text: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: FONT.bold,
     color: '#121212',
   },
+  /* Category breakdown */
   catRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 7,
+    gap: 10,
+    marginBottom: 8,
   },
-  catEmoji: { fontSize: 12, width: 18 },
+  catEmoji: { fontSize: 14, width: 20 },
   catTrack: {
     flex: 1,
     height: 6,
@@ -254,10 +297,10 @@ const s = StyleSheet.create({
   },
   catFill: { height: 6, borderRadius: 999 },
   catCount: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: FONT.medium,
     color: COLORS.textSecondary,
-    width: 24,
+    width: 28,
     textAlign: 'right',
   },
 });
