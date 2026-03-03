@@ -195,8 +195,8 @@ const s = StyleSheet.create({
   posterFallback: { borderRadius: 12, borderWidth: 1, borderColor: '#ffffff12', alignItems: 'center', justifyContent: 'center' },
   posterInit: { fontSize: 36, fontFamily: FONT.bold, color: '#FFFFFF' },
   /* Complete */
-  dividerA: { height: 1.5, marginVertical: 16, zIndex: 1 },
-  dividerB: { height: 1, backgroundColor: '#2A2A2A', marginVertical: 16, zIndex: 1 },
+  dividerA: { height: 1.5, marginVertical: 16, marginHorizontal: -20, zIndex: 1 },
+  dividerB: { height: 1, backgroundColor: '#2A2A2A', marginVertical: 16, marginHorizontal: -20, zIndex: 1 },
   contentRow: { flexDirection: 'row', alignItems: 'center', gap: 16, zIndex: 1 },
   infoCol: { flex: 1 },
   titleComplete: { fontSize: 28, fontFamily: FONT.bold, color: '#FFFFFF' },

@@ -24,16 +24,16 @@ export function CardAmbientGlow({ accentColor }: CardAmbientGlowProps): React.Re
       <View style={styles.glowTopRight} pointerEvents="none">
         {/* Layer A (Horizontal sweep) */}
         <LinearGradient
-          colors={[accentColor + '33', accentColor + '1A', accentColor + '00']}
-          locations={[0, 0.4, 1]}
+          colors={[accentColor + '1A', accentColor + '1A', accentColor + '0D', accentColor + '00']}
+          locations={[0, 0.3, 0.7, 1]}
           start={{ x: 1, y: 0 }}
           end={{ x: 0, y: 0 }}
           style={StyleSheet.absoluteFill}
         />
         {/* Layer B (Vertical sweep) */}
         <LinearGradient
-          colors={[accentColor + '26', accentColor + '00']}
-          locations={[0, 1]}
+          colors={[accentColor + '14', accentColor + '0A', accentColor + '00']}
+          locations={[0, 0.4, 1]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={StyleSheet.absoluteFill}
@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH * 0.7,
     height: CARD_HEIGHT * 0.5,
     pointerEvents: 'none',
-    borderRadius: 80,
   },
   glowBottomRight: {
     position: 'absolute',
@@ -76,6 +75,5 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH * 0.45,
     height: CARD_HEIGHT * 0.3,
     pointerEvents: 'none',
-    borderRadius: 60,
   },
 });

@@ -15,7 +15,7 @@ export interface CardFooterProps {
  */
 export function CardFooter({ username, accentColor }: CardFooterProps): React.ReactElement {
   return (
-    <View style={[styles.container, { borderTopColor: '#1A1A1A' }]}>
+    <View style={styles.container}>
       <Text style={styles.username}>@{username}</Text>
       <Text style={styles.wordmark}>
         <Text style={styles.wordmarkMain}>Rate</Text>
@@ -30,7 +30,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderTopWidth: 1,
     paddingTop: 14,
   },
   username: {
