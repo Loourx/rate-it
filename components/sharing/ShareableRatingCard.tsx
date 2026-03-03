@@ -173,7 +173,14 @@ export function ShareableRatingCard({
 
 /* ── Styles ────────────────────────────────────────────────── */
 const s = StyleSheet.create({
-  card: { borderRadius: 20, backgroundColor: '#0A0A0A', padding: 20, overflow: 'hidden' },
+  card: {
+    width: CARD_DIMENSIONS.stories.width,
+    height: CARD_DIMENSIONS.stories.height,
+    borderRadius: 20,
+    backgroundColor: '#0A0A0A',
+    padding: 20,
+    overflow: 'hidden',
+  },
   cardMinimal: { justifyContent: 'space-between' },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 12, zIndex: 1 },
   infoRow: { flexDirection: 'row', gap: 16, zIndex: 1 },
