@@ -6,6 +6,7 @@ import {
     TextInput,
     StyleSheet,
     TouchableOpacity,
+    useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -27,6 +28,7 @@ import {
 } from '@/components/sharing';
 import { useShareForm } from '@/lib/hooks/useShareForm';
 import { useGenerateAndShare } from '@/lib/hooks/useGenerateAndShare';
+import { useState, useRef } from 'react';
 
 // ── Sub-components ────────────────────────────────────────
 
@@ -70,6 +72,58 @@ function HeadlineSection({
     );
 }
 
+function FormatSelector({
+    value,
+    onChange,
+    accentColor,
+}: {
+    value: 'stories' | 'feed';
+    onChange: (v: 'stories' | 'feed') => void;
+    accentColor: string;
+}): React.ReactElement {
+    const options = [
+        { value: 'stories', label: '9:16 Stories', icon: 'phone-portrait-outline' as const },
+        { value: 'feed', label: '4:5 Feed', icon: 'image-outline' as const },
+    ];
+
+    return (
+        <View style={styles.selectorRow}>
+            {options.map((opt) => {
+                const isSelected = value === opt.value;
+                return (
+                    <TouchableOpacity
+                        key={opt.value}
+                        onPress={() => onChange(opt.value as 'stories' | 'feed')}
+                        style={[
+                            styles.selectorPill,
+                            isSelected
+                                ? { backgroundColor: accentColor + '22', borderColor: accentColor }
+                                : { backgroundColor: COLORS.surface, borderColor: COLORS.divider },
+                        ]}
+                    >
+                        <Ionicons
+                            name={opt.icon}
+                            size={16}
+                            color={isSelected ? accentColor : COLORS.textSecondary}
+                        />
+                        <Text
+                            style={[
+                                styles.selectorLabel,
+                                {
+                                    color: isSelected ? accentColor : COLORS.textSecondary,
+                                    fontFamily: isSelected ? FONT.semibold : FONT.regular,
+                                },
+                            ]}
+                        >
+                            {opt.label}
+                        </Text>
+                    </TouchableOpacity>
+                );
+            })}
+        </View>
+    );
+}
+
 // ── Main screen ───────────────────────────────────────────
 
 export default function ShareScreen(): React.ReactElement {
@@ -98,13 +152,20 @@ export default function ShareScreen(): React.ReactElement {
         fromRating: fromRating === 'true',
     });
 
-    const { shareRef, handleGenerate, isGenerating } = useGenerateAndShare({
+    const [format, setFormat] = useState<'stories' | 'feed'>('stories');
+    const storiesRef = useRef<View | null>(null);
+    const feedRef = useRef<View | null>(null);
+
+    const activeRef = format === 'stories' ? storiesRef : feedRef;
+
+    const { handleGenerate, isGenerating } = useGenerateAndShare({
         contentType,
         contentId: id,
         existingRatingId: existingRating?.id ?? null,
         formState,
         fromRating: fromRating === 'true',
-        format: 'stories',
+        format,
+        shareRef: activeRef,
     });
 
     const accentColor = getCategoryColor(contentType);
@@ -132,7 +193,7 @@ export default function ShareScreen(): React.ReactElement {
             >
                 {/* Preview mini centered */}
                 <View style={styles.previewContainer}>
-                    <SharePreviewMini cardProps={cardProps} />
+                    <SharePreviewMini cardProps={cardProps} format={format} />
                 </View>
 
                 {/* Score display */}
@@ -214,6 +275,14 @@ export default function ShareScreen(): React.ReactElement {
 
             {/* Fixed bottom bar */}
             <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
+                <View style={{ marginBottom: SPACING.lg }}>
+                    <FormatSelector
+                        value={format}
+                        onChange={setFormat}
+                        accentColor={accentColor}
+                    />
+                </View>
+
                 <Button
                     label={isGenerating ? 'Generando...' : 'Generar y compartir'}
                     onPress={handleGenerate}
@@ -223,9 +292,15 @@ export default function ShareScreen(): React.ReactElement {
                 />
             </SafeAreaView>
 
-            {/* Off-screen portal for capture — F11-PI-i */}
-            <View ref={shareRef} style={styles.offScreen} pointerEvents="none">
-                <ShareableRatingCard {...cardProps} />
+            {/* Off-screen portals for capture — F11-PI-j */}
+            <View style={styles.offScreen} pointerEvents="none">
+                <View ref={storiesRef} collapsable={false}>
+                    <ShareableRatingCard {...cardProps} format="stories" />
+                </View>
+                <View style={{ height: 100 }} />
+                <View ref={feedRef} collapsable={false}>
+                    <ShareableRatingCard {...cardProps} format="feed" />
+                </View>
             </View>
         </SafeAreaView>
     );
@@ -290,10 +365,30 @@ const styles = StyleSheet.create({
         paddingHorizontal: SPACING.xl,
         paddingTop: SPACING.base,
         backgroundColor: COLORS.background,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.divider,
+    },
+    selectorRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 12,
+    },
+    selectorPill: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: RADIUS.full,
+        borderWidth: 1,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        gap: 6,
+    },
+    selectorLabel: {
+        fontSize: 13,
     },
     offScreen: {
         position: 'absolute',
-        top: -9999,
-        left: -9999,
+        top: -2000,
+        left: -2000,
+        opacity: 0,
     },
 });

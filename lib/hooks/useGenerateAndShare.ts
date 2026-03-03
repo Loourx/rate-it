@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
@@ -20,6 +20,7 @@ export interface UseGenerateAndShareProps {
     formState: ShareFormState;
     fromRating?: boolean;
     format: 'stories' | 'feed';
+    shareRef: React.RefObject<View | null>;
 }
 
 export interface UseGenerateAndShareReturn {
@@ -35,11 +36,12 @@ export function useGenerateAndShare({
     existingRatingId,
     formState,
     fromRating = false,
+    format,
+    shareRef,
 }: UseGenerateAndShareProps): UseGenerateAndShareReturn {
     const router = useRouter();
     const updateRatingMeta = useUpdateRatingMeta();
 
-    const shareRef = useRef<View | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

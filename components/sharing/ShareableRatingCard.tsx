@@ -5,8 +5,12 @@ import { COLORS, getCategoryColor } from '@/lib/utils/constants';
 import { FONT } from '@/lib/utils/typography';
 import { CardAmbientGlow, CardFooter, CardScoreHero } from '@/components/sharing/partials';
 
-const CARD_WIDTH = 360;
-const CARD_HEIGHT = 640;
+export const CARD_DIMENSIONS = {
+  stories: { width: 360, height: 640 },
+  feed: { width: 360, height: 450 },
+};
+
+const DEFAULT_DIMENSIONS = CARD_DIMENSIONS.stories;
 
 type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music';
 
@@ -35,6 +39,8 @@ export interface ShareableRatingCardProps {
   primaryGenre?: string | null;
   /** Layout variant */
   cardVariant?: CardVariant;
+  /** Share format: 9:16 Stories vs 4:5 Feed */
+  format?: 'stories' | 'feed';
 }
 
 const EMOJI: Record<ContentType, string> = {
@@ -86,7 +92,9 @@ export function ShareableRatingCard({
   year, director, trackAverage, episodeAverage,
   platform, favoriteTrack, bookFormat, primaryGenre,
   cardVariant = 'complete',
+  format = 'stories',
 }: ShareableRatingCardProps): React.ReactElement {
+  const { width: CARD_WIDTH, height: CARD_HEIGHT } = CARD_DIMENSIONS[format];
   const color = getCategoryColor(contentType);
   const isMusic = contentType === 'music';
   const isBook = contentType === 'book';
@@ -283,8 +291,6 @@ export function ShareableRatingCard({
 /* ── Styles ────────────────────────────────────────────────── */
 const s = StyleSheet.create({
   card: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
     borderRadius: 20,
     backgroundColor: '#121212',
     padding: 20,

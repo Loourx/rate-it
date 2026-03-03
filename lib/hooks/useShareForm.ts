@@ -100,7 +100,7 @@ type CardVariant = 'complete' | 'no-headline' | 'minimal';
 
 // ── Hook ────────────────────────────────────────────────────
 
-export function useShareForm({ contentType, contentId }: UseShareFormProps) {
+export function useShareForm({ contentType, contentId, fromRating }: UseShareFormProps) {
     // ── Data fetching ────────────────────────────────────────
     const { data: content, isLoading: loadingContent, isError } =
         useContentDetails(contentType, contentId);

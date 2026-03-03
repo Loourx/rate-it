@@ -14,7 +14,6 @@ import { useIsPinned, usePinItem, useUnpinItem } from '@/lib/hooks/usePinnedItem
 import { useContentDetails } from '@/lib/hooks/useContentDetails';
 import { useExistingRating } from '@/lib/hooks/useCreateRating';
 import { useProfile } from '@/lib/hooks/useProfile';
-import { useShareRating } from '@/lib/hooks/useShareRating';
 import { ContentType, Movie, Series, /* MVP_DISABLED: Anything, */ Music } from '@/lib/types/content';
 import { AlbumTrackList } from '@/components/content/AlbumTrackList';
 import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
@@ -25,10 +24,8 @@ import { ContentMetadataBadges } from '@/components/content/ContentMetadataBadge
 import { ContentDetailSkeleton } from '@/components/content/ContentDetailSkeleton';
 import { CommunityScore } from '@/components/content/CommunityScore';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { Toast } from '@/components/ui/Toast';
 /* MVP_DISABLED: import { ReportModal } from '@/components/anything/ReportModal'; */
 import { RecommendModal } from '@/components/content/RecommendModal';
-import { ShareableRatingCardPortal } from '@/components/sharing';
 /* MVP_DISABLED: import { useHasReported } from '@/lib/hooks/useReportAnything'; */
 import type { ShareableRatingCardProps } from '@/components/sharing';
 
@@ -130,36 +127,8 @@ export default function ContentDetailsScreen() {
         username: profile?.username ?? 'usuario',
     };
 
-    const {
-        shareAsStory,
-        shareAsFeed,
-        isCapturing,
-        storiesRef,
-        feedRef,
-        toastVisible,
-        toastMessage,
-        toastType,
-        dismissToast,
-    } = useShareRating({ cardProps });
-
-    const handleShare = useCallback(() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        Alert.alert(
-            'Compartir valoración',
-            'Elige el formato de la tarjeta:',
-            [
-                {
-                    text: 'Formato Stories (9:16)',
-                    onPress: () => { void shareAsStory(); },
-                },
-                {
-                    text: 'Formato Feed (4:5)',
-                    onPress: () => { void shareAsFeed(); },
-                },
-                { text: 'Cancelar', style: 'cancel' },
-            ],
-        );
-    }, [shareAsStory, shareAsFeed]);
+    // F11-PI-k: useShareRating and handleShare removed as sharing logic
+    // is now handled by the intermediate screen /share/[type]/[id].
 
     if (isLoading) {
         return (
@@ -261,15 +230,14 @@ export default function ContentDetailsScreen() {
 
 
                             <TouchableOpacity
-                                style={[S.iconBtn, isCapturing && S.iconBtnDisabled, { borderColor: isCapturing ? COLORS.divider : color }]}
+                                style={[S.iconBtn, { borderColor: color }]}
                                 onPress={() => router.push(`/share/${type}/${id}`)}
                                 activeOpacity={0.7}
-                                disabled={isCapturing}
                             >
                                 <Ionicons
                                     name="share-social-outline"
                                     size={22}
-                                    color={isCapturing ? COLORS.textSecondary : color}
+                                    color={color}
                                 />
                             </TouchableOpacity>
 
@@ -334,21 +302,7 @@ export default function ContentDetailsScreen() {
                 contentImageUrl={item?.imageUrl ?? null}
             />
 
-            {/* Off-screen portal for share card capture */}
-            {userRating && (
-                <ShareableRatingCardPortal
-                    cardProps={cardProps}
-                    storiesRef={storiesRef}
-                    feedRef={feedRef}
-                />
-            )}
-
-            <Toast
-                visible={toastVisible}
-                message={toastMessage}
-                type={toastType}
-                onDismiss={dismissToast}
-            />
+            {/* F11-PI-k: ShareableRatingCardPortal and Toast removed */}
         </>
     );
 }
