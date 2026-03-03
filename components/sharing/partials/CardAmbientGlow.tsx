@@ -24,7 +24,7 @@ export function CardAmbientGlow({ accentColor }: CardAmbientGlowProps): React.Re
       <View style={styles.glowTopRight} pointerEvents="none">
         {/* Layer A (Horizontal sweep) */}
         <LinearGradient
-          colors={[accentColor + '33', accentColor + '1A', 'transparent']}
+          colors={[accentColor + '33', accentColor + '1A', accentColor + '00']}
           locations={[0, 0.4, 1]}
           start={{ x: 1, y: 0 }}
           end={{ x: 0, y: 0 }}
@@ -32,7 +32,7 @@ export function CardAmbientGlow({ accentColor }: CardAmbientGlowProps): React.Re
         />
         {/* Layer B (Vertical sweep) */}
         <LinearGradient
-          colors={[accentColor + '26', 'transparent']}
+          colors={[accentColor + '26', accentColor + '00']}
           locations={[0, 1]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
@@ -43,7 +43,7 @@ export function CardAmbientGlow({ accentColor }: CardAmbientGlowProps): React.Re
       {/* --- Glow 2: Bottom-Right (45%w, 30%h) --- */}
       <View style={styles.glowBottomRight} pointerEvents="none">
         <LinearGradient
-          colors={[accentColor + '14', accentColor + '0A', 'transparent']}
+          colors={[accentColor + '14', accentColor + '0A', accentColor + '00']}
           locations={[0, 0.5, 1]}
           start={{ x: 1, y: 1 }}
           end={{ x: 0, y: 0 }}
@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH * 0.7,
     height: CARD_HEIGHT * 0.5,
     pointerEvents: 'none',
+    borderRadius: 80,
   },
   glowBottomRight: {
     position: 'absolute',
@@ -75,5 +76,6 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH * 0.45,
     height: CARD_HEIGHT * 0.3,
     pointerEvents: 'none',
+    borderRadius: 60,
   },
 });

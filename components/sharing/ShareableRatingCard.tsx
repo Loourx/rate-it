@@ -100,7 +100,15 @@ export function ShareableRatingCard({
         <View style={s.contentRow}>
           <Poster url={posterUrl} w={CW * 0.38} ratio={2 / 3} fallback={title.charAt(0).toUpperCase()} color={color} />
           <View style={s.infoCol}>
-            <Text style={s.titleComplete} numberOfLines={2} ellipsizeMode="tail">{title}</Text>
+            <Text
+              style={s.titleComplete}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+              adjustsFontSizeToFit={true}
+              minimumFontScale={0.72}
+            >
+              {title}
+            </Text>
             {!!year && <Text style={s.yearText}>{year}</Text>}
           </View>
         </View>

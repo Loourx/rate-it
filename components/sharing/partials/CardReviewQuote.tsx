@@ -23,6 +23,7 @@ export function CardReviewQuote({ text }: CardReviewQuoteProps): React.ReactElem
 const styles = StyleSheet.create({
     quote: {
         paddingHorizontal: 64,
+        paddingVertical: 20,
         textAlign: 'center',
         fontStyle: 'italic',
         color: '#F0F0F0',

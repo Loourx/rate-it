@@ -96,9 +96,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -(CARD_WIDTH * 0.15),
     bottom: -8,
-    fontSize: 220,
+    fontSize: 155,
     fontFamily: FONT.bold,
-    lineHeight: 220,
+    lineHeight: 155,
     includeFontPadding: false,
   },
 });
