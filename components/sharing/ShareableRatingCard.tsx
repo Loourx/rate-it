@@ -197,7 +197,7 @@ const s = StyleSheet.create({
   /* Complete */
   dividerA: { height: 1.5, marginVertical: 16, zIndex: 1 },
   dividerB: { height: 1, backgroundColor: '#2A2A2A', marginVertical: 16, zIndex: 1 },
-  contentRow: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 24, zIndex: 1 },
+  contentRow: { flexDirection: 'row', alignItems: 'center', gap: 16, zIndex: 1 },
   infoCol: { flex: 1 },
   titleComplete: { fontSize: 28, fontFamily: FONT.bold, color: '#FFFFFF' },
   yearText: { fontSize: 16, color: '#888888', marginTop: 6 },
