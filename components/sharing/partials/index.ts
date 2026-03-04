@@ -6,3 +6,5 @@ export { CardAmbientGlow } from './CardAmbientGlow';
 export type { CardAmbientGlowProps } from './CardAmbientGlow';
 export { CardReviewQuote } from './CardReviewQuote';
 export type { CardReviewQuoteProps } from './CardReviewQuote';
+export { CardFeedContentRow } from './CardFeedContentRow';
+export type { CardFeedContentRowProps } from './CardFeedContentRow';

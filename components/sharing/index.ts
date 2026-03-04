@@ -1,5 +1,6 @@
 export { ShareableRatingCard } from './ShareableRatingCard';
 export type { ShareableRatingCardProps } from './ShareableRatingCard';
+export { ShareableRatingCardFeed } from './ShareableRatingCardFeed';
 export { ShareableProfileCard } from './ShareableProfileCard';
 export type { ShareableProfileCardProps } from './ShareableProfileCard';
 export { ShareableChallengeCard } from './ShareableChallengeCard';

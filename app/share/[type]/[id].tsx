@@ -25,6 +25,7 @@ import {
     BookFormatSelector,
     AutoInfoSection,
     ShareableRatingCard,
+    ShareableRatingCardFeed,
 } from '@/components/sharing';
 import { useShareForm } from '@/lib/hooks/useShareForm';
 import { useGenerateAndShare } from '@/lib/hooks/useGenerateAndShare';
@@ -318,7 +319,7 @@ export default function ShareScreen(): React.ReactElement {
                 </View>
                 <View style={{ height: 100 }} />
                 <View ref={feedRef} collapsable={false}>
-                    <ShareableRatingCard {...cardProps} format="feed" />
+                    <ShareableRatingCardFeed {...cardProps} />
                 </View>
             </View>
         </SafeAreaView>
