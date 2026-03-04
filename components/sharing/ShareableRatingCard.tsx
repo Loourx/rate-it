@@ -12,7 +12,7 @@ export const CARD_DIMENSIONS = {
   feed: { width: 360, height: 450 },
 };
 
-type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music';
+type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
 export type CardVariant = 'complete' | 'no-headline' | 'minimal';
 
 export interface ShareableRatingCardProps {
@@ -24,7 +24,8 @@ export interface ShareableRatingCardProps {
   reviewText: string | null;
   username: string;
   year?: string | number | null;
-  director?: string | null;
+  /** Primary creator: artist (música), director (películas), author (libros), developer (juegos), creator (series) */
+  creator?: string | null;
   trackAverage?: number | null;
   episodeAverage?: number | null;
   platform?: string | null;
@@ -35,11 +36,13 @@ export interface ShareableRatingCardProps {
   format?: 'stories' | 'feed';
 }
 
+// Fixed accent for books — #FFCA3A
+const ACCENT = COLORS.categoryBook;
 const EMOJI: Record<ContentType, string> = {
-  movie: '🎬', series: '📺', book: '📚', game: '🎮', music: '🎵',
+  movie: '🎬', series: '📺', book: '📚', game: '🎮', music: '🎵', podcast: '🎙️', anything: '⭐',
 };
 const LABEL: Record<ContentType, string> = {
-  movie: 'PELÍCULA', series: 'SERIE', book: 'LIBRO', game: 'JUEGO', music: 'MÚSICA',
+  movie: 'PELÍCULA', series: 'SERIE', book: 'LIBRO', game: 'JUEGO', music: 'MÚSICA', podcast: 'PODCAST', anything: 'ARTÍCULO',
 };
 const BOOK_FMT: Record<'paper' | 'digital' | 'audiobook', string> = {
   paper: '📖 Papel', digital: '📱 Digital', audiobook: '🎧 Audiolibro',
@@ -68,34 +71,40 @@ function Poster({ url, w, h, ratio, fallback, color }: {
   url: string | null; w: number; h?: number; ratio?: number; fallback: string; color: string;
 }): React.ReactElement {
   const imgStyle = ratio
-    ? { width: w, aspectRatio: ratio, borderRadius: 8, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 8, elevation: 4 }
-    : { width: w, height: h, borderRadius: 12, borderWidth: 1 as const, borderColor: '#ffffff12' as const };
+    ? { width: w, aspectRatio: ratio, borderRadius: 12 }
+    : { width: w, height: h, borderRadius: 12 };
+
   const fbH = ratio ? w / ratio : (h ?? w);
-  return url ? (
-    <Image source={url} style={imgStyle} contentFit="cover" cachePolicy="memory-disk" />
-  ) : (
-    <View style={[s.posterFallback, { width: w, height: fbH, backgroundColor: color + '33' }]}>
-      <Text style={s.posterInit}>{fallback}</Text>
+  return (
+    <View style={{ borderRadius: 12, overflow: 'hidden' }}>
+      {url ? (
+        <Image source={url} style={imgStyle} contentFit="cover" cachePolicy="memory-disk" />
+      ) : (
+        <View style={[s.posterFallback, { width: w, height: fbH, backgroundColor: color + '33' }]}>
+          <Text style={s.posterInit}>{fallback}</Text>
+        </View>
+      )}
     </View>
   );
 }
 
 /* ── Main component ───────────────────────────────────────── */
 export function ShareableRatingCard({
-  contentType, title, posterUrl, score, reviewText, username,
-  year, director, platform, favoriteTrack, bookFormat, primaryGenre,
+  contentType, title, posterUrl, score, headline, reviewText, username,
+  year, creator, platform, favoriteTrack, bookFormat, primaryGenre,
   cardVariant = 'complete', format = 'stories',
 }: ShareableRatingCardProps): React.ReactElement {
-  const { width: CW } = CARD_DIMENSIONS[format];
+  const { width: CW, height: CH } = CARD_DIMENSIONS[format];
   const color = getCategoryColor(contentType);
 
   /* ── Complete variant (Stories redesign) ─────────────────── */
   if (cardVariant === 'complete') {
-    const hasReview = !!reviewText && reviewText.length > 5;
+    const displayQuote = headline?.trim() || (reviewText && reviewText.length > 5 ? reviewText : null);
+
     return (
       <View style={s.card}>
-        <CardAmbientGlow accentColor={color} height={320} />
-        <CardScoreHero score={score} contentType={contentType} accentColor={color} />
+        <CardAmbientGlow accentColor={color} cardWidth={CW} height={CH} />
+        <CardScoreHero score={score} contentType={contentType} accentColor={color} cardWidth={CW} />
         <View style={[s.dividerA, { backgroundColor: color }]} />
         <View style={s.contentRow}>
           <Poster url={posterUrl} w={CW * 0.38} ratio={2 / 3} fallback={title.charAt(0).toUpperCase()} color={color} />
@@ -110,10 +119,18 @@ export function ShareableRatingCard({
               {title}
             </Text>
             {!!year && <Text style={s.yearText}>{year}</Text>}
+
+            {/* F11-FIX-S3: Favorite track for music in complete variant */}
+            {contentType === 'music' && !!favoriteTrack?.trim() && (
+              <View style={s.musicMetaRow}>
+                <Text style={s.musicMetaIcon}>🎵</Text>
+                <Text style={s.musicMetaText} numberOfLines={1}>{favoriteTrack}</Text>
+              </View>
+            )}
           </View>
         </View>
         <View style={s.dividerB} />
-        {hasReview && <CardReviewQuote text={reviewText as string} />}
+        {!!displayQuote && <CardReviewQuote text={displayQuote as string} />}
         <CardFooter username={username} accentColor={color} />
       </View>
     );
@@ -125,7 +142,7 @@ export function ShareableRatingCard({
     const mH = Math.round(mW * 1.4);
     return (
       <View style={[s.card, s.cardMinimal]}>
-        <CardAmbientGlow accentColor={color} height={320} />
+        <CardAmbientGlow accentColor={color} cardWidth={CW} height={CH} />
         <View style={s.topRow}><Badge type={contentType} color={color} /></View>
         <View style={s.middle}>
           <Poster url={posterUrl} w={mW} h={mH} fallback={title.charAt(0).toUpperCase()} color={color} />
@@ -140,13 +157,13 @@ export function ShareableRatingCard({
   /* ── No-headline variant ─────────────────────────────────── */
   const pH = 200;
   const pW = Math.round(pH * (2 / 3));
-  const sub = [year ? String(year) : null, director].filter(Boolean).join(' · ') || null;
+  const sub = [year ? String(year) : null, creator].filter(Boolean).join(' · ') || null;
   return (
     <View style={s.card}>
-      <CardAmbientGlow accentColor={color} height={320} />
+      <CardAmbientGlow accentColor={color} cardWidth={CW} height={CH} />
       <View style={s.topRow}>
         <Badge type={contentType} color={color} />
-        <CardScoreHero score={score} contentType={contentType} accentColor={color} />
+        <CardScoreHero score={score} contentType={contentType} accentColor={color} cardWidth={CW} />
       </View>
       <View style={s.infoRow}>
         <Poster url={posterUrl} w={pW} h={pH} fallback={title.charAt(0).toUpperCase()} color={color} />
@@ -178,7 +195,8 @@ const s = StyleSheet.create({
     height: CARD_DIMENSIONS.stories.height,
     borderRadius: 20,
     backgroundColor: '#0A0A0A',
-    padding: 20,
+    paddingHorizontal: 24, // F11-FIX-S3
+    paddingVertical: 20,   // F11-FIX-S3
     overflow: 'hidden',
   },
   cardMinimal: { justifyContent: 'space-between' },
@@ -200,7 +218,10 @@ const s = StyleSheet.create({
   contentRow: { flexDirection: 'row', alignItems: 'center', gap: 16, zIndex: 1 },
   infoCol: { flex: 1 },
   titleComplete: { fontSize: 28, fontFamily: FONT.bold, color: '#FFFFFF' },
-  yearText: { fontSize: 16, color: '#888888', marginTop: 6 },
+  yearText: { fontSize: 16, color: '#888888', marginTop: 4 },
+  musicMetaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 6 },
+  musicMetaIcon: { fontSize: 13, color: COLORS.textSecondary },
+  musicMetaText: { fontSize: 14, color: COLORS.textSecondary, fontFamily: FONT.regular },
   /* Non-complete */
   title: { fontSize: 18, fontFamily: FONT.bold, color: '#FFFFFF', lineHeight: 24 },
   titleMinimal: { fontSize: 22, fontFamily: FONT.bold, color: '#FFFFFF', lineHeight: 28, marginTop: 12, textAlign: 'center' },

@@ -75,10 +75,14 @@ function getContentYear(content: AllContent | undefined): string | null {
     return null;
 }
 
-function getContentDirector(content: AllContent | undefined): string | null {
+function getContentCreator(content: AllContent | undefined): string | null {
     if (!content) return null;
     if (content.type === 'movie') return content.director ?? null;
     if (content.type === 'series') return content.creator ?? null;
+    if (content.type === 'book') return content.author ?? null;
+    if (content.type === 'game') return content.developer ?? null;
+    if (content.type === 'music') return content.artist ?? null;
+    if (content.type === 'podcast') return content.publisher ?? null;
     return null;
 }
 
@@ -235,7 +239,7 @@ export function useShareForm({ contentType, contentId, fromRating: _fromRating }
             reviewText: existingRating?.review_text ?? null,
             headline: headline.trim() || null,
             year: getContentYear(typedContent),
-            director: getContentDirector(typedContent),
+            creator: getContentCreator(typedContent),
             trackAverage: computeAverage(trackEntries),
             episodeAverage: computeAverage(episodeEntries),
             // Missing fields for F11-FIX-S1

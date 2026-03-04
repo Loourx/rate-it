@@ -130,15 +130,6 @@ function RootLayoutNav() {
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                 <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-                <Stack.Screen name="profile/edit" options={{ headerShown: true, title: 'Editar perfil' }} />
-                <Stack.Screen
-                    name="share/[type]/[id]"
-                    options={{
-                        presentation: 'modal',
-                        headerShown: false,
-                        gestureEnabled: true,
-                    }}
-                />
                 <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="light" />

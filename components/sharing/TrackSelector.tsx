@@ -60,8 +60,7 @@ export function TrackSelector({
                 keyExtractor={keyExtractor}
                 ItemSeparatorComponent={ItemSeparator}
                 showsVerticalScrollIndicator={false}
-                scrollEnabled
-                nestedScrollEnabled
+                scrollEnabled={false}
             />
         </View>
     );
@@ -69,8 +68,7 @@ export function TrackSelector({
 
 const styles = StyleSheet.create({
     container: {
-        maxHeight: 200,
-        overflow: 'hidden',
+        // No fixed height to allow ScrollView parent to manage scroll
     },
     row: {
         flexDirection: 'row',

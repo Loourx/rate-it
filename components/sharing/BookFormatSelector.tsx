@@ -17,8 +17,8 @@ const FORMAT_OPTIONS: FormatOption[] = [
     { value: 'audiobook', label: 'Audiolibro', emoji: '🎧' },
 ];
 
-// Fixed accent for books — #8AC926 (COLORS.categoryMusic maps to this value)
-const ACCENT = COLORS.categoryMusic;
+// Fixed accent for books — #FFCA3A
+const ACCENT = COLORS.categoryBook;
 
 interface BookFormatSelectorProps {
     selected: BookFormat | null;

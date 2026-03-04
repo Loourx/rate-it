@@ -4,11 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export interface CardAmbientGlowProps {
   accentColor: string;
+  cardWidth?: number;
   height?: number;
 }
-
-const CARD_WIDTH = 360;
-const CARD_HEIGHT = 640;
 
 /**
  * Atmospheric signature of every card.
@@ -17,11 +15,21 @@ const CARD_HEIGHT = 640;
  * 2. Bottom-right: Subtle diagonal glow.
  * Left 30% remains pure #0A0A0A.
  */
-export function CardAmbientGlow({ accentColor }: CardAmbientGlowProps): React.ReactElement {
+export function CardAmbientGlow({
+  accentColor,
+  cardWidth = 360,
+  height = 640,
+}: CardAmbientGlowProps): React.ReactElement {
   return (
     <View style={styles.container} pointerEvents="none">
       {/* --- Glow 1: Top-Right (70%w, 50%h) --- */}
-      <View style={styles.glowTopRight} pointerEvents="none">
+      <View
+        style={[
+          styles.glowTopRight,
+          { width: cardWidth * 0.7, height: height * 0.5 },
+        ]}
+        pointerEvents="none"
+      >
         {/* Layer A (Horizontal sweep) */}
         <LinearGradient
           colors={[accentColor + '1A', accentColor + '1A', accentColor + '0D', accentColor + '00']}
@@ -41,7 +49,13 @@ export function CardAmbientGlow({ accentColor }: CardAmbientGlowProps): React.Re
       </View>
 
       {/* --- Glow 2: Bottom-Right (45%w, 30%h) --- */}
-      <View style={styles.glowBottomRight} pointerEvents="none">
+      <View
+        style={[
+          styles.glowBottomRight,
+          { width: cardWidth * 0.45, height: height * 0.3 },
+        ]}
+        pointerEvents="none"
+      >
         <LinearGradient
           colors={[accentColor + '14', accentColor + '0A', accentColor + '00']}
           locations={[0, 0.5, 1]}
@@ -64,16 +78,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    width: CARD_WIDTH * 0.7,
-    height: CARD_HEIGHT * 0.5,
     pointerEvents: 'none',
   },
   glowBottomRight: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: CARD_WIDTH * 0.45,
-    height: CARD_HEIGHT * 0.3,
     pointerEvents: 'none',
   },
 });

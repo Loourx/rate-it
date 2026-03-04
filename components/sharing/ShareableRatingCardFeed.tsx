@@ -9,10 +9,10 @@ import type { ShareableRatingCardProps } from '@/components/sharing/ShareableRat
 // Card dimensions: 360×450
 
 const EMOJI: Record<string, string> = {
-    movie: '🎬', series: '📺', book: '📚', game: '🎮', music: '🎵',
+    movie: '🎬', series: '📺', book: '📚', game: '🎮', music: '🎵', podcast: '🎙️', anything: '⭐',
 };
 const LABEL: Record<string, string> = {
-    movie: 'PELÍCULA', series: 'SERIE', book: 'LIBRO', game: 'JUEGO', music: 'MÚSICA',
+    movie: 'PELÍCULA', series: 'SERIE', book: 'LIBRO', game: 'JUEGO', music: 'MÚSICA', podcast: 'PODCAST', anything: 'ARTÍCULO',
 };
 
 function formatScore(score: number): string {
@@ -29,7 +29,7 @@ export function ShareableRatingCardFeed({
     reviewText,
     username,
     year,
-    director,
+    creator,
     platform,
     favoriteTrack,
 }: ShareableRatingCardProps): React.ReactElement {
@@ -37,8 +37,8 @@ export function ShareableRatingCardFeed({
     const emoji = EMOJI[contentType] ?? '⭐';
     const label = LABEL[contentType] ?? contentType.toUpperCase();
 
-    // `director` carries creator for all types (director/author/artist/developer)
-    const creator = director ?? null;
+    // `creator` field for all types (director/author/artist/developer)
+    const displayCreator = creator ?? null;
 
     const rawQuote = headline?.trim() || (reviewText && reviewText.length > 5 ? reviewText : null);
     const displayQuote = rawQuote
@@ -62,7 +62,7 @@ export function ShareableRatingCardFeed({
             <CardFeedContentRow
                 title={title}
                 posterUrl={posterUrl}
-                creator={creator}
+                creator={displayCreator}
                 year={year}
                 platform={platform}
                 favoriteTrack={favoriteTrack}

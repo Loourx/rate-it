@@ -1,16 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { FONT } from '@/lib/utils/typography';
-import { CARD_DIMENSIONS } from '../ShareableRatingCard';
 
-const CARD_WIDTH = CARD_DIMENSIONS.stories.width; // Standard card width used for bleed calculation
-
-export type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music';
+export type ContentType = 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
 
 export interface CardScoreHeroProps {
   score: number;
   contentType: ContentType;
   accentColor: string;
+  cardWidth?: number;
 }
 
 const EMOJI: Record<ContentType, string> = {
@@ -19,6 +17,8 @@ const EMOJI: Record<ContentType, string> = {
   book: '📖',
   game: '🎮',
   music: '🎵',
+  podcast: '🎙️',
+  anything: '⭐',
 };
 
 const LABEL: Record<ContentType, string> = {
@@ -27,6 +27,8 @@ const LABEL: Record<ContentType, string> = {
   book: 'LIBRO',
   game: 'JUEGO',
   music: 'MÚSICA',
+  podcast: 'PODCAST',
+  anything: 'ARTÍCULO',
 };
 
 /**
@@ -48,6 +50,7 @@ export function CardScoreHero({
   score,
   contentType,
   accentColor,
+  cardWidth = 360,
 }: CardScoreHeroProps): React.ReactElement {
   return (
     <View style={styles.topRow}>
@@ -58,7 +61,7 @@ export function CardScoreHero({
       </View>
 
       {/* Oversized Score with bleed effect */}
-      <Text style={[styles.score, { color: accentColor }]}>
+      <Text style={[styles.score, { color: accentColor, right: -(cardWidth * 0.15) }]}>
         {formatScore(score)}
       </Text>
     </View>
@@ -94,7 +97,6 @@ const styles = StyleSheet.create({
   },
   score: {
     position: 'absolute',
-    right: -(CARD_WIDTH * 0.15),
     bottom: -8,
     fontSize: 155,
     fontFamily: FONT.bold,

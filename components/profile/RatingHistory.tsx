@@ -248,28 +248,32 @@ export function RatingHistory({ userId, username }: { userId?: string; username?
                     isFetchingNextPage={isFetchingNextPage}
                 />
             ) : (
-                <FlatList
-                    data={allItems}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                        <HistoryItem
-                            item={item}
-                            onPress={() => handlePress(item)}
-                            onShare={currentUserId === item.userId && SHAREABLE_TYPES.has(item.contentType)
-                                ? () => handleShareItem(item)
-                                : undefined
-                            }
-                            isSharingThis={isSharingItem && shareItem?.id === item.id}
-                        />
+                <View>
+                    {allItems.map((item, index) => (
+                        <React.Fragment key={item.id}>
+                            <HistoryItem
+                                item={item}
+                                onPress={() => handlePress(item)}
+                                onShare={currentUserId === item.userId && SHAREABLE_TYPES.has(item.contentType)
+                                    ? () => handleShareItem(item)
+                                    : undefined
+                                }
+                                isSharingThis={isSharingItem && shareItem?.id === item.id}
+                            />
+                            {index < allItems.length - 1 && <View style={styles.separator} />}
+                        </React.Fragment>
+                    ))}
+                    {isFetchingNextPage && <SkeletonCard />}
+
+                    {hasNextPage && !isFetchingNextPage && (
+                        <TouchableOpacity
+                            onPress={() => fetchNextPage()}
+                            style={styles.loadMoreBtn}
+                        >
+                            <Text style={styles.loadMoreText}>Cargar más</Text>
+                        </TouchableOpacity>
                     )}
-                    ItemSeparatorComponent={() => <View style={styles.separator} />}
-                    onEndReached={handleEndReached}
-                    onEndReachedThreshold={0.5}
-                    scrollEnabled={false}
-                    ListFooterComponent={
-                        isFetchingNextPage ? <SkeletonCard /> : null
-                    }
-                />
+                </View>
             )}
 
             {/* Off-screen card for image capture — not tappable */}
@@ -329,4 +333,16 @@ const styles = StyleSheet.create({
     sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     toggleRow: { flexDirection: 'row', gap: 4 },
     toggleButton: { padding: 4 },
+    loadMoreBtn: {
+        alignItems: 'center',
+        paddingVertical: 12,
+        marginTop: 8,
+        backgroundColor: COLORS.surfaceElevated,
+        borderRadius: 12,
+    },
+    loadMoreText: {
+        ...TYPO.bodySmall,
+        fontFamily: FONT.bold,
+        color: COLORS.textPrimary,
+    },
 });

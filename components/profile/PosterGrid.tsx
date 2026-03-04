@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { COLORS, SPACING, RADIUS, formatScore, getCategoryColor } from '@/lib/utils/constants';
@@ -72,14 +72,13 @@ export function PosterGrid({ ratings, onPressItem, onEndReached, isFetchingNextP
         : 0;
     const cellHeight = Math.round(cellWidth * 1.5); // 2:3
 
-    const getItemLayout = useCallback(
-        (_: ArrayLike<RatingHistoryItem> | null | undefined, index: number) => ({
-            length: cellHeight + GAP,
-            offset: (cellHeight + GAP) * Math.floor(index / COLUMNS),
-            index,
-        }),
-        [cellHeight],
-    );
+    const chunkedRatings = useMemo(() => {
+        const chunks: RatingHistoryItem[][] = [];
+        for (let i = 0; i < ratings.length; i += COLUMNS) {
+            chunks.push(ratings.slice(i, i + COLUMNS));
+        }
+        return chunks;
+    }, [ratings]);
 
     return (
         <View
@@ -87,39 +86,41 @@ export function PosterGrid({ ratings, onPressItem, onEndReached, isFetchingNextP
             onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
         >
             {containerWidth > 0 && (
-                <FlatList
-                    data={ratings}
-                    keyExtractor={(item) => item.id}
-                    numColumns={COLUMNS}
-                    columnWrapperStyle={{ gap: GAP }}
-                    renderItem={({ item }) => (
-                        <PosterCell
-                            item={item}
-                            cellWidth={cellWidth}
-                            cellHeight={cellHeight}
-                            onPress={() => onPressItem(item)}
-                        />
+                <View>
+                    {chunkedRatings.map((row, rowIdx) => (
+                        <View key={rowIdx} style={[S.row, { gap: GAP }]}>
+                            {row.map((item) => (
+                                <PosterCell
+                                    key={item.id}
+                                    item={item}
+                                    cellWidth={cellWidth}
+                                    cellHeight={cellHeight}
+                                    onPress={() => onPressItem(item)}
+                                />
+                            ))}
+                            {/* Fill empty spaces in last row if needed */}
+                            {row.length < COLUMNS && (
+                                Array.from({ length: COLUMNS - row.length }).map((_, i) => (
+                                    <View key={`empty-${i}`} style={{ width: cellWidth }} />
+                                ))
+                            )}
+                        </View>
+                    ))}
+
+                    {isFetchingNextPage && (
+                        <View style={S.loadingFooter}>
+                            <Text style={S.loadingText}>Cargando…</Text>
+                        </View>
                     )}
-                    getItemLayout={getItemLayout}
-                    scrollEnabled={false}
-                    removeClippedSubviews
-                    onEndReached={onEndReached}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                        isFetchingNextPage ? (
-                            <View style={S.loadingFooter}>
-                                <Text style={S.loadingText}>Cargando…</Text>
-                            </View>
-                        ) : null
-                    }
-                />
+                </View>
             )}
         </View>
     );
 }
 
 const S = StyleSheet.create({
-    container: { width: '100%' },
+    container: { width: '100%', paddingHorizontal: SPACING.xl },
+    row: { flexDirection: 'row', marginBottom: GAP },
     cellWrap: { overflow: 'hidden' },
     posterContainer: {
         width: '100%',
