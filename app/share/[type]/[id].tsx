@@ -17,7 +17,7 @@ import { TYPO, FONT } from '@/lib/utils/typography';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Button } from '@/components/ui/Button';
-import { RatingSliderDisplay } from '@/components/rating/RatingSliderDisplay';
+import { RatingSliderInteractive } from '@/components/rating/RatingSliderInteractive';
 import {
     SharePreviewMini,
     PlatformSelector,
@@ -145,6 +145,8 @@ export default function ShareScreen(): React.ReactElement {
         availableTracks,
         cardProps,
         cardVariant,
+        previewScore,
+        pendingScore,
         actions,
     } = useShareForm({
         contentType,
@@ -196,11 +198,28 @@ export default function ShareScreen(): React.ReactElement {
                     <SharePreviewMini cardProps={cardProps} format={format} />
                 </View>
 
-                {/* Score display */}
+                {/* Score slider */}
                 {cardVariant !== 'minimal' ? (
                     <View style={styles.section}>
                         <SectionLabel>Tu valoración</SectionLabel>
-                        <RatingSliderDisplay value={cardProps.score} category={contentType} />
+                        <RatingSliderInteractive
+                            value={previewScore}
+                            onValueChange={actions.handleScoreChange}
+                            category={contentType}
+                        />
+                        {pendingScore !== null && (
+                            <TouchableOpacity
+                                onPress={actions.confirmScoreSave}
+                                style={[
+                                    styles.saveScoreCta,
+                                    { backgroundColor: accentColor + '33' },
+                                ]}
+                            >
+                                <Text style={[styles.saveScoreText, { color: accentColor }]}>
+                                    {'Guardar ' + pendingScore.toFixed(1) + ' como nueva nota ✓'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 ) : (
                     <View style={styles.section}>
@@ -390,5 +409,16 @@ const styles = StyleSheet.create({
         top: -2000,
         left: -2000,
         opacity: 0,
+    },
+    saveScoreCta: {
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        marginTop: 8,
+        alignSelf: 'center',
+    },
+    saveScoreText: {
+        fontSize: 14,
+        fontFamily: FONT.semibold,
     },
 });

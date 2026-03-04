@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     ContentType,
     AllContent,
@@ -12,6 +12,7 @@ import { useContentDetails } from '@/lib/hooks/useContentDetails';
 import { useExistingRating } from '@/lib/hooks/useCreateRating';
 import { useProfile } from '@/lib/hooks/useProfile';
 import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
+import { useUpdateRatingMeta } from '@/lib/hooks/useUpdateRatingMeta';
 import type { ShareableRatingCardProps } from '@/components/sharing';
 
 // ── Helpers (pure functions, no hooks) ──────────────────────
@@ -98,9 +99,38 @@ interface ShareFormState {
 
 type CardVariant = 'complete' | 'no-headline' | 'minimal';
 
+interface UseShareFormReturn {
+    // Data
+    content: AllContent | undefined;
+    existingRating: ReturnType<typeof useExistingRating>['data'];
+    username: string;
+    isLoading: boolean;
+    isError: boolean;
+    // Editable form
+    formState: ShareFormState;
+    // Options per type
+    availablePlatforms: string[];
+    availableTracks: AlbumTrack[];
+    // Computed preview props
+    cardProps: ShareableRatingCardProps;
+    cardVariant: CardVariant;
+    // Score preview state
+    previewScore: number;
+    pendingScore: number | null;
+    // Actions
+    actions: {
+        setHeadline: (v: string) => void;
+        setSelectedPlatform: (v: string | null) => void;
+        setFavoriteTrack: (v: string | null) => void;
+        setBookFormat: (v: 'paper' | 'digital' | 'audiobook' | null) => void;
+        handleScoreChange: (v: number) => void;
+        confirmScoreSave: () => void;
+    };
+}
+
 // ── Hook ────────────────────────────────────────────────────
 
-export function useShareForm({ contentType, contentId, fromRating }: UseShareFormProps) {
+export function useShareForm({ contentType, contentId, fromRating: _fromRating }: UseShareFormProps): UseShareFormReturn {
     // ── Data fetching ────────────────────────────────────────
     const { data: content, isLoading: loadingContent, isError } =
         useContentDetails(contentType, contentId);
@@ -110,6 +140,7 @@ export function useShareForm({ contentType, contentId, fromRating }: UseShareFor
     const { data: albumTracks } = useAlbumTracks(
         contentType === 'music' ? contentId : undefined,
     );
+    const updateRatingMeta = useUpdateRatingMeta();
 
     // ── Editable state ───────────────────────────────────────
     const [headline, setHeadline] = useState('');
@@ -117,6 +148,10 @@ export function useShareForm({ contentType, contentId, fromRating }: UseShareFor
     const [favoriteTrack, setFavoriteTrack] = useState<string | null>(null);
     const [bookFormat, setBookFormat] = useState<'paper' | 'digital' | 'audiobook' | null>(null);
     const [prefilled, setPrefilled] = useState(false);
+
+    // ── Score preview state ──────────────────────────────────
+    const [previewScore, setPreviewScore] = useState<number>(0);
+    const [pendingScore, setPendingScore] = useState<number | null>(null);
 
     // ── Prefill from existing rating ─────────────────────────
     useEffect(() => {
@@ -129,8 +164,34 @@ export function useShareForm({ contentType, contentId, fromRating }: UseShareFor
         setSelectedPlatform(existingRating.share_platform ?? null);
         setFavoriteTrack(existingRating.favorite_track ?? null);
         setBookFormat(existingRating.book_format ?? null);
+        setPreviewScore(existingRating.score ?? 0);
         setPrefilled(true);
     }, [existingRating, loadingRating, prefilled]);
+
+    // ── Score change handlers ────────────────────────────────
+    const handleScoreChange = useCallback((value: number): void => {
+        setPreviewScore(value);
+        if (value !== (existingRating?.score ?? 0)) {
+            setPendingScore(value);
+        } else {
+            setPendingScore(null);
+        }
+    }, [existingRating?.score]);
+
+    const confirmScoreSave = useCallback((): void => {
+        if (pendingScore === null || !existingRating?.id) return;
+        updateRatingMeta.mutate({
+            ratingId: existingRating.id,
+            contentType,
+            contentId,
+            headline: existingRating.headline ?? null,
+            sharePlatform: existingRating.share_platform ?? null,
+            favoriteTrack: existingRating.favorite_track ?? null,
+            bookFormat: existingRating.book_format ?? null,
+            score: pendingScore,
+        });
+        setPendingScore(null);
+    }, [pendingScore, existingRating, contentType, contentId, updateRatingMeta]);
 
     // ── Derived: available options ───────────────────────────
     const availablePlatforms = useMemo(
@@ -149,6 +210,12 @@ export function useShareForm({ contentType, contentId, fromRating }: UseShareFor
         return headline.trim() !== '' ? 'complete' : 'no-headline';
     }, [existingRating, headline]);
 
+    // ── Form state (read-only snapshot) ──────────────────────
+    const formState: ShareFormState = useMemo(
+        () => ({ headline, selectedPlatform, favoriteTrack, bookFormat }),
+        [headline, selectedPlatform, favoriteTrack, bookFormat],
+    );
+
     // ── Derived: card props ──────────────────────────────────
     const cardProps: ShareableRatingCardProps = useMemo(() => {
         const trackEntries = parseJsonEntries<TrackRatingEntry>(
@@ -164,21 +231,20 @@ export function useShareForm({ contentType, contentId, fromRating }: UseShareFor
             title: typedContent?.title ?? '',
             posterUrl: typedContent?.imageUrl ?? null,
             username: profile?.username ?? 'usuario',
-            score: existingRating?.score ?? 0,
+            score: previewScore,
             reviewText: existingRating?.review_text ?? null,
             headline: headline.trim() || null,
             year: getContentYear(typedContent),
             director: getContentDirector(typedContent),
             trackAverage: computeAverage(trackEntries),
             episodeAverage: computeAverage(episodeEntries),
+            // Missing fields for F11-FIX-S1
+            favoriteTrack: formState.favoriteTrack,
+            platform: formState.selectedPlatform,
+            bookFormat: formState.bookFormat,
+            primaryGenre: getPrimaryGenre(typedContent),
         };
-    }, [contentType, content, existingRating, profile, headline]);
-
-    // ── Form state (read-only snapshot) ──────────────────────
-    const formState: ShareFormState = useMemo(
-        () => ({ headline, selectedPlatform, favoriteTrack, bookFormat }),
-        [headline, selectedPlatform, favoriteTrack, bookFormat],
-    );
+    }, [contentType, content, existingRating, profile, headline, formState, previewScore]);
 
     // ── Public API ───────────────────────────────────────────
     const isLoading = loadingContent || loadingRating;
@@ -202,12 +268,18 @@ export function useShareForm({ contentType, contentId, fromRating }: UseShareFor
         cardProps,
         cardVariant,
 
+        // Score preview state
+        previewScore,
+        pendingScore,
+
         // Actions
         actions: {
             setHeadline,
             setSelectedPlatform,
             setFavoriteTrack,
             setBookFormat,
+            handleScoreChange,
+            confirmScoreSave,
         },
     };
 }

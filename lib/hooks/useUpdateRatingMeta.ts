@@ -11,6 +11,7 @@ export interface UpdateRatingMetaInput {
     sharePlatform: string | null;
     favoriteTrack: string | null;
     bookFormat: 'paper' | 'digital' | 'audiobook' | null;
+    score?: number;
 }
 
 export function useUpdateRatingMeta() {
@@ -21,14 +22,19 @@ export function useUpdateRatingMeta() {
         mutationFn: async (input: UpdateRatingMetaInput) => {
             if (!userId) throw new Error('Usuario no autenticado');
 
+            const updatePayload: Record<string, unknown> = {
+                headline: input.headline,
+                share_platform: input.sharePlatform,
+                favorite_track: input.favoriteTrack,
+                book_format: input.bookFormat,
+            };
+            if (input.score !== undefined) {
+                updatePayload['score'] = input.score;
+            }
+
             const { error } = await supabase
                 .from('ratings')
-                .update({
-                    headline: input.headline,
-                    share_platform: input.sharePlatform,
-                    favorite_track: input.favoriteTrack,
-                    book_format: input.bookFormat,
-                })
+                .update(updatePayload)
                 .eq('id', input.ratingId)
                 .eq('user_id', userId);
 
