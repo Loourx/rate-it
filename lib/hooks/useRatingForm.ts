@@ -13,7 +13,61 @@ interface UseRatingFormProps {
     contentId: string;
 }
 
-export function useRatingForm({ contentType, contentId }: UseRatingFormProps) {
+interface UseRatingFormReturn {
+    content: AllContent | undefined;
+    formData: {
+        score: number;
+        review: string;
+        privateNote: string;
+        hasSpoiler: boolean;
+        status: ContentStatus | null;
+        trackRatings: TrackRatingEntry[];
+        showTrackRatings: boolean;
+        trackAverage: number | null;
+        episodeRatings: EpisodeRatingEntry[];
+        showEpisodeRatings: boolean;
+        episodeAverage: number | null;
+    };
+    state: {
+        isLoading: boolean;
+        isError: boolean;
+        isSaving: boolean;
+        isEditing: boolean;
+        toastConfig: {
+            visible: boolean;
+            message: string;
+            type: 'success' | 'error';
+        };
+        isAlbumContent: boolean;
+        isSeriesContent: boolean;
+        showCelebration: boolean;
+        savedContent: {
+            score: number;
+            reviewText: string | null;
+            trackAverage: number | null;
+            episodeAverage: number | null;
+        } | null;
+    };
+    actions: {
+        setScore: (score: number) => void;
+        setReview: (review: string) => void;
+        setPrivateNote: (note: string) => void;
+        setHasSpoiler: (update: boolean | ((prev: boolean) => boolean)) => void;
+        setStatus: (status: ContentStatus | null) => void;
+        setToastConfig: (update: React.SetStateAction<UseRatingFormReturn['state']['toastConfig']>) => void;
+        handleSave: () => Promise<void>;
+        refetch: () => void;
+        setTrackScore: (trackId: string, score: number) => void;
+        setShowTrackRatings: (show: boolean) => void;
+        initializeTrackRatings: (tracks: AlbumTrack[]) => void;
+        setEpisodeScore: (episodeId: string, score: number) => void;
+        setShowEpisodeRatings: (show: boolean) => void;
+        initializeEpisodeRatings: (episodes: SeriesEpisode[]) => void;
+        dismissCelebration: () => void;
+    };
+}
+
+export function useRatingForm({ contentType, contentId }: UseRatingFormProps): UseRatingFormReturn {
     const router = useRouter();
 
     const { data: item, isLoading: loadingContent, isError, refetch } = useContentDetails(contentType, contentId);

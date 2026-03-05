@@ -7,7 +7,9 @@ import { getMusicDetails } from '../api/itunes';
 import { supabase } from '../supabase';
 import { ContentType, Movie, Series, Book, Game, Music /* MVP_DISABLED: , Podcast, Anything */ } from '../types/content';
 
-export function useContentDetails(type: ContentType, id: string, isAlbum?: boolean) {
+import { UseQueryResult } from '@tanstack/react-query';
+
+export function useContentDetails(type: ContentType, id: string, isAlbum?: boolean): UseQueryResult<any> {
     return useQuery({
         queryKey: ['content', type, id, isAlbum],
         staleTime: 10 * 60 * 1000, // 10 min

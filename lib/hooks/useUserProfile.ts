@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types/database';
 
@@ -8,7 +8,7 @@ const STALE_TIME = 5 * 60 * 1000; // 5 minutes
  * Fetches ANY user's public profile by their UUID.
  * Does not require the viewer to be the profile owner.
  */
-export function useUserProfile(userId: string | undefined) {
+export function useUserProfile(userId: string | undefined): UseQueryResult<Profile | null> {
     return useQuery<Profile | null>({
         queryKey: ['user-profile', userId],
         queryFn: async () => {

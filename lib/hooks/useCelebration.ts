@@ -10,7 +10,12 @@ const storeKey = (id: string) => `challenge_celebrated_${id}`;
  *   and SecureStore hasn't recorded a prior celebration for this challengeId.
  * - `markCelebrated`: persists the flag so the confetti won't replay on re-open.
  */
-export function useCelebration(challengeId: string, isCompleted: boolean) {
+interface UseCelebrationReturn {
+    shouldCelebrate: boolean;
+    markCelebrated: () => void;
+}
+
+export function useCelebration(challengeId: string, isCompleted: boolean): UseCelebrationReturn {
     // null = still reading from SecureStore
     const [hasCelebrated, setHasCelebrated] = useState<boolean | null>(null);
     const markedRef = useRef(false);
@@ -29,7 +34,7 @@ export function useCelebration(challengeId: string, isCompleted: boolean) {
         if (markedRef.current) return;
         markedRef.current = true;
         setHasCelebrated(true);
-        SecureStore.setItemAsync(storeKey(challengeId), 'true').catch(() => {/* ignore */});
+        SecureStore.setItemAsync(storeKey(challengeId), 'true').catch(() => {/* ignore */ });
     };
 
     // Only true when: challenge is done AND SecureStore resolved AND hasn't been celebrated yet

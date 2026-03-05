@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { fetchDiaryMonth, type DiaryDay } from '@/lib/api/diary';
 
 export type { DiaryDay };
 
 /** Returns ratings grouped by 'YYYY-MM-DD' for a specific user/year/month. */
-export function useDiary(userId: string | undefined, year: number, month: number) {
+export function useDiary(userId: string | undefined, year: number, month: number): UseQueryResult<Map<string, DiaryDay[]>> {
     return useQuery<Map<string, DiaryDay[]>>({
         queryKey: ['diary', userId, year, month],
         queryFn: () => fetchDiaryMonth(userId!, year, month),

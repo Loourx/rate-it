@@ -57,7 +57,7 @@ export default function UserSearchScreen() {
     const { data, isLoading, isError } = useSearchUsers(query);
 
     // Filter out the current user from results
-    const results = (data ?? []).filter((u) => u.id !== currentUserId);
+    const results = (data ?? []).filter((u: UserSearchResult) => u.id !== currentUserId);
 
     const renderItem = ({ item }: { item: UserSearchResult }) => (
         <UserSearchResultCard user={item} currentUserId={currentUserId} />

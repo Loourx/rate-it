@@ -10,7 +10,13 @@ const ONBOARDING_KEY = 'has_completed_onboarding';
  * - `hasCompleted`: true if the user has already seen onboarding.
  * - `markCompleted`: persists the flag; idempotent.
  */
-export function useOnboardingFlag() {
+interface UseOnboardingFlagReturn {
+    isLoaded: boolean;
+    hasCompleted: boolean;
+    markCompleted: () => void;
+}
+
+export function useOnboardingFlag(): UseOnboardingFlagReturn {
     const [hasCompleted, setHasCompleted] = useState<boolean | null>(null);
     const markedRef = useRef(false);
 
@@ -24,7 +30,7 @@ export function useOnboardingFlag() {
         if (markedRef.current) return;
         markedRef.current = true;
         setHasCompleted(true);
-        SecureStore.setItemAsync(ONBOARDING_KEY, 'true').catch(() => {/* ignore */});
+        SecureStore.setItemAsync(ONBOARDING_KEY, 'true').catch(() => {/* ignore */ });
     };
 
     return {

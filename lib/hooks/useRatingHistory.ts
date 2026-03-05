@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, UseInfiniteQueryResult, InfiniteData } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 
@@ -22,7 +22,7 @@ interface RatingHistoryPage {
     nextOffset: number | undefined;
 }
 
-export function useRatingHistory(overrideUserId?: string) {
+export function useRatingHistory(overrideUserId?: string): UseInfiniteQueryResult<InfiniteData<RatingHistoryPage>> {
     const { session } = useAuthStore();
     const userId = overrideUserId ?? session?.user.id;
 

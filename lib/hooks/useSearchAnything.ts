@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '../supabase';
 import { Anything } from '../types/content';
 import { AnythingItem } from '../types/database';
@@ -30,7 +30,7 @@ async function searchAnything(query: string): Promise<Anything[]> {
     return (data || []).map(mapAnythingItemToContent);
 }
 
-export function useSearchAnything(query: string) {
+export function useSearchAnything(query: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['search', 'anything', query],
         queryFn: () => searchAnything(query),

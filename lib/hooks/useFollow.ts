@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { followUser, unfollowUser } from '@/lib/api/social';
 
-export function useFollow(targetUserId: string) {
+export function useFollow(targetUserId: string): UseMutationResult<void, Error, boolean> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const currentUserId = session?.user.id;

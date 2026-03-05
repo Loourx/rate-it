@@ -95,7 +95,7 @@ export function AlbumTrackRatingSection({
                     {!isLoading &&
                         !error &&
                         tracks &&
-                        tracks.map((track) => {
+                        tracks.map((track: AlbumTrack) => {
                             const entry = trackRatings.find(
                                 (r) => r.trackId === track.trackId
                             );

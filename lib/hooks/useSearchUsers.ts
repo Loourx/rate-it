@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { searchUsers } from '@/lib/api/users';
 
-export function useSearchUsers(query: string) {
+export function useSearchUsers(query: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['search', 'users', query],
         queryFn: () => searchUsers(query),

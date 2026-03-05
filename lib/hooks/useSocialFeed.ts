@@ -1,10 +1,10 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, UseInfiniteQueryResult, InfiniteData } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { getSocialFeed } from '@/lib/api/social';
 
 const PAGE_SIZE = 20;
 
-export function useSocialFeed() {
+export function useSocialFeed(): UseInfiniteQueryResult<InfiniteData<any>> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 

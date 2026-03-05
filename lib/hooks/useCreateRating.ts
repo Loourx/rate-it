@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { ContentType } from '@/lib/types/content';
@@ -29,7 +29,7 @@ interface UpdateRatingInput {
     hasSpoiler: boolean;
 }
 
-export function useCreateRating() {
+export function useCreateRating(): UseMutationResult<any, Error, CreateRatingInput> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;
@@ -84,7 +84,7 @@ export function useCreateRating() {
     });
 }
 
-export function useExistingRating(contentType: ContentType, contentId: string) {
+export function useExistingRating(contentType: ContentType, contentId: string): UseQueryResult<any> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 
@@ -110,7 +110,7 @@ export function useExistingRating(contentType: ContentType, contentId: string) {
     });
 }
 
-export function useDeleteRating() {
+export function useDeleteRating(): UseMutationResult<void, Error, string> {
     const queryClient = useQueryClient();
 
     return useMutation({

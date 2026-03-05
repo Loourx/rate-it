@@ -2,8 +2,19 @@ import { supabase } from '../supabase';
 import { useAuthStore } from '../stores/authStore';
 import { makeRedirectUri } from 'expo-auth-session';
 import { useQueryClient } from '@tanstack/react-query';
+import { Session, User } from '@supabase/supabase-js';
 
-export function useAuth() {
+interface UseAuthReturn {
+    session: Session | null;
+    user: User | null;
+    isLoading: boolean;
+    isAuthenticated: boolean;
+    signInWithGoogle: () => Promise<any>;
+    signInWithEmail: (email: string, password: string) => Promise<any>;
+    signOut: () => Promise<void>;
+}
+
+export function useAuth(): UseAuthReturn {
     const { session, user, isLoading } = useAuthStore();
     const queryClient = useQueryClient();
 

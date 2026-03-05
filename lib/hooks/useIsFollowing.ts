@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { checkIfFollowing } from '@/lib/api/social';
 
 const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
-export function useIsFollowing(targetUserId: string | undefined) {
+export function useIsFollowing(targetUserId: string | undefined): UseQueryResult<boolean> {
     const { session } = useAuthStore();
     const currentUserId = session?.user.id;
 

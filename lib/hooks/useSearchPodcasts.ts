@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { searchPodcasts } from '../api/podcasts';
 
-export function useSearchPodcasts(query: string) {
+export function useSearchPodcasts(query: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['search', 'podcasts', query],
         queryFn: () => searchPodcasts(query),

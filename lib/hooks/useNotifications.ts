@@ -1,8 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { getNotifications, markAsRead, markAllAsRead } from '@/lib/api/notifications';
+import { Notification } from '@/lib/types/notifications';
 
-export function useNotifications() {
+type UseNotificationsReturn = UseQueryResult<Notification[], Error> & {
+    markAsRead: (notificationIds: string[]) => void;
+    markAllAsRead: () => void;
+};
+
+export function useNotifications(): UseNotificationsReturn {
     const { session } = useAuthStore();
     const userId = session?.user.id;
     const queryClient = useQueryClient();

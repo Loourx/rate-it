@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 export interface FollowCounts {
@@ -6,7 +6,7 @@ export interface FollowCounts {
     followingCount: number;
 }
 
-export function useFollowCounts(userId: string | undefined) {
+export function useFollowCounts(userId: string | undefined): UseQueryResult<FollowCounts> {
     return useQuery<FollowCounts>({
         queryKey: ['follow-counts', userId],
         queryFn: async () => {

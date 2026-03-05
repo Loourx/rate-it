@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 export interface UseStreakResult {
@@ -58,7 +58,7 @@ function calcStreak(timestamps: string[]): number {
  *
  * Returns `{ streakDays: 0 }` while loading so callers never block on this data.
  */
-export function useStreak(userId: string | undefined) {
+export function useStreak(userId: string | undefined): UseQueryResult<UseStreakResult> {
     return useQuery<UseStreakResult>({
         queryKey: ['streak', userId],
         queryFn: async (): Promise<UseStreakResult> => {

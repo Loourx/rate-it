@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { ContentType } from '@/lib/types/content';
@@ -14,7 +14,14 @@ export interface UpdateRatingMetaInput {
     score?: number;
 }
 
-export function useUpdateRatingMeta() {
+interface UseUpdateRatingMetaReturn {
+    mutate: UseMutationResult<void, Error, UpdateRatingMetaInput>['mutate'];
+    mutateAsync: UseMutationResult<void, Error, UpdateRatingMetaInput>['mutateAsync'];
+    isPending: boolean;
+    error: Error | null;
+}
+
+export function useUpdateRatingMeta(): UseUpdateRatingMetaReturn {
     const queryClient = useQueryClient();
     const userId = useAuthStore((s) => s.user?.id);
 

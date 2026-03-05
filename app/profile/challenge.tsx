@@ -44,7 +44,7 @@ export default function ChallengeScreen() {
         return (
             <>
                 <Stack.Screen options={{ title: `Mis retos ${YEAR}` }} />
-                <ErrorState onRetry={() => {}} />
+                <ErrorState onRetry={() => { }} />
             </>
         );
     }

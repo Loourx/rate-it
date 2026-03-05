@@ -1,8 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { getUnreadCount } from '@/lib/api/notifications';
 
-export function useUnreadCount() {
+export function useUnreadCount(): UseQueryResult<number> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 

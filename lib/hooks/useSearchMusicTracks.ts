@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { searchMusicTracks } from '../api/itunes';
 
-export function useSearchMusicTracks(query: string) {
+export function useSearchMusicTracks(query: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['search', 'musicTracks', query],
         queryFn: () => searchMusicTracks(query),

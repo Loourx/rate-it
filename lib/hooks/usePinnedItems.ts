@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { ContentType } from '@/lib/types/content';
@@ -42,7 +42,7 @@ interface PinItemInput {
 /*  usePinnedItems — get pinned items for a user       */
 /* -------------------------------------------------- */
 
-export function usePinnedItems(userId: string | undefined) {
+export function usePinnedItems(userId: string | undefined): UseQueryResult<PinnedItem[]> {
     return useQuery({
         queryKey: ['pinned-items', userId],
         queryFn: async (): Promise<PinnedItem[]> => {
@@ -73,7 +73,7 @@ export function usePinnedItems(userId: string | undefined) {
 /*  useIsPinned — check if item is pinned             */
 /* -------------------------------------------------- */
 
-export function useIsPinned(contentType: ContentType, contentId: string) {
+export function useIsPinned(contentType: ContentType, contentId: string): UseQueryResult<PinnedItem | null> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 
@@ -110,7 +110,7 @@ export function useIsPinned(contentType: ContentType, contentId: string) {
 /*  usePinItem — pin content to profile               */
 /* -------------------------------------------------- */
 
-export function usePinItem() {
+export function usePinItem(): UseMutationResult<void, Error, PinItemInput> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;
@@ -152,7 +152,7 @@ export function usePinItem() {
 /*  useUnpinItem — remove pinned item                 */
 /* -------------------------------------------------- */
 
-export function useUnpinItem() {
+export function useUnpinItem(): UseMutationResult<void, Error, string> {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -174,7 +174,7 @@ export function useUnpinItem() {
 /*  useTopRatedItems — top 5 ratings by score          */
 /* -------------------------------------------------- */
 
-export function useTopRatedItems(userId: string | undefined) {
+export function useTopRatedItems(userId: string | undefined): UseQueryResult<TopRatedItem[]> {
     return useQuery({
         queryKey: ['top-rated', userId],
         queryFn: async (): Promise<TopRatedItem[]> => {
@@ -205,7 +205,7 @@ export function useTopRatedItems(userId: string | undefined) {
 /*  useUpdatePinnedMode — toggle manual / auto         */
 /* -------------------------------------------------- */
 
-export function useUpdatePinnedMode() {
+export function useUpdatePinnedMode(): UseMutationResult<void, Error, 'manual' | 'auto'> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;

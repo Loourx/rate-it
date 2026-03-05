@@ -218,7 +218,7 @@ export default function RateScreen() {
                         <Text style={styles.charCount}>{formData.privateNote.length}/{MAX_PRIVATE_NOTE_LENGTH}</Text>
                     </Animated.View>
                     <TouchableOpacity
-                        onPress={() => actions.setHasSpoiler((p) => !p)}
+                        onPress={() => actions.setHasSpoiler((p: boolean) => !p)}
                         style={styles.spoilerRow}
                         activeOpacity={0.7}
                     >

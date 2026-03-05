@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { getRatingLikesCount } from '@/lib/api/social';
 
-export function useRatingLikesCount(ratingId: string) {
+export function useRatingLikesCount(ratingId: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['ratingLikesCount', ratingId],
         queryFn: () => getRatingLikesCount(ratingId),

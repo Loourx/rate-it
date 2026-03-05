@@ -11,7 +11,9 @@ interface UpsertStatusInput {
     status: ContentStatus;
 }
 
-export function useExistingContentStatus(contentType: ContentType, contentId: string) {
+import { UseQueryResult, UseMutationResult } from '@tanstack/react-query';
+
+export function useExistingContentStatus(contentType: ContentType, contentId: string): UseQueryResult<any> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 
@@ -37,7 +39,7 @@ export function useExistingContentStatus(contentType: ContentType, contentId: st
     });
 }
 
-export function useUpsertContentStatus() {
+export function useUpsertContentStatus(): UseMutationResult<any, Error, UpsertStatusInput> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;

@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { getFollowing } from '@/lib/api/social';
 import type { FollowingProfile } from '@/lib/types/social';
 
 const STALE_TIME = 3 * 60 * 1000; // 3 minutes
 
-export function useFollowing(userId: string | undefined) {
+export function useFollowing(userId: string | undefined): UseQueryResult<FollowingProfile[]> {
     return useQuery<FollowingProfile[]>({
         queryKey: ['following', userId],
         queryFn: () => getFollowing(userId!),

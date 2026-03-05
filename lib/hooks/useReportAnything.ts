@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 
@@ -7,7 +7,7 @@ interface ReportAnythingInput {
     reason: string;
 }
 
-export function useReportAnything() {
+export function useReportAnything(): UseMutationResult<any, Error, ReportAnythingInput> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 
@@ -46,7 +46,7 @@ export function useReportAnything() {
 /**
  * Check if current user has already reported an item
  */
-export function useHasReported(anythingItemId: string) {
+export function useHasReported(anythingItemId: string): UseQueryResult<boolean> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 

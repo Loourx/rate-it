@@ -19,14 +19,14 @@ const CATEGORY_META: {
     label: string;
     emoji: string;
 }[] = [
-    { type: 'movie', label: 'Películas', emoji: '🎬' },
-    { type: 'series', label: 'Series', emoji: '📺' },
-    { type: 'book', label: 'Libros', emoji: '📚' },
-    { type: 'game', label: 'Juegos', emoji: '🎮' },
-    { type: 'music', label: 'Música', emoji: '🎵' },
-    /* MVP_DISABLED: { type: 'podcast', label: 'Podcasts', emoji: '🎙️' }, */
-    /* MVP_DISABLED: { type: 'anything', label: 'Anything', emoji: '✨' }, */
-];
+        { type: 'movie', label: 'Películas', emoji: '🎬' },
+        { type: 'series', label: 'Series', emoji: '📺' },
+        { type: 'book', label: 'Libros', emoji: '📚' },
+        { type: 'game', label: 'Juegos', emoji: '🎮' },
+        { type: 'music', label: 'Música', emoji: '🎵' },
+        /* MVP_DISABLED: { type: 'podcast', label: 'Podcasts', emoji: '🎙️' }, */
+        /* MVP_DISABLED: { type: 'anything', label: 'Anything', emoji: '✨' }, */
+    ];
 
 /* -------------------------------------------------- */
 /*  Hook                                               */
@@ -37,7 +37,18 @@ const CATEGORY_META: {
  * sorted dynamically by count (most items first).
  * All 7 categories are always present (empty ones have count: 0).
  */
-export function useGroupedBookmarks(userId?: string) {
+interface UseGroupedBookmarksReturn {
+    groups: BookmarkGroup[];
+    totalCount: number;
+    isLoading: boolean;
+    isError: boolean;
+    refetch: () => void;
+    fetchNextPage: () => void;
+    hasNextPage: boolean;
+    isFetchingNextPage: boolean;
+}
+
+export function useGroupedBookmarks(userId?: string): UseGroupedBookmarksReturn {
     const bookmarksQuery = useBookmarks(userId);
 
     const allItems = bookmarksQuery.data?.pages.flatMap((p) => p.items) ?? [];

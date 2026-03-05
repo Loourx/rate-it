@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { searchBooks } from '../api/googleBooks';
 
-export function useSearchBooks(query: string) {
+export function useSearchBooks(query: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['search', 'books', query],
         queryFn: () => searchBooks(query),

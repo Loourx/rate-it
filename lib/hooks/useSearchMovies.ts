@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { searchMovies } from '../api/tmdb';
 
-export function useSearchMovies(query: string) {
+export function useSearchMovies(query: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['search', 'movies', query],
         queryFn: () => searchMovies(query),

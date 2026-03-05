@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
@@ -13,7 +13,14 @@ interface CreateAnythingInput {
 }
 
 
-export function useCreateAnythingItem() {
+type UseCreateAnythingItemReturn = UseMutationResult<any, Error, CreateAnythingInput> & {
+    toastVisible: boolean;
+    toastMessage: string;
+    toastType: 'success' | 'error' | 'info';
+    setToastVisible: (visible: boolean) => void;
+};
+
+export function useCreateAnythingItem(): UseCreateAnythingItemReturn {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;
@@ -27,7 +34,7 @@ export function useCreateAnythingItem() {
         setToastVisible(true);
     };
 
-    return useMutation({
+    const mutation = useMutation({
         mutationFn: async (input: CreateAnythingInput) => {
             if (!userId) throw new Error('No autenticado');
 
@@ -100,4 +107,12 @@ export function useCreateAnythingItem() {
             }
         },
     });
+
+    return {
+        ...mutation,
+        toastVisible,
+        toastMessage,
+        toastType,
+        setToastVisible,
+    };
 }

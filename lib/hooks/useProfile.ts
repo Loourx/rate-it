@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseQueryResult, UseMutationResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { Profile } from '@/lib/types/database';
@@ -10,7 +10,7 @@ interface UpdateProfileInput {
     avatarUrl?: string;
 }
 
-export function useProfile() {
+export function useProfile(): UseQueryResult<Profile | null> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 
@@ -44,7 +44,7 @@ export function useProfile() {
     });
 }
 
-export function useUpdateProfile() {
+export function useUpdateProfile(): UseMutationResult<any, Error, UpdateProfileInput> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;

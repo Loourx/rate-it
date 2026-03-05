@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 
@@ -20,7 +20,7 @@ export interface ProfileStats {
  * Fetches only content_type + score for the current user and aggregates
  * client-side. Lightweight for MVP — avoids needing an RPC migration.
  */
-export function useProfileStats(overrideUserId?: string) {
+export function useProfileStats(overrideUserId?: string): UseQueryResult<ProfileStats> {
     const { session } = useAuthStore();
     const userId = overrideUserId ?? session?.user.id;
 

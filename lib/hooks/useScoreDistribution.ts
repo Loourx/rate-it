@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { COLORS } from '@/lib/utils/constants';
 
@@ -10,11 +10,11 @@ const ALL_BUCKETS = Array.from({ length: 21 }, (_, i) =>
 type DbContentType = 'movie' | 'series' | 'book' | 'game' | 'music' /* MVP_DISABLED: | 'podcast' | 'anything' */;
 
 const CATEGORY_COLORS: Record<DbContentType, string> = {
-    movie:    COLORS.categoryMovie,
-    series:   COLORS.categorySeries,
-    book:     COLORS.categoryBook,
-    game:     COLORS.categoryGame,
-    music:    COLORS.categoryMusic,
+    movie: COLORS.categoryMovie,
+    series: COLORS.categorySeries,
+    book: COLORS.categoryBook,
+    game: COLORS.categoryGame,
+    music: COLORS.categoryMusic,
     /* MVP_DISABLED: podcast:  COLORS.categoryPodcast, */
     /* MVP_DISABLED: anything: COLORS.categoryAnything, */
 };
@@ -37,7 +37,7 @@ export interface ScoreDistributionData {
     totalRatings: number;
 }
 
-export function useScoreDistribution(userId: string | undefined) {
+export function useScoreDistribution(userId: string | undefined): UseQueryResult<ScoreDistributionData> {
     return useQuery<ScoreDistributionData>({
         queryKey: ['score-distribution', userId],
         queryFn: async () => {

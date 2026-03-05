@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { ContentType } from '@/lib/types/content';
@@ -12,7 +12,7 @@ export interface PendingItem {
     status: 'want' | 'doing';
 }
 
-export function usePendingRatings() {
+export function usePendingRatings(): UseQueryResult<PendingItem[]> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 

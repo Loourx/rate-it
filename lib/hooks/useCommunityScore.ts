@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { ContentType } from '@/lib/types/content';
 
@@ -7,7 +7,7 @@ export interface CommunityScoreData {
     totalRatings: number;
 }
 
-export function useCommunityScore(contentType: ContentType, contentId: string) {
+export function useCommunityScore(contentType: ContentType, contentId: string): UseQueryResult<CommunityScoreData> {
     return useQuery<CommunityScoreData>({
         queryKey: ['community-score', contentType, contentId],
         queryFn: async () => {

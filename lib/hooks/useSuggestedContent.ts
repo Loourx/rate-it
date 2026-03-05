@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { ContentType } from '@/lib/types/content';
@@ -12,7 +12,7 @@ export interface SuggestedItem {
     friendCount: number;    // Cuántos amigos lo valoraron con 8+
 }
 
-export function useSuggestedContent() {
+export function useSuggestedContent(): UseQueryResult<SuggestedItem[]> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 

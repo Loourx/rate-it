@@ -1,4 +1,4 @@
-import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { AnnualChallenge } from '@/lib/types/database';
 import type { ContentType } from '@/lib/types/content';
@@ -9,7 +9,20 @@ import {
     countProgress,
 } from '@/lib/api/challenges';
 
-export function useAnnualChallenges(year: number = new Date().getFullYear()) {
+interface UseAnnualChallengesReturn {
+    challenges: AnnualChallenge[];
+    isLoading: boolean;
+    error: Error | null;
+    createChallenge: UseMutationResult<any, Error, { targetCount: number; categoryFilter: AnnualChallenge['categoryFilter'] }>['mutate'];
+    deleteChallenge: UseMutationResult<any, Error, string>['mutate'];
+    isCreating: boolean;
+    isDeleting: boolean;
+    getProgress: (challengeId: string) => number;
+    getPercentage: (challengeId: string) => number;
+    isCompleted: (challengeId: string) => boolean;
+}
+
+export function useAnnualChallenges(year: number = new Date().getFullYear()): UseAnnualChallengesReturn {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id ?? '';
@@ -23,6 +36,8 @@ export function useAnnualChallenges(year: number = new Date().getFullYear()) {
         queryKey: ['challenges', userId, year],
         queryFn: () => fetchChallenges(userId, year),
         enabled: !!userId,
+        staleTime: 60_000,
+        gcTime: 300_000,
     });
 
     // ── 2. Batch progress queries — one per challenge ────────────────────────
@@ -31,6 +46,8 @@ export function useAnnualChallenges(year: number = new Date().getFullYear()) {
             queryKey: ['challenge-progress', userId, year, c.categoryFilter] as const,
             queryFn: () => countProgress(userId, year, c.categoryFilter as (ContentType | 'all')),
             enabled: !!userId,
+            staleTime: 60_000,
+            gcTime: 300_000,
         })),
     });
 

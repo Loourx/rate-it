@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { ContentType } from '@/lib/types/content';
 
@@ -11,7 +11,7 @@ export interface GlobalTrendingItem {
     averageScore: number;
 }
 
-export function useGlobalTrending() {
+export function useGlobalTrending(): UseQueryResult<GlobalTrendingItem[]> {
     return useQuery<GlobalTrendingItem[]>({
         queryKey: ['global-trending'],
         staleTime: 5 * 60 * 1000, // 5 min

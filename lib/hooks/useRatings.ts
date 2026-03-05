@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { ContentType } from '@/lib/types/content';
@@ -17,7 +17,7 @@ export interface Rating {
     updated_at: string;
 }
 
-export function useRatings() {
+export function useRatings(): UseQueryResult<Rating[]> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 

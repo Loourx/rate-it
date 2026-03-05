@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { searchGames } from '../api/rawg';
 
-export function useSearchGames(query: string) {
+export function useSearchGames(query: string): UseQueryResult<any> {
     return useQuery({
         queryKey: ['search', 'games', query],
         queryFn: () => searchGames(query),

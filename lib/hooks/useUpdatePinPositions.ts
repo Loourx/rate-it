@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/lib/stores/authStore';
 
@@ -8,7 +8,7 @@ interface PositionUpdate {
 }
 
 /** Batch-update pinned item positions after drag-and-drop reorder. */
-export function useUpdatePinPositions() {
+export function useUpdatePinPositions(): UseMutationResult<void, Error, PositionUpdate[]> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;

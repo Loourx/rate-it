@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { FlatList } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useNotifications } from '@/lib/hooks/useNotifications';
+import { Notification } from '@/lib/types/notifications';
 import NotificationItem from '@/components/notifications/NotificationItem';
 import Screen from '@/components/ui/Screen';
 import { NotificationSkeletonList } from '@/components/ui/Skeleton';
@@ -22,7 +23,7 @@ export default function NotificationsScreen() {
 
     // Marcar todas como leídas 500ms después de abrir la pantalla
     useEffect(() => {
-        if (notifications && notifications.some((n) => !n.isRead)) {
+        if (notifications && notifications.some((n: Notification) => !n.isRead)) {
             const timer = setTimeout(() => markAllAsRead(), 500);
             return () => clearTimeout(timer);
         }

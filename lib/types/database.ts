@@ -47,18 +47,6 @@ export interface TrackRatingEntry {
     score: number;
 }
 
-export interface UserContentStatus {
-    id: string; // uuid
-    userId: string; // uuid references profiles
-    contentType: 'movie' | 'series' | 'book' | 'game' | 'music' | 'podcast' | 'anything';
-    contentId: string; // text
-    contentTitle: string; // text
-    contentImageUrl: string | null; // text
-    status: 'want' | 'doing' | 'done' | 'dropped';
-    createdAt: string; // timestamptz
-    updatedAt: string; // timestamptz
-}
-
 export interface PinnedItem {
     id: string; // uuid
     userId: string; // uuid references profiles
@@ -74,13 +62,6 @@ export interface Follow {
     id: string; // uuid
     followerId: string; // uuid references profiles
     followingId: string; // uuid references profiles
-    createdAt: string; // timestamptz
-}
-
-export interface ReviewLike {
-    id: string; // uuid
-    userId: string; // uuid references profiles
-    ratingId: string; // uuid references ratings
     createdAt: string; // timestamptz
 }
 

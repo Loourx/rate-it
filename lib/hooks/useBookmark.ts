@@ -35,7 +35,7 @@ const PAGE_SIZE = 20;
 /*  useIsBookmarked                                    */
 /* -------------------------------------------------- */
 
-export function useIsBookmarked(contentType: ContentType, contentId: string) {
+export function useIsBookmarked(contentType: ContentType, contentId: string): UseQueryResult<boolean> {
     const { session } = useAuthStore();
     const userId = session?.user.id;
 
@@ -55,8 +55,8 @@ export function useIsBookmarked(contentType: ContentType, contentId: string) {
             return (count ?? 0) > 0;
         },
         enabled: !!userId,
-        staleTime: 2 * 60 * 1000, // 2 min
-        gcTime: 5 * 60 * 1000, // 5 min
+        staleTime: 60_000,
+        gcTime: 300_000,
     });
 }
 
@@ -64,7 +64,7 @@ export function useIsBookmarked(contentType: ContentType, contentId: string) {
 /*  useToggleBookmark                                  */
 /* -------------------------------------------------- */
 
-export function useToggleBookmark() {
+export function useToggleBookmark(): UseMutationResult<{ action: 'added' | 'removed' }, Error, ToggleBookmarkInput> {
     const { session } = useAuthStore();
     const queryClient = useQueryClient();
     const userId = session?.user.id;
@@ -147,7 +147,9 @@ export function useToggleBookmark() {
 /*  useBookmarks (paginated list)                      */
 /* -------------------------------------------------- */
 
-export function useBookmarks(overrideUserId?: string) {
+import { UseQueryResult, UseMutationResult, UseInfiniteQueryResult, InfiniteData } from '@tanstack/react-query';
+
+export function useBookmarks(overrideUserId?: string): UseInfiniteQueryResult<InfiniteData<BookmarkPage>> {
     const { session } = useAuthStore();
     const userId = overrideUserId ?? session?.user.id;
 
@@ -193,5 +195,7 @@ export function useBookmarks(overrideUserId?: string) {
         initialPageParam: 0,
         getNextPageParam: (lastPage) => lastPage.nextOffset,
         enabled: !!userId,
+        staleTime: 60_000,
+        gcTime: 300_000,
     });
 }
