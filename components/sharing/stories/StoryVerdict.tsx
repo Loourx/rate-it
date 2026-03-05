@@ -42,9 +42,10 @@ const styles = StyleSheet.create({
         backgroundColor: STORY_TOKENS.SURFACE.dividerVertical,
         alignSelf: 'stretch',
         marginVertical: 4,
+        marginHorizontal: 16,  // añadir esto — da aire a ambos lados del divisor
     },
     infoWrapper: {
         flex: 1,
-        paddingLeft: 16,
+        paddingLeft: 0,  // era 16 — ahora el marginHorizontal del divider lo gestiona
     },
 });

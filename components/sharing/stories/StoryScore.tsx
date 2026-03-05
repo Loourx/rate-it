@@ -33,8 +33,8 @@ const styles = StyleSheet.create({
     },
     scoreText: {
         fontFamily: 'SpaceGrotesk_700Bold',
-        fontSize: 76,
-        lineHeight: 80,
+        fontSize: 66,  // era 76 hardcodeado — ajusta aquí directamente
+        lineHeight: 68,
         letterSpacing: -2,
         includeFontPadding: false,
     },

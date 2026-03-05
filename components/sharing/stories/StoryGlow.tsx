@@ -1,7 +1,5 @@
 import React from 'react';
-import Svg, {
-    Defs, RadialGradient, Stop, Rect, Ellipse,
-} from 'react-native-svg';
+import Svg, { Defs, RadialGradient, Stop, Rect, Ellipse } from 'react-native-svg';
 import { getCategoryColor } from '@/lib/utils/constants';
 import { STORY_TOKENS } from './storyTokens';
 import { StoryContentType } from './storyTypes';
@@ -10,15 +8,9 @@ interface StoryGlowProps {
     contentType: StoryContentType;
 }
 
-/**
- * Ambient background glow for the story canvas.
- * Uses a radial gradient centered in the safe zone.
- */
-export function StoryGlow({ contentType }: StoryGlowProps) {
+export function StoryGlow({ contentType }: StoryGlowProps): React.ReactElement {
     const { width, height } = STORY_TOKENS.CANVAS;
-    const {
-        centerX, centerY, rx, ry, opacityStart,
-    } = STORY_TOKENS.GLOW;
+    const { top, bottom } = STORY_TOKENS.GLOW;
     const color = getCategoryColor(contentType);
 
     return (
@@ -26,32 +18,55 @@ export function StoryGlow({ contentType }: StoryGlowProps) {
             width={width}
             height={height}
             viewBox={`0 0 ${width} ${height}`}
-            style={{ position: 'absolute', inset: 0 }}
+            style={{ position: 'absolute', top: 0, left: 0 }}
         >
             <Defs>
                 <RadialGradient
-                    id="glow"
-                    cx={centerX}
-                    cy={centerY}
-                    rx={rx}
-                    ry={ry}
+                    id="glowTop"
+                    cx={top.cx}
+                    cy={top.cy}
+                    rx={top.rx}
+                    ry={top.ry}
                     gradientUnits="userSpaceOnUse"
                 >
-                    <Stop offset="0" stopColor={color} stopOpacity={opacityStart} />
-                    <Stop offset="1" stopColor="#121212" stopOpacity={0} />
+                    <Stop offset="0" stopColor={color} stopOpacity={top.opacity} />
+                    <Stop offset="0.5" stopColor={color} stopOpacity={top.opacity * 0.4} />
+                    <Stop offset="1" stopColor={color} stopOpacity={0} />
+                </RadialGradient>
+
+                <RadialGradient
+                    id="glowBottom"
+                    cx={bottom.cx}
+                    cy={bottom.cy}
+                    rx={bottom.rx}
+                    ry={bottom.ry}
+                    gradientUnits="userSpaceOnUse"
+                >
+                    <Stop offset="0" stopColor={color} stopOpacity={bottom.opacity} />
+                    <Stop offset="0.5" stopColor={color} stopOpacity={bottom.opacity * 0.4} />
+                    <Stop offset="1" stopColor={color} stopOpacity={0} />
                 </RadialGradient>
             </Defs>
 
-            {/* Background Rect */}
-            <Rect x="0" y="0" width={width} height={height} fill="#121212" />
+            {/* Fondo base */}
+            <Rect x="0" y="0" width={width} height={height} fill="#0A0A0A" />
 
-            {/* Ambient Gradient Ellipse */}
+            {/* Glow superior derecha */}
             <Ellipse
-                cx={centerX}
-                cy={centerY}
-                rx={rx}
-                ry={ry}
-                fill="url(#glow)"
+                cx={top.cx}
+                cy={top.cy}
+                rx={top.rx}
+                ry={top.ry}
+                fill="url(#glowTop)"
+            />
+
+            {/* Glow inferior izquierda */}
+            <Ellipse
+                cx={bottom.cx}
+                cy={bottom.cy}
+                rx={bottom.rx}
+                ry={bottom.ry}
+                fill="url(#glowBottom)"
             />
         </Svg>
     );

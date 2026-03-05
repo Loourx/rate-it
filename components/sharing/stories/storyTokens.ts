@@ -47,7 +47,7 @@ export const STORY_TOKENS = {
     },
     TYPOGRAPHY: {
         score: {
-            fontSize: 120,
+            fontSize: 96,
             fontFamily: FONT.bold,
             letterSpacing: -4,
         },
@@ -100,12 +100,20 @@ export const STORY_TOKENS = {
         music: { emoji: '🎵', label: 'MÚSICA' },
     } as Record<StoryContentType, { emoji: string; label: string }>,
     GLOW: {
-        centerX: 195,   // centro horizontal del canvas (390/2)
-        centerY: 380,   // ligeramente por encima del centro vertical
-        rx: 420,        // desborda el canvas (390px ancho) → glow suave en bordes laterales
-        ry: 500,        // desborda el canvas (844px alto) → nunca se ve el borde duro
-        opacityStart: 0.28,  // suficiente para ver el color sin quemar el fondo
-        opacityEnd: 0,
+        top: {
+            cx: 580,      // anclado derecha, desborda el canvas
+            cy: 60,       // muy arriba — visible en zona negra sobre la tarjeta
+            rx: 320,      // masivo — sangra fuera del canvas por la derecha
+            ry: 220,
+            opacity: 0.55, // agresivo — referencia muestra glows muy saturados
+        },
+        bottom: {
+            cx: 0,       // anclado izquierda abajo (contraste diagonal)
+            cy: 700,      // muy abajo — visible en zona negra bajo la tarjeta
+            rx: 280,
+            ry: 280,
+            opacity: 0.15,
+        },
     },
     SCORE_COLUMN_WIDTH: 110,
 };
