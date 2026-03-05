@@ -93,6 +93,7 @@ export function useCreateAnythingItem(): UseCreateAnythingItemReturn {
 
                 if (ratingError) {
                     showToast('No se pudo guardar la valoración inicial. Puedes añadirla desde el perfil.', 'error');
+                    throw ratingError;
                 }
             }
 

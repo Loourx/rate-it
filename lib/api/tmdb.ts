@@ -70,13 +70,6 @@ interface TmdbSeasonDetails {
     }>;
 }
 
-const getHeaders = () => {
-    return {
-        accept: 'application/json',
-        Authorization: `Bearer ${API_KEY}`
-    };
-};
-
 // Helper for image URL
 const getImageUrl = (path: string | null): string | null => {
     return path ? `https://image.tmdb.org/t/p/w500${path}` : null;
