@@ -1,37 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { getCategoryColor } from '@/lib/utils/constants';
-import { FONT } from '@/lib/utils/typography';
-import { STORY_TOKENS } from './storyTokens';
-import { StoryContentType } from './storyTypes';
 
 interface StoryScoreProps {
     score: number;
-    contentType: StoryContentType;
+    accentColor: string;
+}
+
+function formatScore(score: number): string {
+    if (score === 10) return '10';
+    return score.toFixed(1); // "7.0", "9.5", etc.
 }
 
 /**
- * Oversized score display for Story cards.
- * Features an emissive glow effect and specific formatting for "10".
+ * StoryScore — Unifies score rendering into a single line.
+ * Optimized size (76px) to prevent vertical overflow on social shares.
  */
-export function StoryScore({ score, contentType }: StoryScoreProps) {
-    const color = getCategoryColor(contentType);
-
-    // Formatting: 10 fixed, others show one decimal
-    const displayScore = score === 10 ? '10' : score.toFixed(1);
-
+export function StoryScore({ score, accentColor }: StoryScoreProps): React.ReactElement {
     return (
         <View style={styles.container}>
-            <Text
-                style={[
-                    styles.score,
-                    {
-                        color,
-                        textShadowColor: color + 'AA', // Emissive glow (~66% opacity per briefing instruction)
-                    },
-                ]}
-            >
-                {displayScore}
+            <Text style={[styles.scoreText, { color: accentColor }]}>
+                {formatScore(score)}
             </Text>
         </View>
     );
@@ -39,15 +27,15 @@ export function StoryScore({ score, contentType }: StoryScoreProps) {
 
 const styles = StyleSheet.create({
     container: {
-        width: STORY_TOKENS.SCORE_COLUMN_WIDTH, // 110px
+        alignItems: 'flex-start',
         justifyContent: 'center',
-        alignItems: 'center',
+        paddingVertical: 8,
     },
-    score: {
-        ...STORY_TOKENS.TYPOGRAPHY.score,
-        fontFamily: FONT.bold,
-        letterSpacing: -4,
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 40,
+    scoreText: {
+        fontFamily: 'SpaceGrotesk_700Bold',
+        fontSize: 76,
+        lineHeight: 80,
+        letterSpacing: -2,
+        includeFontPadding: false,
     },
 });

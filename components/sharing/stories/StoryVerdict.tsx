@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
+import { getCategoryColor } from '@/lib/utils/constants';
 import { STORY_TOKENS } from './storyTokens';
 import { StoryScore } from './StoryScore';
 import { StoryInfo } from './StoryInfo';
@@ -13,7 +14,10 @@ export function StoryVerdict(props: StoryCardProps) {
     return (
         <View style={styles.container}>
             {/* Left: Score */}
-            <StoryScore score={props.score} contentType={props.contentType} />
+            <StoryScore
+                score={props.score}
+                accentColor={getCategoryColor(props.contentType)}
+            />
 
             {/* Vertical Divider */}
             <View style={styles.divider} />
