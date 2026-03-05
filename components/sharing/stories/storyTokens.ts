@@ -100,11 +100,11 @@ export const STORY_TOKENS = {
         music: { emoji: '🎵', label: 'MÚSICA' },
     } as Record<StoryContentType, { emoji: string; label: string }>,
     GLOW: {
-        centerX: 195,
-        centerY: 422,
-        rx: 156,
-        ry: 253,
-        opacityStart: 0.20,
+        centerX: 195,   // centro horizontal del canvas (390/2)
+        centerY: 380,   // ligeramente por encima del centro vertical
+        rx: 420,        // desborda el canvas (390px ancho) → glow suave en bordes laterales
+        ry: 500,        // desborda el canvas (844px alto) → nunca se ve el borde duro
+        opacityStart: 0.28,  // suficiente para ver el color sin quemar el fondo
         opacityEnd: 0,
     },
     SCORE_COLUMN_WIDTH: 110,
