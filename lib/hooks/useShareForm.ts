@@ -14,6 +14,7 @@ import { useProfile } from '@/lib/hooks/useProfile';
 import { useAlbumTracks } from '@/lib/hooks/useAlbumTracks';
 import { useUpdateRatingMeta } from '@/lib/hooks/useUpdateRatingMeta';
 import type { ShareableRatingCardProps } from '@/components/sharing';
+import type { StoryCardProps, StoryContentType } from '@/components/sharing/stories/storyTypes';
 
 // ── Helpers (pure functions, no hooks) ──────────────────────
 
@@ -51,6 +52,43 @@ function getPrimaryGenre(content: AllContent | undefined): string | null {
         default:
             return null;
     }
+}
+
+const STORY_CONTENT_TYPES = new Set<ContentType>(['movie', 'series', 'book', 'game', 'music']);
+
+function isStoryContentType(t: ContentType): t is StoryContentType {
+    return STORY_CONTENT_TYPES.has(t);
+}
+
+function buildStoryCardProps(
+    contentType: ContentType,
+    content: AllContent | undefined,
+    existingRating: ReturnType<typeof useExistingRating>['data'],
+    headline: string,
+    selectedPlatform: string | null,
+    favoriteTrack: string | null,
+    previewScore: number,
+    username: string,
+    showReview: boolean,
+    showPlatform: boolean,
+    showFavoriteTrack: boolean,
+): StoryCardProps | null {
+    if (!isStoryContentType(contentType)) return null;
+    const reviewText = headline.trim() || existingRating?.review_text || undefined;
+    return {
+        contentType,
+        title: content?.title ?? '',
+        posterUrl: content?.imageUrl ?? null,
+        score: previewScore,
+        reviewText,
+        username,
+        year: getContentYear(content) ?? undefined,
+        platform: selectedPlatform ?? undefined,
+        favoriteTrack: favoriteTrack ?? undefined,
+        showReview,
+        showPlatform,
+        showFavoriteTrack,
+    };
 }
 
 function parseJsonEntries<T>(raw: unknown): T[] | null {
@@ -118,6 +156,12 @@ interface UseShareFormReturn {
     // Computed preview props
     cardProps: ShareableRatingCardProps;
     cardVariant: CardVariant;
+    // Story card props
+    storyCardProps: StoryCardProps | null;
+    // Story visibility toggles
+    showReview: boolean;
+    showPlatform: boolean;
+    showFavoriteTrack: boolean;
     // Score preview state
     previewScore: number;
     pendingScore: number | null;
@@ -129,6 +173,9 @@ interface UseShareFormReturn {
         setBookFormat: (v: 'paper' | 'digital' | 'audiobook' | null) => void;
         handleScoreChange: (v: number) => void;
         confirmScoreSave: () => void;
+        toggleReview: () => void;
+        togglePlatform: () => void;
+        toggleFavoriteTrack: () => void;
     };
 }
 
@@ -153,6 +200,11 @@ export function useShareForm({ contentType, contentId, fromRating: _fromRating }
     const [bookFormat, setBookFormat] = useState<'paper' | 'digital' | 'audiobook' | null>(null);
     const [prefilled, setPrefilled] = useState(false);
 
+    // ── Story visibility toggles ─────────────────────────────
+    const [showReview, setShowReview] = useState<boolean>(false);
+    const [showPlatform, setShowPlatform] = useState<boolean>(false);
+    const [showFavoriteTrack, setShowFavoriteTrack] = useState<boolean>(false);
+
     // ── Score preview state ──────────────────────────────────
     const [previewScore, setPreviewScore] = useState<number>(0);
     const [pendingScore, setPendingScore] = useState<number | null>(null);
@@ -169,6 +221,10 @@ export function useShareForm({ contentType, contentId, fromRating: _fromRating }
         setFavoriteTrack(existingRating.favorite_track ?? null);
         setBookFormat(existingRating.book_format ?? null);
         setPreviewScore(existingRating.score ?? 0);
+        // Init toggles based on whether the data exists
+        setShowReview(Boolean(existingRating.headline || existingRating.review_text));
+        setShowPlatform(Boolean(existingRating.share_platform));
+        setShowFavoriteTrack(Boolean(existingRating.favorite_track));
         setPrefilled(true);
     }, [existingRating, loadingRating, prefilled]);
 
@@ -250,6 +306,25 @@ export function useShareForm({ contentType, contentId, fromRating: _fromRating }
         };
     }, [contentType, content, existingRating, profile, headline, formState, previewScore]);
 
+    // ── Derived: story card props ────────────────────────────
+    const storyCardProps = useMemo(
+        () => buildStoryCardProps(
+            contentType,
+            content as AllContent | undefined,
+            existingRating,
+            headline,
+            selectedPlatform,
+            favoriteTrack,
+            previewScore,
+            profile?.username ?? '',
+            showReview,
+            showPlatform,
+            showFavoriteTrack,
+        ),
+        [contentType, content, existingRating, headline, selectedPlatform,
+            favoriteTrack, previewScore, profile, showReview, showPlatform, showFavoriteTrack],
+    );
+
     // ── Public API ───────────────────────────────────────────
     const isLoading = loadingContent || loadingRating;
 
@@ -272,6 +347,14 @@ export function useShareForm({ contentType, contentId, fromRating: _fromRating }
         cardProps,
         cardVariant,
 
+        // Story card props
+        storyCardProps,
+
+        // Story visibility toggles
+        showReview,
+        showPlatform,
+        showFavoriteTrack,
+
         // Score preview state
         previewScore,
         pendingScore,
@@ -284,6 +367,9 @@ export function useShareForm({ contentType, contentId, fromRating: _fromRating }
             setBookFormat,
             handleScoreChange,
             confirmScoreSave,
+            toggleReview: () => setShowReview(v => !v),
+            togglePlatform: () => setShowPlatform(v => !v),
+            toggleFavoriteTrack: () => setShowFavoriteTrack(v => !v),
         },
     };
 }

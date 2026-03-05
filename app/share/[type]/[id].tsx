@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
     View,
     Text,
@@ -6,7 +6,7 @@ import {
     TextInput,
     StyleSheet,
     TouchableOpacity,
-    useWindowDimensions,
+    Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -19,17 +19,14 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { Button } from '@/components/ui/Button';
 import { RatingSliderInteractive } from '@/components/rating/RatingSliderInteractive';
 import {
-    SharePreviewMini,
     PlatformSelector,
     TrackSelector,
     BookFormatSelector,
     AutoInfoSection,
-    ShareableRatingCard,
-    ShareableRatingCardFeed,
 } from '@/components/sharing';
+import { StoryPreviewMini, StoryCanvas } from '@/components/sharing/stories';
 import { useShareForm } from '@/lib/hooks/useShareForm';
 import { useGenerateAndShare } from '@/lib/hooks/useGenerateAndShare';
-import { useState, useRef } from 'react';
 
 // ── Sub-components ────────────────────────────────────────
 
@@ -47,80 +44,24 @@ function SectionLabel({ children }: { children: string }): React.ReactElement {
     return <Text style={styles.sectionLabel}>{children}</Text>;
 }
 
-function HeadlineSection({
+function ToggleRow({
+    label,
     value,
     onChange,
 }: {
-    value: string;
-    onChange: (text: string) => void;
+    label: string;
+    value: boolean;
+    onChange: () => void;
 }): React.ReactElement {
     return (
-        <View style={styles.section}>
-            <SectionLabel>Gancho (máx. 50 caracteres)</SectionLabel>
-            <View>
-                <TextInput
-                    style={styles.textInput}
-                    multiline
-                    maxLength={50}
-                    placeholder="Resúmelo en pocas palabras..."
-                    placeholderTextColor={COLORS.textTertiary}
-                    value={value}
-                    onChangeText={onChange}
-                />
-                <Text style={styles.charCount}>{value.length}/50</Text>
-            </View>
-        </View>
-    );
-}
-
-function FormatSelector({
-    value,
-    onChange,
-    accentColor,
-}: {
-    value: 'stories' | 'feed';
-    onChange: (v: 'stories' | 'feed') => void;
-    accentColor: string;
-}): React.ReactElement {
-    const options = [
-        { value: 'stories', label: '9:16 Stories', icon: 'phone-portrait-outline' as const },
-        { value: 'feed', label: '4:5 Feed', icon: 'image-outline' as const },
-    ];
-
-    return (
-        <View style={styles.selectorRow}>
-            {options.map((opt) => {
-                const isSelected = value === opt.value;
-                return (
-                    <TouchableOpacity
-                        key={opt.value}
-                        onPress={() => onChange(opt.value as 'stories' | 'feed')}
-                        style={[
-                            styles.selectorPill,
-                            isSelected
-                                ? { backgroundColor: accentColor + '22', borderColor: accentColor }
-                                : { backgroundColor: COLORS.surface, borderColor: COLORS.divider },
-                        ]}
-                    >
-                        <Ionicons
-                            name={opt.icon}
-                            size={16}
-                            color={isSelected ? accentColor : COLORS.textSecondary}
-                        />
-                        <Text
-                            style={[
-                                styles.selectorLabel,
-                                {
-                                    color: isSelected ? accentColor : COLORS.textSecondary,
-                                    fontFamily: isSelected ? FONT.semibold : FONT.regular,
-                                },
-                            ]}
-                        >
-                            {opt.label}
-                        </Text>
-                    </TouchableOpacity>
-                );
-            })}
+        <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>{label}</Text>
+            <Switch
+                value={value}
+                onValueChange={onChange}
+                trackColor={{ false: '#333', true: COLORS.textPrimary }}
+                thumbColor={value ? '#FFF' : '#AAA'}
+            />
         </View>
     );
 }
@@ -144,10 +85,12 @@ export default function ShareScreen(): React.ReactElement {
         existingRating,
         availablePlatforms,
         availableTracks,
-        cardProps,
-        cardVariant,
+        storyCardProps,
         previewScore,
         pendingScore,
+        showReview,
+        showPlatform,
+        showFavoriteTrack,
         actions,
     } = useShareForm({
         contentType,
@@ -155,11 +98,7 @@ export default function ShareScreen(): React.ReactElement {
         fromRating: fromRating === 'true',
     });
 
-    const [format, setFormat] = useState<'stories' | 'feed'>('stories');
-    const storiesRef = useRef<View | null>(null);
-    const feedRef = useRef<View | null>(null);
-
-    const activeRef = format === 'stories' ? storiesRef : feedRef;
+    const captureRef = useRef<View | null>(null);
 
     const { handleGenerate, isGenerating } = useGenerateAndShare({
         contentType,
@@ -167,8 +106,7 @@ export default function ShareScreen(): React.ReactElement {
         existingRatingId: existingRating?.id ?? null,
         formState,
         fromRating: fromRating === 'true',
-        format,
-        shareRef: activeRef,
+        shareRef: captureRef,
     });
 
     const accentColor = getCategoryColor(contentType);
@@ -187,146 +125,175 @@ export default function ShareScreen(): React.ReactElement {
                 <Text style={styles.headerTitle}>Compartir</Text>
                 <View style={styles.headerBtn} />
             </View>
-            <View style={styles.divider} />
+            <View style={styles.headerDivider} />
 
             <ScrollView
                 style={styles.flex}
                 contentContainerStyle={styles.scroll}
                 keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             >
-                {/* Preview mini centered */}
+                {/* 1. Preview Area (~55% visual importance) */}
                 <View style={styles.previewContainer}>
-                    <SharePreviewMini cardProps={cardProps} format={format} />
+                    {storyCardProps ? (
+                        <StoryPreviewMini {...storyCardProps} />
+                    ) : (
+                        <Text style={styles.unsupportedText}>
+                            Vista previa no disponible para este tipo
+                        </Text>
+                    )}
                 </View>
 
-                {/* Score slider */}
-                {cardVariant !== 'minimal' ? (
-                    <View style={styles.section}>
-                        <SectionLabel>Tu valoración</SectionLabel>
-                        <RatingSliderInteractive
-                            value={previewScore}
-                            onValueChange={actions.handleScoreChange}
-                            category={contentType}
-                        />
-                        {pendingScore !== null && (
-                            <TouchableOpacity
-                                onPress={actions.confirmScoreSave}
-                                style={[
-                                    styles.saveScoreCta,
-                                    { backgroundColor: accentColor + '33' },
-                                ]}
-                            >
-                                <Text style={[styles.saveScoreText, { color: accentColor }]}>
-                                    {'Guardar ' + pendingScore.toFixed(1) + ' como nueva nota ✓'}
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                ) : (
-                    <View style={styles.section}>
-                        <Text style={styles.minimalHint}>Sin valoración — card minimalista</Text>
-                    </View>
-                )}
+                {/* 2. Controls Zone */}
+                <View style={styles.controlsContainer}>
+                    {/* Rating Slider */}
+                    {storyCardProps && (
+                        <View style={styles.section}>
+                            <SectionLabel>Tu valoración</SectionLabel>
+                            <RatingSliderInteractive
+                                value={previewScore}
+                                onValueChange={actions.handleScoreChange}
+                                category={contentType}
+                            />
+                            {pendingScore !== null && (
+                                <TouchableOpacity
+                                    onPress={actions.confirmScoreSave}
+                                    style={[
+                                        styles.saveScoreCta,
+                                        { backgroundColor: accentColor + '33' },
+                                    ]}
+                                >
+                                    <Text style={[styles.saveScoreText, { color: accentColor }]}>
+                                        {'Guardar ' + pendingScore.toFixed(1) + ' como nueva nota ✓'}
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
 
-                {/* Headline input */}
-                <HeadlineSection value={formState.headline} onChange={actions.setHeadline} />
+                    {/* Headline / Review text only if it exists or is being edited */}
+                    {(existingRating?.review_text || formState.headline) && (
+                        <View style={styles.section}>
+                            <SectionLabel>Tu reseña (máx. 50 caracteres)</SectionLabel>
+                            <TextInput
+                                style={styles.textInput}
+                                multiline
+                                maxLength={50}
+                                placeholder="Resúmelo en pocas palabras..."
+                                placeholderTextColor={COLORS.textTertiary}
+                                value={formState.headline}
+                                onChangeText={actions.setHeadline}
+                            />
+                            <Text style={styles.charCount}>{formState.headline.length}/50</Text>
+                        </View>
+                    )}
 
-                {/* Platform selector — movie / series / game */}
-                {(contentType === 'movie' || contentType === 'series') && (
+                    {/* Dónde (Categoría específica) */}
+                    {(contentType === 'movie' || contentType === 'series' || contentType === 'game') && (
+                        <View style={styles.section}>
+                            <SectionLabel>
+                                {contentType === 'game' ? '¿En qué plataforma jugaste?' : '¿Dónde lo viste?'}
+                            </SectionLabel>
+                            <PlatformSelector
+                                platforms={availablePlatforms}
+                                selected={formState.selectedPlatform}
+                                onSelect={actions.setSelectedPlatform}
+                                accentColor={accentColor}
+                            />
+                        </View>
+                    )}
+
+                    {isAlbum && (
+                        <View style={styles.section}>
+                            <SectionLabel>Canción favorita</SectionLabel>
+                            <TrackSelector
+                                tracks={availableTracks}
+                                selected={formState.favoriteTrack}
+                                onSelect={actions.setFavoriteTrack}
+                                accentColor={accentColor}
+                            />
+                        </View>
+                    )}
+
+                    {contentType === 'book' && (
+                        <View style={styles.section}>
+                            <SectionLabel>Formato de lectura</SectionLabel>
+                            <BookFormatSelector
+                                selected={formState.bookFormat}
+                                onSelect={actions.setBookFormat}
+                            />
+                        </View>
+                    )}
+
+                    {/* Opciones de la tarjeta (Toggles) */}
                     <View style={styles.section}>
-                        <SectionLabel>¿Dónde lo viste?</SectionLabel>
-                        <PlatformSelector
-                            platforms={availablePlatforms}
-                            selected={formState.selectedPlatform}
-                            onSelect={actions.setSelectedPlatform}
+                        <SectionLabel>Opciones de la tarjeta</SectionLabel>
+                        <View style={styles.optionsCard}>
+                            {(storyCardProps?.reviewText) && (
+                                <ToggleRow
+                                    label="Mostrar reseña"
+                                    value={showReview}
+                                    onChange={actions.toggleReview}
+                                />
+                            )}
+                            {formState.selectedPlatform && (
+                                <ToggleRow
+                                    label="Mostrar plataforma"
+                                    value={showPlatform}
+                                    onChange={actions.togglePlatform}
+                                />
+                            )}
+                            {(contentType === 'music' && formState.favoriteTrack) && (
+                                <ToggleRow
+                                    label="Mostrar canción favorita"
+                                    value={showFavoriteTrack}
+                                    onChange={actions.toggleFavoriteTrack}
+                                />
+                            )}
+                            {!(storyCardProps?.reviewText) && !formState.selectedPlatform && !formState.favoriteTrack && (
+                                <Text style={styles.noOptionsText}>Sin opciones adicionales disponibles</Text>
+                            )}
+                        </View>
+                    </View>
+
+                    {/* Auto Info Section */}
+                    <View style={styles.section}>
+                        <AutoInfoSection
+                            trackAverage={null}
+                            episodeAverage={null}
+                            score={previewScore}
+                            contentType={contentType}
                             accentColor={accentColor}
                         />
                     </View>
-                )}
-                {contentType === 'game' && (
-                    <View style={styles.section}>
-                        <SectionLabel>¿En qué plataforma jugaste?</SectionLabel>
-                        <PlatformSelector
-                            platforms={availablePlatforms}
-                            selected={formState.selectedPlatform}
-                            onSelect={actions.setSelectedPlatform}
-                            accentColor={accentColor}
-                        />
-                    </View>
-                )}
 
-                {/* Track selector — music albums only */}
-                {isAlbum && (
-                    <View style={styles.section}>
-                        <SectionLabel>Track favorito</SectionLabel>
-                        <TrackSelector
-                            tracks={availableTracks}
-                            selected={formState.favoriteTrack}
-                            onSelect={actions.setFavoriteTrack}
-                            accentColor={accentColor}
-                        />
-                    </View>
-                )}
-
-                {/* Book format */}
-                {contentType === 'book' && (
-                    <View style={styles.section}>
-                        <SectionLabel>Formato de lectura</SectionLabel>
-                        <BookFormatSelector
-                            selected={formState.bookFormat}
-                            onSelect={actions.setBookFormat}
-                        />
-                    </View>
-                )}
-
-                {/* Auto info (collapsable) */}
-                <View style={styles.section}>
-                    <AutoInfoSection
-                        trackAverage={cardProps.trackAverage ?? null}
-                        episodeAverage={cardProps.episodeAverage ?? null}
-                        score={cardProps.score}
-                        contentType={contentType}
-                        accentColor={accentColor}
-                    />
+                    <View style={{ height: 120 }} />
                 </View>
-
-                <View style={{ paddingBottom: 100 }} />
             </ScrollView>
 
-            {/* Fixed bottom bar */}
+            {/* Bottom Bar */}
             <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
-                <View style={{ marginBottom: SPACING.lg }}>
-                    <FormatSelector
-                        value={format}
-                        onChange={setFormat}
-                        accentColor={accentColor}
-                    />
-                </View>
-
                 <Button
-                    label={isGenerating ? 'Generando...' : 'Generar y compartir'}
+                    label={isGenerating ? 'Capturando...' : 'Compartir'}
                     onPress={handleGenerate}
                     variant="primary"
                     className="w-full"
-                    disabled={isGenerating}
+                    disabled={isGenerating || !storyCardProps}
+                    isLoading={isGenerating}
                 />
             </SafeAreaView>
 
-            {/* Off-screen portals for capture — F11-PI-j */}
+            {/* Off-screen capture portal */}
             <View style={styles.offScreen} pointerEvents="none">
-                <View ref={storiesRef} collapsable={false}>
-                    <ShareableRatingCard {...cardProps} format="stories" />
-                </View>
-                <View style={{ height: 100 }} />
-                <View ref={feedRef} collapsable={false}>
-                    <ShareableRatingCardFeed {...cardProps} />
-                </View>
+                {storyCardProps && (
+                    <View ref={captureRef} collapsable={false}>
+                        <StoryCanvas {...storyCardProps} />
+                    </View>
+                )}
             </View>
         </SafeAreaView>
     );
 }
-
-// ── Styles ────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
     flex: { flex: 1, backgroundColor: COLORS.background },
@@ -344,11 +311,15 @@ const styles = StyleSheet.create({
         fontFamily: FONT.bold,
         textAlign: 'center',
     },
-    divider: { height: 1, backgroundColor: COLORS.divider },
-    scroll: { padding: SPACING.xl, paddingBottom: 20 },
+    headerDivider: { height: 1, backgroundColor: COLORS.divider },
+    scroll: { flexGrow: 1 },
     previewContainer: {
         alignItems: 'center',
-        marginVertical: SPACING['2xl'],
+        paddingVertical: SPACING['2xl'],
+        backgroundColor: '#000', // Sub-light background for preview focus
+    },
+    controlsContainer: {
+        paddingHorizontal: SPACING.xl,
     },
     section: { marginTop: SPACING['2xl'] },
     sectionLabel: {
@@ -363,7 +334,7 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.md,
         padding: SPACING.base,
         ...TYPO.body,
-        minHeight: 80,
+        minHeight: 60,
         textAlignVertical: 'top',
     },
     charCount: {
@@ -372,10 +343,23 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         marginTop: SPACING.xs,
     },
-    minimalHint: {
-        color: COLORS.textTertiary,
-        ...TYPO.bodySmall,
-        textAlign: 'center',
+    optionsCard: {
+        backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.lg,
+        padding: SPACING.md,
+        gap: SPACING.sm,
+        borderWidth: 1,
+        borderColor: COLORS.divider,
+    },
+    toggleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 4,
+    },
+    toggleLabel: {
+        color: COLORS.textPrimary,
+        ...TYPO.body,
     },
     bottomBar: {
         position: 'absolute',
@@ -383,39 +367,35 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         paddingHorizontal: SPACING.xl,
-        paddingTop: SPACING.base,
+        paddingTop: SPACING.lg,
+        paddingBottom: SPACING.xl,
         backgroundColor: COLORS.background,
         borderTopWidth: 1,
         borderTopColor: COLORS.divider,
     },
-    selectorRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        gap: 12,
-    },
-    selectorPill: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: RADIUS.full,
-        borderWidth: 1,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        gap: 6,
-    },
-    selectorLabel: {
-        fontSize: 13,
-    },
     offScreen: {
         position: 'absolute',
-        top: -2000,
-        left: -2000,
+        top: -3000,
+        left: -3000,
         opacity: 0,
     },
-    saveScoreCta: {
-        borderRadius: 8,
+    unsupportedText: {
+        color: COLORS.textTertiary,
+        ...TYPO.body,
+        textAlign: 'center',
+        paddingVertical: 100,
+    },
+    noOptionsText: {
+        color: COLORS.textTertiary,
+        ...TYPO.caption,
+        textAlign: 'center',
         paddingVertical: 10,
-        paddingHorizontal: 16,
-        marginTop: 8,
+    },
+    saveScoreCta: {
+        borderRadius: RADIUS.full,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        marginTop: SPACING.md,
         alignSelf: 'center',
     },
     saveScoreText: {

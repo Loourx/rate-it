@@ -19,7 +19,9 @@ export interface UseGenerateAndShareProps {
     existingRatingId: string | null;
     formState: ShareFormState;
     fromRating?: boolean;
-    format: 'stories' | 'feed';
+    /* MVP_FEED_DISABLED */
+    // format: 'stories' | 'feed';
+    /* /MVP_FEED_DISABLED */
     shareRef: React.RefObject<View | null>;
 }
 
@@ -36,7 +38,9 @@ export function useGenerateAndShare({
     existingRatingId,
     formState,
     fromRating = false,
-    format,
+    /* MVP_FEED_DISABLED */
+    // format,
+    /* /MVP_FEED_DISABLED */
     shareRef,
 }: UseGenerateAndShareProps): UseGenerateAndShareReturn {
     const router = useRouter();
