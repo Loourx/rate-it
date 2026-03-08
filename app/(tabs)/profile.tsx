@@ -191,6 +191,13 @@ export default function ProfileScreen() {
                             <Text className="text-primary font-medium">Mi diario 📅</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
+                            onPress={() => router.push('/import')}
+                            className="px-4 py-2 bg-surface-elevated rounded-full flex-row items-center gap-2"
+                        >
+                            <Ionicons name="cloud-upload-outline" size={16} color={COLORS.textPrimary} />
+                            <Text className="text-primary font-medium">Importar historial</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
                             onPress={handleSignOut}
                             className="px-4 py-2 bg-surface-elevated rounded-full"
                         >
