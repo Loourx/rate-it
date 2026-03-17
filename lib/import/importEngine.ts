@@ -28,6 +28,8 @@ export async function executeImport(
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
+    let isSkipped = false;
+    let isImportedAsRating = false;
 
     // --- Paso 2: insertar rating si tiene score ---
     if (item.score !== null) {
@@ -48,6 +50,7 @@ export async function executeImport(
       if (error) {
         if (error.code === '23505') {
           result.skippedExisting++;
+          isSkipped = true;
         } else {
           result.errors.push(
             `Rating "${item.contentTitle}": ${error.message}`,
@@ -55,6 +58,7 @@ export async function executeImport(
         }
       } else {
         result.ratingsImported++;
+        isImportedAsRating = true;
       }
     }
 
@@ -70,14 +74,23 @@ export async function executeImport(
       });
 
       if (error) {
-        if (error.code !== '23505') {
+        if (error.code === '23505') {
+          // Solo sumamos a skipped si NO lo sumamos ya en el paso de rating
+          if (!isSkipped && !isImportedAsRating) {
+            result.skippedExisting++;
+            isSkipped = true;
+          }
+        } else {
           result.errors.push(
             `Status "${item.contentTitle}": ${error.message}`,
           );
         }
-        // 23505 en status → ignorar silenciosamente
       } else {
-        result.statusImported++;
+        // Solo sumamos a statusImported si NO se importó como rating
+        // (Ratings y Vistos son mutuamente excluyentes)
+        if (!isImportedAsRating && !isSkipped) {
+          result.statusImported++;
+        }
       }
     }
 
