@@ -4,14 +4,14 @@ import * as SecureStore from 'expo-secure-store';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Custom storage implementation using Expo SecureStore for better security on mobile
-const ExpoSecureStoreAdapter = {
+// Adapter nativo — iOS Keychain / Android Keystore
+const NativeSecureStoreAdapter = {
   getItem: async (key: string): Promise<string | null> => {
     try {
       return await SecureStore.getItemAsync(key);
     } catch (err) {
       console.error('[SecureStore] getItem failed:', err);
-      return null;  // Sin sesión guardada — usuario no autenticado
+      return null;
     }
   },
   setItem: async (key: string, value: string): Promise<void> => {
@@ -19,7 +19,6 @@ const ExpoSecureStoreAdapter = {
       await SecureStore.setItemAsync(key, value);
     } catch (err) {
       console.error('[SecureStore] setItem failed:', err);
-      // No lanzar — la sesión puede funcionar en memoria aunque no persista
     }
   },
   removeItem: async (key: string): Promise<void> => {
@@ -27,16 +26,31 @@ const ExpoSecureStoreAdapter = {
       await SecureStore.deleteItemAsync(key);
     } catch (err) {
       console.error('[SecureStore] removeItem failed:', err);
-      // No lanzar — el signOut debe completarse aunque el storage falle
     }
   },
 };
 
+// Adapter web — localStorage (solo existe en browser)
+const WebLocalStorageAdapter = {
+  getItem: (key: string): Promise<string | null> =>
+    Promise.resolve(localStorage.getItem(key)),
+  setItem: (key: string, value: string): Promise<void> =>
+    Promise.resolve(localStorage.setItem(key, value)),
+  removeItem: (key: string): Promise<void> =>
+    Promise.resolve(localStorage.removeItem(key)),
+};
+
+const isWeb = typeof localStorage !== 'undefined';
+
+const storage = isWeb
+  ? WebLocalStorageAdapter
+  : NativeSecureStoreAdapter;
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: ExpoSecureStoreAdapter,
+    storage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: isWeb,
   },
 });

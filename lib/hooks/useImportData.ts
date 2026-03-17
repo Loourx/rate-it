@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { Platform } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 import JSZip from 'jszip';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -16,6 +16,37 @@ import type {
     ResolvedImportItem,
     UnresolvedImportItem,
 } from '@/lib/types/import';
+
+/**
+ * Platform-aware file reading function.
+ * - Web: Uses FileReader API and fetch to read files as text or base64
+ * - Native: Uses expo-file-system/legacy with the specified encoding
+ */
+async function readFileAsString(
+    uri: string,
+    encoding: 'utf8' | 'base64' = 'utf8'
+): Promise<string> {
+    if (Platform.OS === 'web') {
+        // On web, the uri is typically a blob URL — use fetch + FileReader
+        const response = await fetch(uri);
+        const text = await response.text();
+
+        if (encoding === 'base64') {
+            // Convert text to base64 using the standard web API
+            // Encode UTF-8 text as base64
+            const uint8Array = new TextEncoder().encode(text);
+            const binary = String.fromCharCode.apply(null, Array.from(uint8Array) as number[]);
+            return btoa(binary);
+        }
+        return text;
+    } else {
+        // On native, use expo-file-system/legacy with dynamic import
+        // to prevent web from attempting to load the native module
+        const FileSystem = await import('expo-file-system/legacy');
+        const content = await FileSystem.readAsStringAsync(uri, { encoding });
+        return content;
+    }
+}
 
 export function useImportData() {
     const { session } = useAuthStore();
@@ -59,7 +90,7 @@ export function useImportData() {
             if (pickerResult.canceled || !pickerResult.assets || pickerResult.assets.length === 0) return;
 
             const uri = pickerResult.assets[0].uri;
-            const base64Data = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
+            const base64Data = await readFileAsString(uri, 'base64');
             const zip = await JSZip.loadAsync(base64Data, { base64: true });
 
             const ratings = await zip.file('ratings.csv')?.async('text');
@@ -101,7 +132,7 @@ export function useImportData() {
             if (pickerResult.canceled || !pickerResult.assets || pickerResult.assets.length === 0) return;
 
             const uri = pickerResult.assets[0].uri;
-            const csvContent = await FileSystem.readAsStringAsync(uri, { encoding: 'utf8' });
+            const csvContent = await readFileAsString(uri, 'utf8');
 
             setProgress((prev) => ({ ...prev, phase: 'parsing' }));
             const items = parseGoodreads(csvContent);
