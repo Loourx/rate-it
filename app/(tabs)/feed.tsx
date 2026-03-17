@@ -1,7 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { View, FlatList, RefreshControl, ActivityIndicator, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useSocialFeed } from '@/lib/hooks/useSocialFeed';
+import { useHybridFeed } from '@/lib/hooks/useHybridFeed';
+import { hybridFeedKeyExtractor } from '@/lib/types/hybridFeed';
+import type { HybridFeedItem } from '@/lib/types/hybridFeed';
+import { FeedSectionSeparator } from '@/components/feed/FeedSectionSeparator';
+import { GlobalTrendingCard } from '@/components/content/GlobalTrendingCard';
 import { router } from 'expo-router';
 import FeedCard from '@/components/feed/FeedCard';
 import { FeedSkeletonList } from '@/components/ui/Skeleton';
@@ -16,23 +20,28 @@ import type { FeedItem } from '@/lib/types/social';
 export default function FeedScreen() {
     const insets = useSafeAreaInsets();
     const {
-        data,
+        items,
         isLoading,
+        isError,
         error,
         refetch,
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-    } = useSocialFeed();
+        hasSocialItems,
+    } = useHybridFeed();
 
     const [categoryFilter, setCategoryFilter] = useState<ContentType | 'all'>('all');
     const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all');
 
-    const allItems = data?.pages.flatMap((page) => page) ?? [];
-
-    const filteredItems = allItems.filter((item) => {
-        if (categoryFilter !== 'all' && item.contentType !== categoryFilter) return false;
-        if (activityFilter === 'reviewed' && !item.reviewText) return false;
+    // El filtro solo aplica a items sociales — los trending y separador
+    // siempre se muestran independientemente del filtro.
+    const filteredItems = items.filter((item): item is HybridFeedItem => {
+        if (item.kind === 'separator') return true;
+        if (item.kind === 'trending') return true;
+        // kind === 'social': aplicar filtros existentes
+        if (categoryFilter !== 'all' && item.data.contentType !== categoryFilter) return false;
+        if (activityFilter === 'reviewed' && !item.data.reviewText) return false;
         return true;
     });
 
@@ -46,9 +55,30 @@ export default function FeedScreen() {
         }
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    const renderItem = useCallback(({ item, index }: { item: FeedItem; index: number }) => (
-        <FeedCard item={item} index={index} />
-    ), []);
+    const renderItem = useCallback(
+        ({ item, index }: { item: HybridFeedItem; index: number }): React.ReactElement | null => {
+            switch (item.kind) {
+                case 'social':
+                    return <FeedCard item={item.data} index={index} />;
+                case 'separator':
+                    return <FeedSectionSeparator label={item.label} />;
+                case 'trending':
+                    return (
+                        <GlobalTrendingCard
+                            item={item.data}
+                            onPress={() =>
+                                router.push(
+                                    `/content/${item.data.contentType}/${item.data.contentId}`
+                                )
+                            }
+                        />
+                    );
+                default:
+                    return null;
+            }
+        },
+        [router],
+    );
 
     // ESTADO 1: Loading inicial
     if (isLoading) {
@@ -60,7 +90,7 @@ export default function FeedScreen() {
     }
 
     // ESTADO 2: Error
-    if (error) {
+    if (isError) {
         return (
             <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
                 <ErrorState
@@ -72,7 +102,7 @@ export default function FeedScreen() {
     }
 
     // ESTADO 3: Empty
-    if (allItems.length === 0) {
+    if (items.length === 0) {
         return (
             <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
                 <EmptyState
@@ -97,7 +127,7 @@ export default function FeedScreen() {
             />
             <FlatList
                 data={filteredItems}
-                keyExtractor={(item) => item.id}
+                keyExtractor={hybridFeedKeyExtractor}
                 renderItem={renderItem}
                 onEndReached={handleEndReached}
                 onEndReachedThreshold={0.5}
