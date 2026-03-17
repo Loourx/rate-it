@@ -32,6 +32,7 @@ export interface Rating {
     sharePlatform: string | null;
     favoriteTrack: string | null;
     bookFormat: 'paper' | 'digital' | 'audiobook' | null;
+    importedFrom: import('./import').ImportSource | null;
     hasSpoiler: boolean; // boolean
     contentSubtype: 'album' | 'track' | null; // text – only for music
     trackRatings: TrackRatingEntry[] | null; // jsonb – per-track scores for album ratings

@@ -1,0 +1,2 @@
+lib/import/resolveTMDB.ts(11,10): error TS2459: Module '"@/lib/api/tmdb"' declares 'fetchTmdb' locally, but it is not exported.
+lib/import/resolveTMDB.ts(11,21): error TS2459: Module '"@/lib/api/tmdb"' declares 'getImageUrl' locally, but it is not exported.

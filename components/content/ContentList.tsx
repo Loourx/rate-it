@@ -25,8 +25,8 @@ export function ContentList({
     isError,
     onItemPress,
     emptyIcon = 'search-outline',
-    emptyTitle = 'Sin resultados',
-    emptyMessage = 'No se encontraron resultados',
+    emptyTitle = 'Sin resultados para esa búsqueda',
+    emptyMessage = 'Prueba con otro título o revisa la ortografía.',
     emptyActionLabel,
     onEmptyAction,
 }: ContentListProps) {

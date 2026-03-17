@@ -26,8 +26,16 @@ const CATEGORY_META: Record<string, { emoji: string; label: string; color: strin
     /* MVP_DISABLED: anything: { emoji: '✨', label: 'Anything', color: COLORS.categoryAnything }, */
 };
 
+const MAX_WEEKLY_FREEZES = 2;
+
 /** Renders the streak counter with an optional pulse animation for ≥7 days. */
-function StreakStat({ streakDays }: { streakDays: number }) {
+function StreakStat({
+    streakDays,
+    freezesAvailable
+}: {
+    streakDays: number;
+    freezesAvailable: number;
+}) {
     const reducedMotion = useReducedMotion();
     const scale = useSharedValue(1);
 
@@ -54,6 +62,12 @@ function StreakStat({ streakDays }: { streakDays: number }) {
         <Animated.View style={[styles.counterItem, animatedStyle]}>
             <Text style={styles.counterNumber}>🔥 {streakDays}</Text>
             <Text style={styles.counterLabel}>días</Text>
+            {/* Freeze slots — solo mostrar si < 2 para no saturar la UI */}
+            {freezesAvailable < MAX_WEEKLY_FREEZES && (
+                <Text style={styles.freezeLabel}>
+                    {'🧊'.repeat(freezesAvailable) || '–'}
+                </Text>
+            )}
         </Animated.View>
     );
 }
@@ -119,6 +133,7 @@ export function ProfileStats({ userId }: { userId?: string }) {
     const { data: followData } = useFollowCounts(userId);
     const { data: streakData } = useStreak(userId);
     const streakDays = streakData?.streakDays ?? 0;
+    const freezesAvailableThisWeek = streakData?.freezesAvailableThisWeek ?? 2;
     const followersCount = followData?.followersCount ?? 0;
     const followingCount = followData?.followingCount ?? 0;
 
@@ -144,7 +159,7 @@ export function ProfileStats({ userId }: { userId?: string }) {
                 <Text style={styles.counterNumber}>{followingCount}</Text>
                 <Text style={styles.counterLabel}>Siguiendo</Text>
             </TouchableOpacity>
-            {streakDays > 0 && <StreakStat streakDays={streakDays} />}
+            {streakDays > 0 && <StreakStat streakDays={streakDays} freezesAvailable={freezesAvailableThisWeek} />}
         </View>
     );
 
@@ -226,4 +241,5 @@ const styles = StyleSheet.create({
     errorText: { ...TYPO.bodySmall, color: COLORS.error, textAlign: 'center' },
     retryButton: { alignSelf: 'center', marginTop: 8, paddingHorizontal: 16, paddingVertical: 8, backgroundColor: COLORS.surfaceElevated, borderRadius: 999 },
     retryText: { ...TYPO.bodySmall, fontFamily: FONT.semibold, color: COLORS.textPrimary },
+    freezeLabel: { fontSize: 10, color: '#60a5fa', marginTop: 2, textAlign: 'center' }
 });

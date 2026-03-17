@@ -76,10 +76,10 @@ export default function FeedScreen() {
         return (
             <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
                 <EmptyState
-                    icon="people-outline"
-                    title="Aquí aparecerá lo que opinan tus amigos"
-                    description="Sigue a personas que admiras y descubre qué están viendo, leyendo y jugando."
-                    actionLabel="Buscar personas"
+                    icon="compass-outline"
+                    title="Tu feed está esperando"
+                    description="Sigue a alguien que te importe y descubre qué están leyendo, viendo y jugando."
+                    actionLabel="Descubrir personas"
                     onAction={() => router.push('/(tabs)/search')}
                 />
             </View>

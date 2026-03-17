@@ -184,15 +184,12 @@ export default function SearchScreen() {
                             emptyTitle={
                                 query.length < 3
                                     ? '¿Qué has visto últimamente?'
-                                    : 'Nada por aquí...'
+                                    : 'Sin resultados para esa búsqueda'
                             }
                             emptyMessage={
                                 query.length < 3
                                     ? 'Busca películas, series, libros, juegos o música.'
                                     : 'Prueba con otro título o revisa la ortografía.'
-                                /* MVP_DISABLED: : activeFolder === 'anything'
-                                    ? '¿No existe? ¡Créalo tú mismo!'
-                                    : 'Prueba con otro título o revisa la ortografía.' */
                             }
                             emptyActionLabel={showCreateAnythingButton ? 'Crear Anything' : undefined}
                             onEmptyAction={showCreateAnythingButton ? handleCreateAnything : undefined}

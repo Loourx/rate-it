@@ -143,9 +143,9 @@ export default function FollowingScreen() {
                 renderItem={renderItem}
                 ListEmptyComponent={
                     <EmptyState
-                        icon="people-outline"
-                        title="¿A quién admiras?"
-                        description="Busca amigos o personas con buen gusto y síguelos para ver sus opiniones."
+                        icon="heart-outline"
+                        title="Aún no sigues a nadie"
+                        description="Encuentra personas con buen gusto y descubre qué están consumiendo."
                         actionLabel="Buscar personas"
                         onAction={() => router.push('/(tabs)/search')}
                     />

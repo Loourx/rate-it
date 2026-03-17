@@ -59,10 +59,10 @@ export default function NotificationsScreen() {
             <Screen edges={['top']}>
                 <Stack.Screen options={{ title: 'Notificaciones' }} />
                 <EmptyState
-                    icon="notifications-off-outline"
-                    title="Todo tranquilo por aquí"
-                    description="Cuando alguien interactúe contigo, lo verás aquí. ¡Comparte una opinión para empezar!"
-                    actionLabel="Puntuar algo"
+                    icon="sparkles-outline"
+                    title="De momento, silencio total"
+                    description="Cuando alguien siga tu perfil o le guste una reseña tuya, aparecerá aquí."
+                    actionLabel="Escribir una reseña"
                     onAction={handleGoToSearch}
                 />
             </Screen>

@@ -71,7 +71,7 @@ interface TmdbSeasonDetails {
 }
 
 // Helper for image URL
-const getImageUrl = (path: string | null): string | null => {
+export const getImageUrl = (path: string | null): string | null => {
     return path ? `https://image.tmdb.org/t/p/w500${path}` : null;
 };
 
@@ -96,7 +96,7 @@ function extractProviders(
 }
 
 // Helper for fetch
-async function fetchTmdb<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+export async function fetchTmdb<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
     if (!API_KEY) throw new Error('TMDB API Key is missing');
 
     const searchParams = new URLSearchParams({

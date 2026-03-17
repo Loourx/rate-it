@@ -28,7 +28,7 @@ interface GoogleBooksSearchResponse {
 }
 
 // Helper to sanitize image URL (http to https)
-const sanitizeImageUrl = (url?: string): string | null => {
+export const sanitizeImageUrl = (url?: string): string | null => {
     if (!url) return null;
     return url.replace('http://', 'https://');
 };
@@ -39,7 +39,7 @@ const getYear = (date?: string): string | undefined => {
 };
 
 // Helper for fetch
-async function fetchGoogleBooks<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+export async function fetchGoogleBooks<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
     const searchParams = new URLSearchParams({
         ...params
     });

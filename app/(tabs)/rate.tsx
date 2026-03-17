@@ -13,6 +13,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { usePendingRatings } from '@/lib/hooks/usePendingRatings';
 import { useRatings } from '@/lib/hooks/useRatings';
+import { ErrorState } from '@/components/ui/ErrorState';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { COLORS, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import type { ContentType } from '@/lib/types/content';
@@ -133,7 +135,13 @@ export default function RateHubScreen() {
                     {loadingRecent ? (
                         <ActivityIndicator color={COLORS.textSecondary} style={S.loader} />
                     ) : recentSlice.length === 0 ? (
-                        <Text style={S.emptyText}>Aún no has valorado nada</Text>
+                        <EmptyState
+                            icon="star-outline"
+                            title="Tu primera valoración te espera"
+                            description="Busca una película, libro, juego o disco y deja tu huella."
+                            actionLabel="Buscar algo"
+                            onAction={() => router.push('/(tabs)/search')}
+                        />
                     ) : (
                         recentSlice.map((item) => (
                             <ContentRow

@@ -144,9 +144,9 @@ export default function FollowersScreen() {
                 ListEmptyComponent={
                     <EmptyState
                         icon="person-add-outline"
-                        title="Todavía sin seguidores"
-                        description="Comparte tu perfil con amigos para que te encuentren."
-                        actionLabel="Compartir perfil"
+                        title="Todavía nadie te sigue"
+                        description="Comparte una reseña en redes y tus amigos encontrarán tu perfil."
+                        actionLabel="Compartir mi perfil"
                         onAction={() => router.push('/(tabs)/profile')}
                     />
                 }
