@@ -26,32 +26,41 @@ export default React.memo(function NotificationItem({ notification, index = 0 }:
         }
     };
 
+    /**
+     * Generates a conversational message based on the notification type.
+     * Uses brand-specific personality (informal, engaging).
+     */
     const getMessage = () => {
+        // New follower: emphasis on visibility
         if (notification.type === 'follow') {
             return (
                 <Text className="text-primary text-sm">
                     <Text className="font-semibold">{notification.actorUsername}</Text>
-                    <Text className="text-secondary"> comenzó a seguirte</Text>
+                    <Text className="text-secondary"> ahora ve lo que puntúas 👀</Text>
                 </Text>
             );
         }
 
+        // Like on review: friendly/appreciative tone
         if (notification.type === 'like') {
             return (
                 <Text className="text-primary text-sm">
                     <Text className="font-semibold">{notification.actorUsername}</Text>
-                    <Text className="text-secondary"> le gustó tu reseña de </Text>
+                    <Text className="text-secondary"> aplaudió tu reseña de </Text>
                     <Text className="font-semibold">{notification.ratingTitle}</Text>
+                    <Text className="text-secondary"> 👏</Text>
                 </Text>
             );
         }
 
+        // Recommendation: helpful/curated suggestion tone
         if (notification.type === 'recommendation') {
             return (
                 <Text className="text-primary text-sm">
                     <Text className="font-semibold">{notification.actorUsername}</Text>
-                    <Text className="text-secondary"> te recomienda </Text>
+                    <Text className="text-secondary"> cree que deberías ver </Text>
                     <Text className="font-semibold">{notification.recContentTitle}</Text>
+                    <Text className="text-secondary"> 🎯</Text>
                 </Text>
             );
         }
