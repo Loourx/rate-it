@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
@@ -42,8 +42,8 @@ export function BookmarkBoxExpanded({
     visible,
 }: BookmarkBoxExpandedProps) {
     const color = getCategoryColor(type);
-    const rowCount = Math.ceil(items.length / COLS);
-    const targetH = visible ? rowCount * (ITEM_H + 28) + SPACING.base : 0;
+    const [measuredHeight, setMeasuredHeight] = useState(0);
+    const targetH = visible ? measuredHeight : 0;
 
     const height = useSharedValue(0);
 
@@ -64,7 +64,15 @@ export function BookmarkBoxExpanded({
 
     return (
         <Animated.View style={animatedStyle}>
-            <View style={S.grid}>
+            <View
+                style={S.grid}
+                onLayout={(e) => {
+                    const nextHeight = Math.ceil(e.nativeEvent.layout.height);
+                    if (nextHeight !== measuredHeight) {
+                        setMeasuredHeight(nextHeight);
+                    }
+                }}
+            >
                 {items.map((item, i) => (
                     <Animated.View
                         key={item.id}

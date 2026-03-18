@@ -56,11 +56,13 @@ export function FilterBar({
     onCategoryChange,
     activityFilter,
     onActivityChange,
+    horizontalInset = SPACING.md,
 }: {
     categoryFilter: ContentType | 'all';
     onCategoryChange: (v: ContentType | 'all') => void;
     activityFilter: ActivityFilter;
     onActivityChange: (v: ActivityFilter) => void;
+    horizontalInset?: number;
 }) {
     return (
         <View style={S.filterBar}>
@@ -68,7 +70,10 @@ export function FilterBar({
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={S.chipRow}
+                contentContainerStyle={[
+                    S.chipRow,
+                    { paddingHorizontal: horizontalInset, paddingRight: horizontalInset + SPACING.sm },
+                ]}
             >
                 {CATEGORY_FILTERS.map((f) => (
                     <FilterChip
@@ -79,13 +84,17 @@ export function FilterBar({
                         onPress={() => onCategoryChange(f.value as ContentType | 'all')}
                     />
                 ))}
+                <View style={S.endSpacer} />
             </ScrollView>
 
             {/* Fila 2: Tipo de actividad */}
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={S.chipRow}
+                contentContainerStyle={[
+                    S.chipRow,
+                    { paddingHorizontal: horizontalInset, paddingRight: horizontalInset + SPACING.sm },
+                ]}
             >
                 {ACTIVITY_FILTERS.map((f) => (
                     <FilterChip
@@ -95,6 +104,7 @@ export function FilterBar({
                         onPress={() => onActivityChange(f.value)}
                     />
                 ))}
+                <View style={S.endSpacer} />
             </ScrollView>
         </View>
     );
@@ -107,10 +117,12 @@ const S = StyleSheet.create({
         paddingBottom: SPACING.sm,
     },
     chipRow: {
-        paddingHorizontal: SPACING.md,
         paddingVertical: SPACING.xs,
         gap: SPACING.sm,
         flexDirection: 'row',
+    },
+    endSpacer: {
+        width: SPACING.xs,
     },
     chip: {
         paddingHorizontal: SPACING.md,

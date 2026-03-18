@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, FlatList, RefreshControl, ActivityIndicator, Text } from 'react-native';
+import { View, FlatList, RefreshControl, ActivityIndicator, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHybridFeed } from '@/lib/hooks/useHybridFeed';
 import { hybridFeedKeyExtractor } from '@/lib/types/hybridFeed';
@@ -19,6 +19,7 @@ import type { FeedItem } from '@/lib/types/social';
 
 export default function FeedScreen() {
     const insets = useSafeAreaInsets();
+    const horizontalInset = Math.max(SPACING.base, Math.max(insets.left, insets.right) + SPACING.sm);
     const {
         items,
         isLoading,
@@ -61,23 +62,45 @@ export default function FeedScreen() {
                 case 'social':
                     return <FeedCard item={item.data} index={index} />;
                 case 'separator':
-                    return <FeedSectionSeparator label={item.label} />;
+                    return <FeedSectionSeparator label={item.label} horizontalInset={horizontalInset} />;
                 case 'trending':
+                    if (index > 0 && filteredItems[index - 1]?.kind === 'trending') {
+                        return null;
+                    }
+
+                    const trendingRow = filteredItems
+                        .slice(index)
+                        .filter((feedItem): feedItem is HybridFeedItem & { kind: 'trending' } => feedItem.kind === 'trending')
+                        .map((feedItem) => feedItem.data);
+
                     return (
-                        <GlobalTrendingCard
-                            item={item.data}
-                            onPress={() =>
-                                router.push(
-                                    `/content/${item.data.contentType}/${item.data.contentId}`
-                                )
-                            }
-                        />
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{
+                                paddingHorizontal: horizontalInset,
+                                paddingRight: horizontalInset + SPACING.sm,
+                            }}
+                        >
+                            {trendingRow.map((trendingItem) => (
+                                <GlobalTrendingCard
+                                    key={`${trendingItem.contentType}-${trendingItem.contentId}`}
+                                    item={trendingItem}
+                                    onPress={() =>
+                                        router.push(
+                                            `/content/${trendingItem.contentType}/${trendingItem.contentId}`
+                                        )
+                                    }
+                                />
+                            ))}
+                            <View style={{ width: SPACING.xs }} />
+                        </ScrollView>
                     );
                 default:
                     return null;
             }
         },
-        [router],
+        [filteredItems, horizontalInset],
     );
 
     // ESTADO 1: Loading inicial
@@ -124,6 +147,7 @@ export default function FeedScreen() {
                 onCategoryChange={setCategoryFilter}
                 activityFilter={activityFilter}
                 onActivityChange={setActivityFilter}
+                horizontalInset={horizontalInset}
             />
             <FlatList
                 data={filteredItems}
@@ -159,7 +183,7 @@ export default function FeedScreen() {
                 windowSize={5}
                 maxToRenderPerBatch={10}
                 initialNumToRender={8}
-                removeClippedSubviews
+                removeClippedSubviews={false}
             />
         </View>
     );

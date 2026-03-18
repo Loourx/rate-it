@@ -1,26 +1,38 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, RefreshControl, Pressable, TouchableOpacity, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useRatings, Rating } from '@/lib/hooks/useRatings';
 import { useFriendsTrending } from '@/lib/hooks/useFriendsTrending';
-import { useGlobalTrending, type GlobalTrendingItem } from '@/lib/hooks/useGlobalTrending';
-import { useSuggestedContent, type SuggestedItem } from '@/lib/hooks/useSuggestedContent';
+import { useGlobalTrending } from '@/lib/hooks/useGlobalTrending';
+import { useSuggestedContent } from '@/lib/hooks/useSuggestedContent';
 import { ContentCard } from '@/components/content/ContentCard';
-import { TrendingCard } from '@/components/content/TrendingCard';
-import { GlobalTrendingCard } from '@/components/content/GlobalTrendingCard';
-import { SuggestionCard } from '@/components/content/SuggestionCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
-import { Button } from '@/components/ui/Button';
-import { ContentType, BaseContent } from '@/lib/types/content';
-import { COLORS, SPACING, RADIUS } from '@/lib/utils/constants';
+import { BaseContent, ContentType } from '@/lib/types/content';
+import { COLORS, SPACING, RADIUS, getCategoryColor } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+type DiscoveryItem = {
+    key: string;
+    contentId: string;
+    contentType: ContentType;
+    title: string;
+    imageUrl: string | null;
+    scoreLabel: string;
+    scoreColor: string;
+    metaLabel: string;
+    metaValue: string;
+};
 
 export default function HomeScreen() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const { data: ratings, isLoading, error, refetch } = useRatings();
     const { data: trending, isLoading: loadingTrending } = useFriendsTrending();
     const hasTrending = trending && trending.length > 0;
@@ -30,6 +42,8 @@ export default function HomeScreen() {
     const { data: suggested } = useSuggestedContent();
     const hasSuggestions = suggested && suggested.length > 0;
     // No loading state para esta sección — si no hay datos simplemente no aparece
+
+    const horizontalPad = Math.max(SPACING.xl, Math.max(insets.left, insets.right) + SPACING.base);
 
     const sections = useMemo(() => {
         if (!ratings) return {};
@@ -60,15 +74,60 @@ export default function HomeScreen() {
         { type: 'anything' as const, label: 'Anything', emoji: '📦' },
     ];
 
+    const trendingWide = useMemo<DiscoveryItem[]>(() => {
+        if (!trending) return [];
+        return trending.map((item) => ({
+            key: `friends-${item.ratingId}`,
+            contentId: item.contentId,
+            contentType: item.contentType,
+            title: item.contentTitle,
+            imageUrl: item.contentImageUrl,
+            scoreLabel: item.score.toFixed(1),
+            scoreColor: getCategoryColor(item.contentType),
+            metaLabel: 'Amigo',
+            metaValue: `@${item.authorUsername}`,
+        }));
+    }, [trending]);
+
+    const globalWide = useMemo<DiscoveryItem[]>(() => {
+        if (!globalTrending) return [];
+        return globalTrending.map((item) => ({
+            key: `global-${item.contentType}-${item.contentId}`,
+            contentId: item.contentId,
+            contentType: item.contentType,
+            title: item.contentTitle,
+            imageUrl: item.contentImageUrl,
+            scoreLabel: item.averageScore.toFixed(1),
+            scoreColor: getCategoryColor(item.contentType),
+            metaLabel: 'Valoraciones',
+            metaValue: `${item.ratingCount}`,
+        }));
+    }, [globalTrending]);
+
+    const suggestedWide = useMemo<DiscoveryItem[]>(() => {
+        if (!suggested) return [];
+        return suggested.map((item) => ({
+            key: `suggested-${item.contentType}-${item.contentId}`,
+            contentId: item.contentId,
+            contentType: item.contentType,
+            title: item.contentTitle,
+            imageUrl: item.contentImageUrl,
+            scoreLabel: item.bestScore.toFixed(1),
+            scoreColor: getCategoryColor(item.contentType),
+            metaLabel: 'Amigos',
+            metaValue: `${item.friendCount}`,
+        }));
+    }, [suggested]);
+
     if (isLoading) {
         return (
-            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+            <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
                 <View className="p-6 gap-6">
                     <View className="gap-2">
                         <Skeleton width={120} height={32} borderRadius={8} />
                         <View className="flex-row gap-4">
-                            <Skeleton width={160} height={260} borderRadius={16} />
-                            <Skeleton width={160} height={260} borderRadius={16} />
+                            <Skeleton width={DISCOVERY_CARD_W} height={DISCOVERY_CARD_H} borderRadius={16} />
+                            <Skeleton width={DISCOVERY_CARD_W} height={DISCOVERY_CARD_H} borderRadius={16} />
                         </View>
                     </View>
                 </View>
@@ -78,7 +137,7 @@ export default function HomeScreen() {
 
     if (error) {
         return (
-            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+            <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
                 <ErrorState
                     message="No pudimos cargar tu biblioteca"
                     onRetry={refetch}
@@ -89,7 +148,7 @@ export default function HomeScreen() {
 
     if (!hasRatings) {
         return (
-            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+            <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
                 <EmptyState
                     icon="compass-outline"
                     title="Tu aventura cultural empieza aquí"
@@ -102,122 +161,64 @@ export default function HomeScreen() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+        <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
             <ScrollView
                 className="flex-1"
                 refreshControl={
                     <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={COLORS.textPrimary} />
                 }
-                contentContainerClassName="pb-24 pt-4"
+                contentContainerStyle={{ paddingTop: SPACING.md, paddingBottom: SPACING['3xl'] + insets.bottom }}
             >
-                {/* ── Sección: Popular entre tus amigos ── */}
-                <View style={trendingStyles.section}>
-                    <Text style={trendingStyles.sectionTitle}>Popular entre tus amigos</Text>
+                <DiscoverySection
+                    title="Popular entre tus amigos"
+                    subtitle="Lo que más está sonando entre la gente que sigues"
+                    loading={loadingTrending}
+                    items={trendingWide}
+                    horizontalPad={horizontalPad}
+                    onCardPress={(item) => router.push(`/content/${item.contentType}/${item.contentId}`)}
+                    emptyState={
+                        isFollowingNobody ? (
+                            <TouchableOpacity
+                                style={[trendingStyles.ctaCard, { marginHorizontal: horizontalPad }]}
+                                onPress={() => router.push('/users/search')}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name="people-outline" size={28} color={COLORS.textSecondary} />
+                                <Text style={trendingStyles.ctaTitle}>Sigue a tus amigos</Text>
+                                <Text style={trendingStyles.ctaSubtitle}>Descubre qué están valorando</Text>
+                            </TouchableOpacity>
+                        ) : null
+                    }
+                />
 
-                    {loadingTrending && (
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={trendingStyles.horizontalList}>
-                            {[1, 2, 3].map((i) => (
-                                <View key={i} style={{ width: 130, marginRight: SPACING.sm, opacity: 0.3, backgroundColor: COLORS.surfaceElevated, height: 240, borderRadius: RADIUS.md }} />
-                            ))}
-                        </ScrollView>
-                    )}
+                <DiscoverySection
+                    title="Lo más valorado"
+                    subtitle="Contenido que está recibiendo más atención global"
+                    loading={loadingGlobal}
+                    items={globalWide}
+                    horizontalPad={horizontalPad}
+                    onCardPress={(item) => router.push(`/content/${item.contentType}/${item.contentId}`)}
+                    emptyState={
+                        !loadingGlobal && !hasGlobalTrending ? (
+                            <Text style={[trendingStyles.emptyHint, { paddingHorizontal: horizontalPad }]}>Aún no hay suficientes valoraciones. ¡Empieza a valorar!</Text>
+                        ) : null
+                    }
+                />
 
-                    {!loadingTrending && isFollowingNobody && (
-                        <TouchableOpacity
-                            style={trendingStyles.ctaCard}
-                            onPress={() => router.push('/users/search')}
-                            activeOpacity={0.8}
-                        >
-                            <Ionicons name="people-outline" size={28} color={COLORS.textSecondary} />
-                            <Text style={trendingStyles.ctaTitle}>Sigue a tus amigos</Text>
-                            <Text style={trendingStyles.ctaSubtitle}>Descubre qué están valorando</Text>
-                        </TouchableOpacity>
-                    )}
-
-                    {!loadingTrending && hasTrending && (
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={trendingStyles.horizontalList}
-                        >
-                            {trending!.map((item) => (
-                                <TrendingCard
-                                    key={item.ratingId}
-                                    item={item}
-                                    onPress={() => router.push(`/content/${item.contentType}/${item.contentId}`)}
-                                />
-                            ))}
-                        </ScrollView>
-                    )}
-                </View>
-
-                {/* ── Sección: Lo más valorado ── */}
-                <View style={trendingStyles.section}>
-                    <Text style={trendingStyles.sectionTitle}>Lo más valorado</Text>
-
-                    {loadingGlobal && (
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={trendingStyles.horizontalList}>
-                            {[1, 2, 3].map((i) => (
-                                <View
-                                    key={i}
-                                    style={[{ width: 130, marginRight: SPACING.sm, opacity: 0.3, backgroundColor: COLORS.surfaceElevated, height: 240, borderRadius: RADIUS.md }]}
-                                />
-                            ))}
-                        </ScrollView>
-                    )}
-
-                    {!loadingGlobal && !hasGlobalTrending && (
-                        <Text style={trendingStyles.emptyHint}>
-                            Aún no hay suficientes valoraciones. ¡Empieza a valorar!
-                        </Text>
-                    )}
-
-                    {!loadingGlobal && hasGlobalTrending && (
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={trendingStyles.horizontalList}
-                        >
-                            {globalTrending!.map((item) => (
-                                <GlobalTrendingCard
-                                    key={`${item.contentType}-${item.contentId}`}
-                                    item={item}
-                                    onPress={() =>
-                                        router.push(`/content/${item.contentType}/${item.contentId}`)
-                                    }
-                                />
-                            ))}
-                        </ScrollView>
-                    )}
-                </View>
-
-                {/* ── Sección: Quizás te interese (solo si hay datos) ── */}
                 {hasSuggestions && (
-                    <View style={trendingStyles.section}>
-                        <Text style={trendingStyles.sectionTitle}>Quizás te interese</Text>
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={trendingStyles.horizontalList}
-                        >
-                            {suggested!.map((item) => (
-                                <SuggestionCard
-                                    key={`${item.contentType}-${item.contentId}`}
-                                    item={item}
-                                    onPress={() =>
-                                        router.push(`/content/${item.contentType}/${item.contentId}`)
-                                    }
-                                />
-                            ))}
-                        </ScrollView>
-                    </View>
+                    <DiscoverySection
+                        title="Quizás te interese"
+                        subtitle="Recomendaciones según lo mejor puntuado por tus amigos"
+                        loading={false}
+                        items={suggestedWide}
+                        horizontalPad={horizontalPad}
+                        onCardPress={(item) => router.push(`/content/${item.contentType}/${item.contentId}`)}
+                    />
                 )}
 
                 {/* ── Sección: Tu biblioteca (existente, sin cambios) ── */}
-                <View className="px-6 mb-6">
-                    <Text className="text-3xl font-bold text-primary">Tu Biblioteca</Text>
+                <View style={[trendingStyles.libraryHeading, { paddingHorizontal: horizontalPad }]}> 
+                    <Text style={trendingStyles.libraryTitle}>Tu Biblioteca</Text>
                 </View>
 
                 {categories.map((cat) => {
@@ -225,16 +226,16 @@ export default function HomeScreen() {
                     if (!catRatings || catRatings.length === 0) return null;
 
                     return (
-                        <View key={cat.type} className="mb-8">
-                            <View className="flex-row items-center justify-between px-6 mb-4">
-                                <Text className="text-xl font-bold text-primary">
+                        <View key={cat.type} style={trendingStyles.librarySection}>
+                            <View style={[trendingStyles.categoryHeader, { paddingHorizontal: horizontalPad }]}>
+                                <Text style={trendingStyles.categoryTitle}>
                                     {cat.emoji} {cat.label}
                                 </Text>
                             </View>
                             <ScrollView
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
-                                contentContainerClassName="px-6"
+                                contentContainerStyle={{ paddingHorizontal: horizontalPad, paddingRight: horizontalPad + SPACING.sm }}
                             >
                                 {catRatings.map((rating) => {
                                     // Construct base content from rating data
@@ -255,6 +256,7 @@ export default function HomeScreen() {
                                         />
                                     );
                                 })}
+                                <View style={{ width: SPACING.sm }} />
                             </ScrollView>
                         </View>
                     );
@@ -264,21 +266,181 @@ export default function HomeScreen() {
     );
 }
 
+function DiscoverySection({
+    title,
+    subtitle,
+    loading,
+    items,
+    horizontalPad,
+    onCardPress,
+    emptyState,
+}: {
+    title: string;
+    subtitle: string;
+    loading: boolean;
+    items: DiscoveryItem[];
+    horizontalPad: number;
+    onCardPress: (item: DiscoveryItem) => void;
+    emptyState?: React.ReactNode;
+}) {
+    return (
+        <View style={trendingStyles.section}>
+            <View style={[trendingStyles.sectionHeader, { paddingHorizontal: horizontalPad }]}> 
+                <Text style={trendingStyles.sectionTitle}>{title}</Text>
+                <Text style={trendingStyles.sectionSubtitle}>{subtitle}</Text>
+            </View>
+
+            {loading && (
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: horizontalPad, paddingRight: horizontalPad + SPACING.sm }}
+                >
+                    {[1, 2, 3].map((i) => (
+                        <View key={i} style={trendingStyles.wideSkeleton} />
+                    ))}
+                </ScrollView>
+            )}
+
+            {!loading && items.length > 0 && (
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: horizontalPad, paddingRight: horizontalPad + SPACING.sm }}
+                >
+                    {items.map((item) => (
+                        <WideDiscoveryCard key={item.key} item={item} onPress={() => onCardPress(item)} />
+                    ))}
+                    <View style={{ width: SPACING.sm }} />
+                </ScrollView>
+            )}
+
+            {!loading && items.length === 0 && emptyState}
+        </View>
+    );
+}
+
+const DISCOVERY_CARD_W = Math.min(320, Math.round(SCREEN_WIDTH * 0.8));
+const DISCOVERY_CARD_H = Math.round(DISCOVERY_CARD_W * 0.56);
+
+function WideDiscoveryCard({ item, onPress }: { item: DiscoveryItem; onPress: () => void }) {
+    return (
+        <TouchableOpacity style={trendingStyles.wideCard} activeOpacity={0.85} onPress={onPress}>
+            {item.imageUrl ? (
+                <Image source={item.imageUrl} style={trendingStyles.wideImage} contentFit="cover" cachePolicy="memory-disk" />
+            ) : (
+                <View style={[trendingStyles.wideImage, trendingStyles.wideImageFallback]}>
+                    <Text style={trendingStyles.posterLetter}>{item.title.charAt(0)}</Text>
+                </View>
+            )}
+
+            <View style={trendingStyles.overlay} />
+
+            <View style={[trendingStyles.scorePill, { backgroundColor: item.scoreColor }]}>
+                <Text style={trendingStyles.scorePillText}>{item.scoreLabel}</Text>
+            </View>
+
+            <View style={trendingStyles.metaPill}>
+                <Text style={trendingStyles.metaPillText}>{item.metaLabel}: {item.metaValue}</Text>
+            </View>
+
+            <View style={trendingStyles.wideFooter}>
+                <Text style={trendingStyles.wideTitle} numberOfLines={2}>{item.title}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+}
+
 const trendingStyles = StyleSheet.create({
     section: { marginBottom: SPACING.xl },
+    sectionHeader: { marginBottom: SPACING.sm },
     sectionTitle: {
         ...TYPO.h4,
         fontFamily: FONT.bold,
         color: COLORS.textPrimary,
-        marginBottom: SPACING.sm,
-        paddingHorizontal: SPACING.xl,
     },
-    horizontalList: { paddingHorizontal: SPACING.xl },
+    sectionSubtitle: {
+        ...TYPO.caption,
+        color: COLORS.textSecondary,
+        marginTop: SPACING.xs,
+    },
+    wideCard: {
+        width: DISCOVERY_CARD_W,
+        height: DISCOVERY_CARD_H,
+        borderRadius: RADIUS.lg,
+        marginRight: SPACING.md,
+        overflow: 'hidden',
+        backgroundColor: COLORS.surfaceElevated,
+    },
+    wideImage: {
+        width: '100%',
+        height: '100%',
+        backgroundColor: COLORS.surfaceElevated,
+    },
+    wideImageFallback: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.34)',
+    },
+    scorePill: {
+        position: 'absolute',
+        top: SPACING.sm,
+        right: SPACING.sm,
+        borderRadius: RADIUS.full,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 4,
+    },
+    scorePillText: {
+        ...TYPO.caption,
+        fontFamily: FONT.bold,
+        color: '#FFFFFF',
+    },
+    metaPill: {
+        position: 'absolute',
+        top: SPACING.sm,
+        left: SPACING.sm,
+        borderRadius: RADIUS.full,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 4,
+        backgroundColor: 'rgba(0,0,0,0.42)',
+        maxWidth: DISCOVERY_CARD_W * 0.64,
+    },
+    metaPillText: {
+        ...TYPO.caption,
+        color: '#E7E7E7',
+        fontFamily: FONT.medium,
+    },
+    wideFooter: {
+        position: 'absolute',
+        left: SPACING.md,
+        right: SPACING.md,
+        bottom: SPACING.md,
+    },
+    wideTitle: {
+        ...TYPO.h4,
+        fontFamily: FONT.bold,
+        color: '#FFFFFF',
+    },
+    wideSkeleton: {
+        width: DISCOVERY_CARD_W,
+        height: DISCOVERY_CARD_H,
+        marginRight: SPACING.md,
+        borderRadius: RADIUS.lg,
+        opacity: 0.35,
+        backgroundColor: COLORS.surfaceElevated,
+    },
+    posterLetter: {
+        fontSize: 44,
+        fontFamily: FONT.bold,
+        color: COLORS.textTertiary,
+    },
     ctaCard: {
         alignItems: 'center',
         gap: SPACING.sm,
         paddingVertical: SPACING.xl,
-        marginHorizontal: SPACING.xl,
         backgroundColor: COLORS.surface,
         borderRadius: RADIUS.md,
         borderWidth: 1,
@@ -298,7 +460,24 @@ const trendingStyles = StyleSheet.create({
         ...TYPO.bodySmall,
         fontFamily: FONT.medium,
         color: COLORS.textSecondary,
-        paddingHorizontal: SPACING.md,
         marginTop: SPACING.sm,
+    },
+    libraryHeading: { marginBottom: SPACING.lg },
+    libraryTitle: {
+        ...TYPO.h2,
+        fontFamily: FONT.bold,
+        color: COLORS.textPrimary,
+    },
+    librarySection: { marginBottom: SPACING['2xl'] },
+    categoryHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: SPACING.md,
+    },
+    categoryTitle: {
+        ...TYPO.h4,
+        color: COLORS.textPrimary,
+        fontFamily: FONT.bold,
     },
 });

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
     useAnimatedStyle,
@@ -44,16 +44,36 @@ function SkeletonBox() {
 /* BookmarksList                                       */
 /* -------------------------------------------------- */
 
-export function BookmarksList({ userId }: { userId?: string }) {
+export function BookmarksList({
+    userId,
+    onRequestScrollTo,
+}: {
+    userId?: string;
+    onRequestScrollTo?: (y: number) => void;
+}) {
     const router = useRouter();
     const { groups, totalCount, isLoading, isError, refetch } = useGroupedBookmarks(userId);
     const [expandedCategory, setExpandedCategory] = useState<ContentType | null>(null);
+    const rowOffsetsRef = useRef<Partial<Record<ContentType, number>>>({});
 
     const handleToggle = useCallback(
         (type: ContentType) => {
-            setExpandedCategory((prev) => (prev === type ? null : type));
+            setExpandedCategory((prev) => {
+                const next = prev === type ? null : type;
+                if (next && onRequestScrollTo) {
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            const y = rowOffsetsRef.current[next];
+                            if (typeof y === 'number') {
+                                onRequestScrollTo(y);
+                            }
+                        }, 120);
+                    });
+                }
+                return next;
+            });
         },
-        [],
+        [onRequestScrollTo],
     );
 
     const handleItemPress = useCallback(
@@ -122,17 +142,23 @@ export function BookmarksList({ userId }: { userId?: string }) {
                         {/* The row of 2 boxes */}
                         <View style={styles.boxRow}>
                             {row.map((group) => (
-                                <BookmarkBox
+                                <View
                                     key={group.type}
-                                    type={group.type}
-                                    label={group.label}
-                                    items={group.items}
-                                    count={group.count}
-                                    isExpanded={expandedCategory === group.type}
-                                    onToggle={() => handleToggle(group.type)}
-                                    onExplore={() => handleExplore(group.type)}
-                                    boxWidth={BOX_W}
-                                />
+                                    onLayout={(e) => {
+                                        rowOffsetsRef.current[group.type] = e.nativeEvent.layout.y;
+                                    }}
+                                >
+                                    <BookmarkBox
+                                        type={group.type}
+                                        label={group.label}
+                                        items={group.items}
+                                        count={group.count}
+                                        isExpanded={expandedCategory === group.type}
+                                        onToggle={() => handleToggle(group.type)}
+                                        onExplore={() => handleExplore(group.type)}
+                                        boxWidth={BOX_W}
+                                    />
+                                </View>
                             ))}
                         </View>
 

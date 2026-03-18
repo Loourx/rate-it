@@ -6,11 +6,12 @@ import { TYPO, FONT } from '@/lib/utils/typography';
 
 interface FeedSectionSeparatorProps {
     label: string;
+    horizontalInset?: number;
 }
 
-export function FeedSectionSeparator({ label }: FeedSectionSeparatorProps): React.ReactElement {
+export function FeedSectionSeparator({ label, horizontalInset = SPACING.md }: FeedSectionSeparatorProps): React.ReactElement {
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingHorizontal: horizontalInset }]}>
             <View style={styles.line} />
             <View style={styles.labelContainer}>
                 <Ionicons name="compass-outline" size={14} color={COLORS.textSecondary} />
@@ -25,7 +26,6 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.md,
         paddingVertical: SPACING.sm,
         marginTop: SPACING.xs,
     },

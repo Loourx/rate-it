@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProfile } from '@/lib/hooks/useProfile';
 import { ProfileStats } from '@/components/profile/ProfileStats';
@@ -30,9 +30,11 @@ import type { ShareableProfileCardProps } from '@/components/sharing';
 import { Toast } from '@/components/ui/Toast';
 
 export default function ProfileScreen() {
+    const insets = useSafeAreaInsets();
     const { signOut } = useAuth();
     const { data: profile, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useProfile();
     const router = useRouter();
+    const scrollRef = useRef<ScrollView>(null);
 
     const handleSignOut = async () => {
         try {
@@ -133,7 +135,10 @@ export default function ProfileScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ position: 'relative' }}>
-            <ScrollView contentContainerClassName="pb-24">
+            <ScrollView
+                ref={scrollRef}
+                contentContainerStyle={{ paddingBottom: 96 + insets.bottom }}
+            >
                 {/* Header */}
                 <View className="px-6 py-6 items-center">
                     <View className="w-24 h-24 bg-surface-elevated rounded-full mb-4 items-center justify-center overflow-hidden border-2 border-surface-elevated">
@@ -245,7 +250,14 @@ export default function ProfileScreen() {
                 <RatingHistory userId={myUserId} username={profile?.username ?? ''} />
 
                 {/* Bookmarks */}
-                <BookmarksList />
+                <BookmarksList
+                    onRequestScrollTo={(y) => {
+                        scrollRef.current?.scrollTo({
+                            y: Math.max(0, y - 16),
+                            animated: true,
+                        });
+                    }}
+                />
             </ScrollView>
 
             {/* Confetti overlay — absolute, does not block scrolling */}
