@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, FlatList, RefreshControl, ActivityIndicator, Text, ScrollView } from 'react-native';
+import { View, FlatList, RefreshControl, ActivityIndicator, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHybridFeed } from '@/lib/hooks/useHybridFeed';
 import { hybridFeedKeyExtractor } from '@/lib/types/hybridFeed';
 import type { HybridFeedItem } from '@/lib/types/hybridFeed';
 import { FeedSectionSeparator } from '@/components/feed/FeedSectionSeparator';
-import { GlobalTrendingCard } from '@/components/content/GlobalTrendingCard';
 import { router } from 'expo-router';
 import FeedCard from '@/components/feed/FeedCard';
 import { FeedSkeletonList } from '@/components/ui/Skeleton';
@@ -15,7 +14,7 @@ import { COLORS, SPACING } from '@/lib/utils/constants';
 import { TYPO } from '@/lib/utils/typography';
 import { FilterBar, type ActivityFilter } from '@/components/feed/FilterBar';
 import type { ContentType } from '@/lib/types/content';
-import type { FeedItem } from '@/lib/types/social';
+import { DiscoveryFullscreenRail } from '@/components/feed/DiscoveryFullscreenRail';
 
 export default function FeedScreen() {
     const insets = useSafeAreaInsets();
@@ -39,7 +38,7 @@ export default function FeedScreen() {
     // siempre se muestran independientemente del filtro.
     const filteredItems = items.filter((item): item is HybridFeedItem => {
         if (item.kind === 'separator') return true;
-        if (item.kind === 'trending') return true;
+        if (item.kind === 'discovery') return true;
         // kind === 'social': aplicar filtros existentes
         if (categoryFilter !== 'all' && item.data.contentType !== categoryFilter) return false;
         if (activityFilter === 'reviewed' && !item.data.reviewText) return false;
@@ -63,44 +62,13 @@ export default function FeedScreen() {
                     return <FeedCard item={item.data} index={index} />;
                 case 'separator':
                     return <FeedSectionSeparator label={item.label} horizontalInset={horizontalInset} />;
-                case 'trending':
-                    if (index > 0 && filteredItems[index - 1]?.kind === 'trending') {
-                        return null;
-                    }
-
-                    const trendingRow = filteredItems
-                        .slice(index)
-                        .filter((feedItem): feedItem is HybridFeedItem & { kind: 'trending' } => feedItem.kind === 'trending')
-                        .map((feedItem) => feedItem.data);
-
-                    return (
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{
-                                paddingHorizontal: horizontalInset,
-                                paddingRight: horizontalInset + SPACING.sm,
-                            }}
-                        >
-                            {trendingRow.map((trendingItem) => (
-                                <GlobalTrendingCard
-                                    key={`${trendingItem.contentType}-${trendingItem.contentId}`}
-                                    item={trendingItem}
-                                    onPress={() =>
-                                        router.push(
-                                            `/content/${trendingItem.contentType}/${trendingItem.contentId}`
-                                        )
-                                    }
-                                />
-                            ))}
-                            <View style={{ width: SPACING.xs }} />
-                        </ScrollView>
-                    );
+                case 'discovery':
+                    return <DiscoveryFullscreenRail />;
                 default:
                     return null;
             }
         },
-        [filteredItems, horizontalInset],
+        [horizontalInset],
     );
 
     // ESTADO 1: Loading inicial
@@ -142,13 +110,15 @@ export default function FeedScreen() {
     // ESTADO 4: Success — FlatList con scroll infinito
     return (
         <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-            <FilterBar
-                categoryFilter={categoryFilter}
-                onCategoryChange={setCategoryFilter}
-                activityFilter={activityFilter}
-                onActivityChange={setActivityFilter}
-                horizontalInset={horizontalInset}
-            />
+            {hasSocialItems ? (
+                <FilterBar
+                    categoryFilter={categoryFilter}
+                    onCategoryChange={setCategoryFilter}
+                    activityFilter={activityFilter}
+                    onActivityChange={setActivityFilter}
+                    horizontalInset={horizontalInset}
+                />
+            ) : null}
             <FlatList
                 data={filteredItems}
                 keyExtractor={hybridFeedKeyExtractor}

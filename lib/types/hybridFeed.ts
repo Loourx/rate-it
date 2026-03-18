@@ -1,11 +1,10 @@
 import type { FeedItem } from '@/lib/types/social';
-import type { GlobalTrendingItem } from '@/lib/hooks/useGlobalTrending';
 
 /** Discriminated union for the hybrid feed FlatList. */
 export type HybridFeedItem =
     | { kind: 'social';    id: string; data: FeedItem }
     | { kind: 'separator'; id: string; label: string }
-    | { kind: 'trending';  id: string; data: GlobalTrendingItem };
+    | { kind: 'discovery'; id: string };
 
 /**
  * Stable key extractor for FlatList — always use this function,

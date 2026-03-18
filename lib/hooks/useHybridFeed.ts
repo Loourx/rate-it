@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSocialFeed } from '@/lib/hooks/useSocialFeed';
-import { useGlobalTrending } from '@/lib/hooks/useGlobalTrending';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import type { HybridFeedItem } from '@/lib/types/hybridFeed';
@@ -39,9 +38,8 @@ export function useHybridFeed(): HybridFeedResult {
         staleTime: 2 * 60 * 1000,
     });
 
-    // Paso 2 — Consumir ambos hooks siempre
+    // Paso 2 — Consumir feed social
     const socialFeed = useSocialFeed();
-    const globalTrending = useGlobalTrending();
 
     // Paso 3 — Aplanar páginas del feed social
     const socialItems = useMemo(() => {
@@ -49,7 +47,6 @@ export function useHybridFeed(): HybridFeedResult {
     }, [socialFeed.data?.pages]);
 
     // Paso 4 — Construir la lista combinada con useMemo
-    const trendingData = globalTrending.data;
     const socialIsLoading = socialFeed.isLoading;
 
     const items = useMemo<HybridFeedItem[]>(() => {
@@ -64,15 +61,14 @@ export function useHybridFeed(): HybridFeedResult {
             data: item,
         }));
 
-        const trendingMapped: HybridFeedItem[] = (trendingData ?? []).map((item) => ({
-            kind: 'trending',
-            id: `trending-${item.contentType}-${item.contentId}`,
-            data: item,
-        }));
+        const discoveryItem: HybridFeedItem = {
+            kind: 'discovery',
+            id: 'discovery-rail',
+        };
 
         // CASO A — Usuario sin follows O sin items sociales:
         if (!hasFollows || socialMapped.length === 0) {
-            return trendingMapped;
+            return [discoveryItem];
         }
 
         // CASO B — Usuario con follows y con items sociales:
@@ -82,19 +78,18 @@ export function useHybridFeed(): HybridFeedResult {
             label: 'Descubrimiento',
         };
 
-        return [...socialMapped, separator, ...trendingMapped];
-    }, [socialItems, trendingData, hasFollows, socialIsLoading]);
+        return [...socialMapped, separator, discoveryItem];
+    }, [socialItems, hasFollows, socialIsLoading]);
 
     // Paso 5 — Consolidar estados de loading/error
-    const isLoading = socialFeed.isLoading || globalTrending.isLoading || hasFollowsLoading;
-    const isError = socialFeed.isError || globalTrending.isError;
-    const error = socialFeed.error ?? globalTrending.error ?? null;
+    const isLoading = socialFeed.isLoading || hasFollowsLoading;
+    const isError = socialFeed.isError;
+    const error = socialFeed.error ?? null;
 
     // Paso 6 — refetch combinado
     const refetch = useCallback(() => {
         socialFeed.refetch();
-        globalTrending.refetch();
-    }, [socialFeed, globalTrending]);
+    }, [socialFeed]);
 
     // Paso 7 — Retorno completo
     return {

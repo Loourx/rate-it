@@ -11,10 +11,11 @@ interface SearchBarProps {
     value: string;
     onChangeText: (text: string) => void;
     placeholder?: string;
+    debounceMs?: number;
 }
 
 export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
-    function SearchBar({ value, onChangeText, placeholder = 'Buscar...' }, ref) {
+    function SearchBar({ value, onChangeText, placeholder = 'Buscar...', debounceMs = 500 }, ref) {
         const inputRef = useRef<TextInput>(null);
         // We keep local state for the input to allow immediate feedback while debouncing the prop call if needed.
         const [localValue, setLocalValue] = useState(value);
@@ -34,9 +35,9 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
                 if (localValue !== value) {
                     onChangeText(localValue);
                 }
-            }, 500); // 500ms debounce
+            }, debounceMs);
             return () => clearTimeout(timer);
-        }, [localValue]);
+        }, [debounceMs, localValue, onChangeText, value]);
 
         return (
             <View className="px-4 py-2">

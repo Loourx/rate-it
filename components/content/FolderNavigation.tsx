@@ -1,20 +1,20 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { COLORS, RADIUS, SPACING, getCategoryColor } from '@/lib/utils/constants';
 import { TYPO, FONT } from '@/lib/utils/typography';
 import type { ContentType } from '@/lib/types/content';
 
-const { width: SCREEN_W } = Dimensions.get('window');
-const GRID_GAP = SPACING.md;
-const GRID_PAD = SPACING.lg;
-const CARD_W = (SCREEN_W - GRID_PAD * 2 - GRID_GAP) / 2;
-const CARD_H = 88;
-const TAB_W = CARD_W * 0.38;
-const TAB_H = 14;
+const CARD_TOTAL_H = 152;
+const VISIBLE_BAND_H = 42;
+const STACK_OVERLAP = CARD_TOTAL_H - VISIBLE_BAND_H;
+const TAB_RISE = 16;
+const TAB_W = 102;
+const TAB_H = 30;
 
 interface FolderNavigationProps {
     onSelectCategory: (category: ContentType) => void;
+    query?: string;
 }
 
 const FOLDERS: { type: ContentType; label: string }[] = [
@@ -27,51 +27,100 @@ const FOLDERS: { type: ContentType; label: string }[] = [
     /* MVP_DISABLED: { type: 'anything', label: 'Anything' }, */
 ];
 
+function normalize(text: string) {
+    return text
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function usesDarkText(folderType: ContentType): boolean {
+    return folderType === 'book' || folderType === 'music';
+}
+
 function FolderCard({
     folder,
+    stackIndex,
+    totalCount,
     index,
     onPress,
 }: {
     folder: (typeof FOLDERS)[number];
+    stackIndex: number;
+    totalCount: number;
     index: number;
     onPress: () => void;
 }) {
     const color = getCategoryColor(folder.type);
+    const darkText = usesDarkText(folder.type);
+    const isLast = stackIndex === totalCount - 1;
+
+    const labelColor = darkText ? COLORS.background : COLORS.textPrimary;
+    const guideColor = darkText ? 'rgba(18,18,18,0.16)' : 'rgba(255,255,255,0.22)';
+    const elevation = Math.max(1, 20 - stackIndex);
 
     return (
         <Animated.View
-            entering={FadeInUp.delay(index * 70).duration(350).springify()}
-            style={[S.cardWrapper, index === FOLDERS.length - 1 && S.lastCard]}
+            entering={FadeInUp.delay(index * 65).duration(330).springify()}
+            style={[
+                S.cardWrapper,
+                stackIndex > 0 && !isLast && S.overlap,
+                {
+                    zIndex: 40 - stackIndex,
+                    ...(Platform.OS === 'android' ? { elevation } : null),
+                },
+            ]}
         >
             <Pressable
                 onPress={onPress}
-                style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.95 : 1 }] }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Abrir carpeta ${folder.label}`}
+                style={({ pressed }) => [{ transform: [{ scale: pressed ? 0.985 : 1 }] }]}
             >
-                {/* Tab / pestaña */}
-                <View style={[S.tab, { backgroundColor: color }]} />
-                {/* Body */}
-                <View style={[S.folder, { backgroundColor: color }]}>
-                    <Text style={S.label} numberOfLines={1}>
-                        {folder.label}
-                    </Text>
+                <View style={S.shapeBox}>
+                    <View style={[S.folderBody, { backgroundColor: color }]}>
+                        <View style={S.folderBevel} />
+                        <View style={[S.labelGuide, { backgroundColor: guideColor }]} />
+                        <Text style={[S.label, { color: labelColor }]} numberOfLines={1}>
+                            {folder.label}
+                        </Text>
+                    </View>
+
+                    <View style={[S.folderTab, { backgroundColor: color }]} />
+                    <View style={[S.tabShoulder, { backgroundColor: color }]} />
                 </View>
             </Pressable>
         </Animated.View>
     );
 }
 
-export function FolderNavigation({ onSelectCategory }: FolderNavigationProps) {
+export function FolderNavigation({ onSelectCategory, query }: FolderNavigationProps) {
+    const normalizedQuery = normalize(query ?? '');
+    const filteredFolders = normalizedQuery
+        ? FOLDERS.filter((folder) => normalize(folder.label).includes(normalizedQuery))
+        : FOLDERS;
+
     return (
         <View style={S.container}>
-            <View style={S.grid}>
-                {FOLDERS.map((folder, i) => (
+            <View style={S.stack}>
+                {filteredFolders.map((folder, i) => (
                     <FolderCard
                         key={folder.type}
                         folder={folder}
+                        stackIndex={i}
+                        totalCount={filteredFolders.length}
                         index={i}
                         onPress={() => onSelectCategory(folder.type)}
                     />
                 ))}
+
+                {filteredFolders.length === 0 && (
+                    <View style={S.emptyState}>
+                        <Text style={S.emptyTitle}>Sin categorías coincidentes</Text>
+                        <Text style={S.emptyMessage}>Prueba con otra palabra o borra la búsqueda.</Text>
+                    </View>
+                )}
             </View>
         </View>
     );
@@ -80,44 +129,91 @@ export function FolderNavigation({ onSelectCategory }: FolderNavigationProps) {
 const S = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: GRID_PAD,
-        paddingTop: SPACING['2xl'],
+        paddingHorizontal: SPACING.lg,
+        paddingTop: SPACING.base,
+        paddingBottom: SPACING['3xl'],
     },
-    grid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: GRID_GAP,
+    stack: {
+        paddingTop: SPACING.sm,
+        overflow: 'visible',
     },
     cardWrapper: {
-        width: CARD_W,
+        width: '100%',
     },
-    lastCard: {
-        // Center the 5th (odd) card — Music
-        alignSelf: 'center',
-        marginLeft: (CARD_W + GRID_GAP) / 2,
+    overlap: {
+        marginTop: -STACK_OVERLAP,
     },
-    tab: {
+    shapeBox: {
+        height: CARD_TOTAL_H,
+    },
+    folderBody: {
+        position: 'absolute',
+        top: TAB_RISE,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: RADIUS.lg + SPACING.sm,
+        borderBottomLeftRadius: RADIUS.lg + SPACING.sm,
+        borderBottomRightRadius: RADIUS.lg + SPACING.sm,
+        justifyContent: 'flex-end',
+        paddingHorizontal: SPACING.lg,
+        paddingBottom: SPACING.sm,
+        overflow: 'hidden',
+    },
+    folderTab: {
+        position: 'absolute',
+        top: 0,
+        left: SPACING.base,
         width: TAB_W,
         height: TAB_H,
-        borderTopLeftRadius: RADIUS.sm,
-        borderTopRightRadius: RADIUS.sm,
-        marginLeft: SPACING.md,
+        borderTopLeftRadius: RADIUS.md,
+        borderTopRightRadius: RADIUS.md,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: RADIUS.md,
     },
-    folder: {
-        width: CARD_W,
-        height: CARD_H,
-        borderTopRightRadius: RADIUS.lg,
-        borderBottomLeftRadius: RADIUS.lg,
-        borderBottomRightRadius: RADIUS.lg,
-        // top-left NOT rounded — connects with tab
-        borderTopLeftRadius: 0,
-        justifyContent: 'flex-end',
-        paddingHorizontal: SPACING.base,
-        paddingBottom: SPACING.md,
+    tabShoulder: {
+        position: 'absolute',
+        top: TAB_RISE,
+        left: SPACING.base + TAB_W - 16,
+        width: 32,
+        height: 18,
+        borderRadius: RADIUS.full,
+    },
+    folderBevel: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(255, 255, 255, 0.07)',
+        opacity: 0.55,
+    },
+    labelGuide: {
+        position: 'absolute',
+        left: SPACING.lg,
+        right: SPACING.lg,
+        top: SPACING.lg,
+        height: 1.5,
     },
     label: {
-        ...TYPO.bodySmall,
+        ...TYPO.h1,
         fontFamily: FONT.bold,
-        color: COLORS.background,
+        letterSpacing: -0.4,
+        lineHeight: 34,
+    },
+    emptyState: {
+        marginTop: SPACING['2xl'],
+        backgroundColor: COLORS.surface,
+        borderRadius: RADIUS.lg,
+        borderWidth: 1,
+        borderColor: COLORS.divider,
+        padding: SPACING.base,
+        gap: SPACING.xs,
+    },
+    emptyTitle: {
+        ...TYPO.body,
+        fontFamily: FONT.semibold,
+        color: COLORS.textPrimary,
+    },
+    emptyMessage: {
+        ...TYPO.caption,
+        color: COLORS.textSecondary,
     },
 });

@@ -16,7 +16,7 @@ import { useSearchPodcasts } from '../../lib/hooks/useSearchPodcasts';
 import { useSearchAnything } from '../../lib/hooks/useSearchAnything';
 import { COLORS, RADIUS, SPACING, getCategoryColor } from '../../lib/utils/constants';
 import { TYPO, FONT } from '../../lib/utils/typography';
-import { FolderNavigation } from '../../components/content/FolderNavigation';
+import { FolderNavigation } from '@/components/content/FolderNavigation';
 
 const CATEGORY_LABELS: Record<ContentType, string> = {
     movie: 'Películas',
@@ -27,6 +27,10 @@ const CATEGORY_LABELS: Record<ContentType, string> = {
     podcast: 'Podcasts',
     anything: 'Anything',
 };
+
+function usesDarkForeground(type: ContentType): boolean {
+    return type === 'book' || type === 'music';
+}
 
 export default function SearchScreen() {
     const router = useRouter();
@@ -93,21 +97,35 @@ export default function SearchScreen() {
     /* MVP_DISABLED: const showCreateAnythingButton = activeFolder === 'anything' && query.length >= 3 && (!data || data.length === 0); */
     const showCreateAnythingButton = false;
 
-    // ── Folder grid view (no folder selected) ──
+    // ── Landing view (no folder selected) ──
     if (!activeFolder) {
         return (
             <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-                <View style={S.gridHeader}>
-                    <Text style={S.gridTitle}>Buscar</Text>
-                    <TouchableOpacity
-                        onPress={() => router.push('/users/search')}
-                        style={S.peopleButton}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons name="people-outline" size={22} color={COLORS.textSecondary} />
-                    </TouchableOpacity>
-                </View>
-                <FolderNavigation onSelectCategory={handleOpenFolder} />
+                <TouchableWithoutFeedback onPress={dismissKeyboard}>
+                    <View style={S.screen}>
+                        <View style={S.gridHeader}>
+                            <Text style={S.gridTitle}>Buscar</Text>
+                            <TouchableOpacity
+                                onPress={() => router.push('/users/search')}
+                                style={S.peopleButton}
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons name="people-outline" size={22} color={COLORS.textSecondary} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={S.gridSubtitle}>Encuentra por categoría</Text>
+
+                        <SearchBar
+                            value={query}
+                            onChangeText={setQuery}
+                            placeholder="Buscar carpeta..."
+                            debounceMs={180}
+                        />
+
+                        <FolderNavigation onSelectCategory={handleOpenFolder} query={query} />
+                    </View>
+                </TouchableWithoutFeedback>
             </SafeAreaView>
         );
     }
@@ -115,32 +133,40 @@ export default function SearchScreen() {
     // ── Inside a folder ──
     const folderColor = getCategoryColor(activeFolder);
     const folderLabel = CATEGORY_LABELS[activeFolder];
+    const darkForeground = usesDarkForeground(activeFolder);
+    const folderTextColor = darkForeground ? COLORS.background : COLORS.textPrimary;
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
             <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                <View className="flex-1">
-                    {/* Folder header bar */}
-                    <View style={[S.folderHeader, { backgroundColor: folderColor }]}>
-                        <Pressable onPress={handleCloseFolder} style={S.backButton} hitSlop={12}>
-                            <Ionicons name="arrow-back" size={22} color={COLORS.background} />
-                        </Pressable>
-                        <Text style={S.folderName}>{folderLabel}</Text>
+                <View style={S.screen}>
+                    <View style={S.gridHeader}>
+                        <Text style={S.gridTitle}>Buscar</Text>
                         <TouchableOpacity
                             onPress={() => router.push('/users/search')}
-                            style={S.headerPeopleBtn}
+                            style={S.peopleButton}
                             activeOpacity={0.7}
                         >
-                            <Ionicons name="people-outline" size={20} color={COLORS.background} />
+                            <Ionicons name="people-outline" size={22} color={COLORS.textSecondary} />
                         </TouchableOpacity>
                     </View>
 
-                    {/* Search bar */}
+                    <View style={S.activeFolderWrap}>
+                        <View style={[S.activeFolderTab, { backgroundColor: folderColor }]} />
+                        <View style={[S.activeFolderHeader, { backgroundColor: folderColor }]}>
+                            <Pressable onPress={handleCloseFolder} style={S.backButton} hitSlop={12}>
+                                <Ionicons name="arrow-back" size={22} color={folderTextColor} />
+                            </Pressable>
+                            <Text style={[S.activeFolderName, { color: folderTextColor }]}>{folderLabel}</Text>
+                        </View>
+                    </View>
+
                     <SearchBar
                         ref={searchBarRef}
                         value={query}
                         onChangeText={setQuery}
                         placeholder={`Buscar en ${folderLabel}...`}
+                        debounceMs={420}
                     />
 
                     {/* Music sub-toggle */}
@@ -197,23 +223,37 @@ export default function SearchScreen() {
                     </View>
                 </View>
             </TouchableWithoutFeedback>
-        </SafeAreaView>
-    );
-}
+            </SafeAreaView>
+        );
+    }
 
 const S = StyleSheet.create({
-    // ── Grid view ──
+    screen: {
+        flex: 1,
+        backgroundColor: COLORS.background,
+    },
+
+    // ── Landing view ──
     gridHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: SPACING.lg,
         paddingTop: SPACING.sm,
-        paddingBottom: SPACING.xs,
+        paddingBottom: SPACING.sm,
     },
     gridTitle: {
-        ...TYPO.h2,
+        ...TYPO.h1,
         color: COLORS.textPrimary,
+    },
+    gridSubtitle: {
+        ...TYPO.caption,
+        color: COLORS.textSecondary,
+        marginTop: SPACING.xs,
+        marginBottom: SPACING.xs,
+        paddingHorizontal: SPACING.lg,
+        textTransform: 'uppercase',
+        letterSpacing: 0.8,
     },
     peopleButton: {
         padding: 8,
@@ -223,27 +263,39 @@ const S = StyleSheet.create({
         justifyContent: 'center',
     },
 
-    // ── Folder header ──
-    folderHeader: {
+    // ── Active folder view ──
+    activeFolderWrap: {
+        paddingHorizontal: SPACING.base,
+        marginTop: SPACING.sm,
+    },
+    activeFolderTab: {
+        width: 136,
+        height: 16,
+        borderTopLeftRadius: RADIUS.sm,
+        borderTopRightRadius: RADIUS.sm,
+        marginLeft: SPACING.base,
+    },
+    activeFolderHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.base,
+        borderRadius: RADIUS.lg + SPACING.sm,
+        paddingHorizontal: SPACING.sm,
         paddingVertical: SPACING.md,
-        gap: SPACING.md,
+        minHeight: 72,
+        gap: SPACING.sm,
     },
     backButton: {
-        padding: 4,
-    },
-    folderName: {
-        ...TYPO.h4,
-        fontFamily: FONT.bold,
-        color: COLORS.background,
-        flex: 1,
-    },
-    headerPeopleBtn: {
-        padding: 6,
+        width: 36,
+        height: 36,
         borderRadius: RADIUS.full,
-        backgroundColor: 'rgba(0,0,0,0.15)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    activeFolderName: {
+        ...TYPO.h2,
+        fontFamily: FONT.bold,
+        flex: 1,
     },
 
     // ── Music toggle ──
@@ -252,7 +304,7 @@ const S = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: SPACING.sm,
-        marginTop: SPACING.xs,
+        marginTop: SPACING.sm,
         paddingHorizontal: SPACING.base,
     },
     musicToggle: {
