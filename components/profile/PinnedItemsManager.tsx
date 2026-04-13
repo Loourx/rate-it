@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform, FlatList } from 'react-native';
 import { Image } from 'expo-image';
 import DraggableFlatList, {
     RenderItemParams,
@@ -125,18 +125,38 @@ export function PinnedItemsManager({ items, pinnedMode }: PinnedItemsManagerProp
         <View style={S.container}>
             {pinnedMode === 'manual' && items.length > 0 ? (
                 <View style={S.row}>
-                    <DraggableFlatList
-                        data={dragData}
-                        onDragEnd={handleDragEnd}
-                        keyExtractor={(item) => item.key}
-                        renderItem={renderItem}
-                        horizontal
-                        onDragBegin={() =>
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-                        }
-                        containerStyle={S.listContainer}
-                        contentContainerStyle={S.listContent}
-                    />
+                    {Platform.OS === 'web' ? (
+                        /* WEB_DISABLED — DraggableFlatList has unstable web support; static list on web */
+                        <FlatList
+                            data={dragData}
+                            keyExtractor={(item) => item.key}
+                            renderItem={({ item }) =>
+                                renderItem({
+                                    item,
+                                    drag: (() => {}) as () => void,
+                                    isActive: false,
+                                    getIndex: () => 0,
+                                } as RenderItemParams<DragItem>)
+                            }
+                            horizontal
+                            scrollEnabled={false}
+                            style={S.listContainer}
+                            contentContainerStyle={S.listContent}
+                        />
+                    ) : (
+                        <DraggableFlatList
+                            data={dragData}
+                            onDragEnd={handleDragEnd}
+                            keyExtractor={(item) => item.key}
+                            renderItem={renderItem}
+                            horizontal
+                            onDragBegin={() =>
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                            }
+                            containerStyle={S.listContainer}
+                            contentContainerStyle={S.listContent}
+                        />
+                    )}
                     {emptySlots}
                 </View>
             ) : (
