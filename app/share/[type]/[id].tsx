@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import {
+    Platform,
     View,
     Text,
     ScrollView,
@@ -68,7 +69,7 @@ function ToggleRow({
 
 // ── Main screen ───────────────────────────────────────────
 
-export default function ShareScreen(): React.ReactElement {
+export default function ShareScreen(): React.ReactElement | null {
     const { type, id, fromRating } = useLocalSearchParams<{
         type: string;
         id: string;
@@ -76,6 +77,15 @@ export default function ShareScreen(): React.ReactElement {
     }>();
     const router = useRouter();
     const contentType = type as ContentType;
+
+    React.useEffect(() => {
+        if (Platform.OS === 'web') {
+            /* WEB_DISABLED — share route not available on web, redirect to content */
+            router.replace(`/content/${contentType}/${id}`);
+        }
+    }, [contentType, id, router]);
+
+    if (Platform.OS === 'web') return null;
 
     const {
         content,

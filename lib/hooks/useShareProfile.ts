@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
@@ -30,6 +30,12 @@ export function useShareProfile(): UseShareProfileReturn {
     const dismissToast = () => setToastVisible(false);
 
     const shareProfile = async (): Promise<void> => {
+        /* WEB_DISABLED — react-native-view-shot and expo-sharing are native-only */
+        if (Platform.OS === 'web') {
+            console.warn('[Rate.] Share not available on web.');
+            return;
+        }
+
         if (!profileCardRef.current) {
             showToast('No se pudo capturar el perfil. Inténtalo de nuevo.');
             return;

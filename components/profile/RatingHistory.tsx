@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { Platform, View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
     useAnimatedStyle,
@@ -85,7 +85,8 @@ function HistoryItem({ item, onPress, onShare, isSharingThis }: {
                     {formatScore(item.score)}
                 </Text>
             </View>
-            {onShare !== undefined && (
+            {Platform.OS !== 'web' && onShare !== undefined && (
+                /* WEB_DISABLED — share feature not available on web */
                 <TouchableOpacity
                     onPress={onShare}
                     disabled={isSharingThis}

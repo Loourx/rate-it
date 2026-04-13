@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { Platform, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -170,19 +170,21 @@ export default function ProfileScreen() {
                             <Ionicons name="pencil" size={16} color={COLORS.textPrimary} />
                             <Text className="text-primary font-medium">Editar perfil</Text>
                         </TouchableOpacity>
-                        {/* Share profile button — secondary style, own profile only */}
-                        <TouchableOpacity
-                            onPress={shareProfile}
-                            disabled={isCapturing}
-                            style={styles.shareBtn}
-                        >
-                            {isCapturing ? (
-                                <ActivityIndicator size="small" color={COLORS.textSecondary} />
-                            ) : (
-                                <Ionicons name="share-outline" size={16} color={COLORS.textSecondary} />
-                            )}
-                            <Text style={styles.shareBtnText}>Compartir perfil</Text>
-                        </TouchableOpacity>
+                        {Platform.OS !== 'web' && (
+                            /* WEB_DISABLED — share feature not available on web */
+                            <TouchableOpacity
+                                onPress={shareProfile}
+                                disabled={isCapturing}
+                                style={styles.shareBtn}
+                            >
+                                {isCapturing ? (
+                                    <ActivityIndicator size="small" color={COLORS.textSecondary} />
+                                ) : (
+                                    <Ionicons name="share-outline" size={16} color={COLORS.textSecondary} />
+                                )}
+                                <Text style={styles.shareBtnText}>Compartir perfil</Text>
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             onPress={() => router.push('/profile/challenge')}
                             className="px-4 py-2 bg-surface-elevated rounded-full flex-row items-center gap-2"
@@ -225,7 +227,8 @@ export default function ProfileScreen() {
 
                 {/* Challenge Progress */}
                 <ChallengeProgress userId={myUserId} isOwnProfile onCelebrate={handleCelebrate} />
-                {firstChallenge !== null && (
+                {Platform.OS !== 'web' && firstChallenge !== null && (
+                    /* WEB_DISABLED — share feature not available on web */
                     <TouchableOpacity
                         onPress={shareChallenge}
                         disabled={isCapturingChallenge}

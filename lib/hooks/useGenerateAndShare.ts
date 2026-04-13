@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { useRouter } from 'expo-router';
@@ -50,6 +50,12 @@ export function useGenerateAndShare({
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const handleGenerate = async (): Promise<void> => {
+        /* WEB_DISABLED — react-native-view-shot and expo-sharing are native-only */
+        if (Platform.OS === 'web') {
+            console.warn('[Rate.] Share not available on web.');
+            return;
+        }
+
         if (isGenerating) return;
         if (!shareRef.current) {
             setErrorMessage('No se pudo capturar la tarjeta. Inténtalo de nuevo.');
