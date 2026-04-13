@@ -24,7 +24,15 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "Rate.",
+      "shortName": "Rate.",
+      "description": "Puntúa, descubre y comparte lo que ves, lees, juegas y escuchas.",
+      "themeColor": "#0a0a0a",
+      "backgroundColor": "#0a0a0a",
+      "startUrl": "/",
+      "display": "standalone",
+      "lang": "es"
     },
     "plugins": [
       "expo-router",
