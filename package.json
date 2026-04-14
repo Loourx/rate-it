@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "web:build": "expo export --platform web && node scripts/patch-pwa-html.js"
+    "web:build": "expo export --platform web && node -e \"const fs=require('fs');const id=Date.now().toString();const p='dist/sw.js';if(fs.existsSync(p)){fs.writeFileSync(p,fs.readFileSync(p,'utf8').replace('self.__BUILD_ID__',JSON.stringify(id)))}\" && node scripts/patch-pwa-html.js"
   },
   "dependencies": {
     "@expo-google-fonts/space-grotesk": "^0.4.1",

@@ -3,7 +3,7 @@
 // Strategy: cache-first for static assets, network-first for everything else.
 // No Workbox dependency — pure browser SW API.
 
-const CACHE_NAME = 'rate-pwa-v1';
+const CACHE_NAME = 'rate-it-' + (self.__BUILD_ID__ || 'dev');
 
 // Static assets worth caching long-term (fonts, icons, images)
 const STATIC_EXTENSIONS = ['.ttf', '.otf', '.woff', '.woff2', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.webp'];
@@ -22,6 +22,20 @@ function isExternalAPI(url) {
     'books.google.com',
   ];
   return externalHosts.some(host => url.hostname.includes(host));
+}
+
+function getOfflineResponse(isNavigationRequest) {
+  if (isNavigationRequest) {
+    return caches.match('/').then((offlineResponse) => {
+      if (offlineResponse) return offlineResponse;
+      return new Response('Offline — abre la app cuando tengas conexión.', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' },
+      });
+    });
+  }
+
+  return Promise.resolve(new Response('', { status: 503 }));
 }
 
 // Install: activate immediately, no waiting
@@ -66,14 +80,16 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type === 'error') {
+        return fetch(event.request)
+          .then((response) => {
+            if (!response || response.status !== 200 || response.type === 'error') {
+              return response;
+            }
+            const toCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, toCache));
             return response;
-          }
-          const toCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, toCache));
-          return response;
-        });
+          })
+          .catch(() => getOfflineResponse(event.request.mode === 'navigate'));
       })
     );
     return;
@@ -90,6 +106,11 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, toCache));
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() =>
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          return getOfflineResponse(event.request.mode === 'navigate');
+        })
+      )
   );
 });
