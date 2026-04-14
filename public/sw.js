@@ -40,20 +40,17 @@ function getOfflineResponse(isNavigationRequest) {
 
 // Install: activate immediately, no waiting
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Rate. service worker v1');
   self.skipWaiting();
 });
 
 // Activate: claim all clients immediately
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Rate. service worker v1');
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
         keys
           .filter((key) => key !== CACHE_NAME)
           .map((key) => {
-            console.log('[SW] Deleting old cache:', key);
             return caches.delete(key);
           })
       )

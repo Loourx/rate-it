@@ -46,8 +46,7 @@ export default function AuthCallbackScreen() {
         } else {
           router.replace('/(auth)/login');
         }
-      } catch (err) {
-        console.error('[AuthCallback] Error:', err);
+      } catch {
         router.replace('/(auth)/login');
       }
     };

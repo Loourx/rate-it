@@ -58,9 +58,8 @@ function RootLayoutNav() {
                 const { data: { session }, error } = await supabase.auth.getSession();
                 if (error) throw error;
                 setSession(session);
-            } catch (err) {
+            } catch {
                 // Sesión no recuperable — tratar como usuario no autenticado
-                console.error('[Auth] Error recovering session:', err);
                 setSession(null);
             } finally {
                 setLoading(false);  // SIEMPRE se ejecuta

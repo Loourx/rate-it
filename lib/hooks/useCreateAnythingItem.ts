@@ -12,8 +12,12 @@ interface CreateAnythingInput {
     score?: number | null;
 }
 
+interface CreateAnythingItemData {
+    id: string;
+    title: string;
+}
 
-type UseCreateAnythingItemReturn = UseMutationResult<any, Error, CreateAnythingInput> & {
+type UseCreateAnythingItemReturn = UseMutationResult<CreateAnythingItemData, Error, CreateAnythingInput> & {
     toastVisible: boolean;
     toastMessage: string;
     toastType: 'success' | 'error' | 'info';
