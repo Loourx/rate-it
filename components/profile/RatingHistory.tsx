@@ -143,6 +143,11 @@ export function RatingHistory({ userId, username }: { userId?: string; username?
         if (!shareItem || !pendingCapture.current) return;
         pendingCapture.current = false;
         const timer = setTimeout(async () => {
+            if (Platform.OS === 'web') {
+                setIsSharingItem(false);
+                setShareItem(null);
+                return;
+            }
             try {
                 const available = await Sharing.isAvailableAsync();
                 if (available && ratingCardRef.current) {
