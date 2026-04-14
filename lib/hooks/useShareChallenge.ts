@@ -32,7 +32,6 @@ export function useShareChallenge(): UseShareChallengeReturn {
     const shareChallenge = async (): Promise<void> => {
         /* WEB_DISABLED — react-native-view-shot and expo-sharing are native-only */
         if (Platform.OS === 'web') {
-            console.warn('[Rate.] Share not available on web.');
             return;
         }
 

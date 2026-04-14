@@ -45,10 +45,5 @@ export async function uploadAnythingImage(
  * Used for rollback if the DB insert fails after upload.
  */
 export async function deleteAnythingImage(storagePath: string): Promise<void> {
-    const { error } = await supabase.storage.from(BUCKET).remove([storagePath]);
-    if (error) {
-        // No lanzar — la imagen huérfana es problema del admin, no del usuario
-        // (este console se eliminará en F12 junto con el resto)
-        console.error('Error deleting image from storage:', error);
-    }
+    await supabase.storage.from(BUCKET).remove([storagePath]);
 }
