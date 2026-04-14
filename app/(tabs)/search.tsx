@@ -68,7 +68,6 @@ export default function SearchScreen() {
     const handleOpenFolder = (category: ContentType) => {
         setActiveFolder(category);
         setQuery('');
-        setTimeout(() => searchBarRef.current?.focus(), 150);
     };
 
     const handleCloseFolder = () => {
@@ -167,6 +166,7 @@ export default function SearchScreen() {
                         onChangeText={setQuery}
                         placeholder={`Buscar en ${folderLabel}...`}
                         debounceMs={420}
+                        autoFocus={true}
                     />
 
                     {/* Music sub-toggle */}

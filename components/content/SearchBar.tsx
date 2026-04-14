@@ -12,10 +12,11 @@ interface SearchBarProps {
     onChangeText: (text: string) => void;
     placeholder?: string;
     debounceMs?: number;
+    autoFocus?: boolean;
 }
 
 export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
-    function SearchBar({ value, onChangeText, placeholder = 'Buscar...', debounceMs = 500 }, ref) {
+    function SearchBar({ value, onChangeText, placeholder = 'Buscar...', debounceMs = 500, autoFocus }, ref) {
         const inputRef = useRef<TextInput>(null);
         // We keep local state for the input to allow immediate feedback while debouncing the prop call if needed.
         const [localValue, setLocalValue] = useState(value);
@@ -46,12 +47,16 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
                     <TextInput
                         ref={inputRef}
                         className="flex-1 ml-2 text-base text-primary font-medium"
+                        autoFocus={autoFocus ?? false}
                         value={localValue}
                         onChangeText={setLocalValue}
                         placeholder={placeholder}
                         placeholderTextColor={COLORS.textTertiary}
                         autoCapitalize="none"
                         autoCorrect={false}
+                        returnKeyType="search"
+                        enterKeyHint="search"
+                        inputMode="search"
                         selectionColor={COLORS.link}
                     />
                     {localValue.length > 0 && (
