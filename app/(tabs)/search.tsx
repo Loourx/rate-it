@@ -131,14 +131,15 @@ export default function SearchScreen() {
                         </View>
                     )}
 
-                    <SearchBar
-                        ref={searchBarRef}
-                        value={query}
-                        onChangeText={setQuery}
-                        placeholder={activeFolder ? `Buscar en ${folderLabel}...` : 'Buscar carpeta...'}
-                        debounceMs={activeFolder ? 420 : 180}
-                        hidden={activeFolder === null}
-                    />
+                    {activeFolder && (
+                        <SearchBar
+                            ref={searchBarRef}
+                            value={query}
+                            onChangeText={setQuery}
+                            placeholder={`Buscar en ${folderLabel}...`}
+                            debounceMs={420}
+                        />
+                    )}
 
                     {/* Music sub-toggle */}
                     {activeFolder === 'music' && (
@@ -168,7 +169,7 @@ export default function SearchScreen() {
                         </View>
                     )}
 
-                    {!activeFolder && <FolderNavigation onSelectCategory={handleOpenFolder} query={query} />}
+                    {!activeFolder && <FolderNavigation onSelectCategory={handleOpenFolder} />}
 
                     {activeFolder && (
                         <View className="flex-1 bg-background mt-1">

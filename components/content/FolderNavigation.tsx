@@ -14,7 +14,6 @@ const TAB_H = 30;
 
 interface FolderNavigationProps {
     onSelectCategory: (category: ContentType) => void;
-    query?: string;
 }
 
 const FOLDERS: { type: ContentType; label: string }[] = [
@@ -26,14 +25,6 @@ const FOLDERS: { type: ContentType; label: string }[] = [
     /* MVP_DISABLED: { type: 'podcast', label: 'Podcasts' }, */
     /* MVP_DISABLED: { type: 'anything', label: 'Anything' }, */
 ];
-
-function normalize(text: string) {
-    return text
-        .trim()
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-}
 
 function usesDarkText(folderType: ContentType): boolean {
     return folderType === 'book' || folderType === 'music';
@@ -95,32 +86,20 @@ function FolderCard({
     );
 }
 
-export function FolderNavigation({ onSelectCategory, query }: FolderNavigationProps) {
-    const normalizedQuery = normalize(query ?? '');
-    const filteredFolders = normalizedQuery
-        ? FOLDERS.filter((folder) => normalize(folder.label).includes(normalizedQuery))
-        : FOLDERS;
-
+export function FolderNavigation({ onSelectCategory }: FolderNavigationProps) {
     return (
         <View style={S.container}>
             <View style={S.stack}>
-                {filteredFolders.map((folder, i) => (
+                {FOLDERS.map((folder, i) => (
                     <FolderCard
                         key={folder.type}
                         folder={folder}
                         stackIndex={i}
-                        totalCount={filteredFolders.length}
+                        totalCount={FOLDERS.length}
                         index={i}
                         onPress={() => onSelectCategory(folder.type)}
                     />
                 ))}
-
-                {filteredFolders.length === 0 && (
-                    <View style={S.emptyState}>
-                        <Text style={S.emptyTitle}>Sin categorías coincidentes</Text>
-                        <Text style={S.emptyMessage}>Prueba con otra palabra o borra la búsqueda.</Text>
-                    </View>
-                )}
             </View>
         </View>
     );
@@ -197,23 +176,5 @@ const S = StyleSheet.create({
         fontFamily: FONT.bold,
         letterSpacing: -0.4,
         lineHeight: 34,
-    },
-    emptyState: {
-        marginTop: SPACING['2xl'],
-        backgroundColor: COLORS.surface,
-        borderRadius: RADIUS.lg,
-        borderWidth: 1,
-        borderColor: COLORS.divider,
-        padding: SPACING.base,
-        gap: SPACING.xs,
-    },
-    emptyTitle: {
-        ...TYPO.body,
-        fontFamily: FONT.semibold,
-        color: COLORS.textPrimary,
-    },
-    emptyMessage: {
-        ...TYPO.caption,
-        color: COLORS.textSecondary,
     },
 });
