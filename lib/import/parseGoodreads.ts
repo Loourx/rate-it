@@ -51,16 +51,10 @@ function cleanISBN(raw: string): string {
 
 export function parseGoodreads(csv: string): ImportItem[] {
     const rows = parseCSV(csv);
-    
-    console.log('RAW CSV (primeros 500 chars):', csv.slice(0, 500));
-    console.log('Líneas detectadas:', rows.length);
     if (rows.length > 0) {
         // Log just the header length and a peek to prevent clutter
-        console.log('Primera fila (header) columnas:', rows[0].length);
     }
     if (rows.length > 1) {
-        console.log('Segunda fila (primera data):', rows[1]);
-        console.log('Columnas parseadas de fila 1:', rows[1].length);
     }
 
     if (rows.length < 2) return [];
@@ -123,8 +117,6 @@ export function parseGoodreads(csv: string): ImportItem[] {
             sourceUri: getVal(bookIdIdx) ? `goodreads:${getVal(bookIdIdx)}` : null,
         });
     }
-
-    console.log(`Parsed ${results.length} valid "read" items from Goodreads CSV`);
 
     return results;
 }

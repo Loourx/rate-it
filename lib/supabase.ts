@@ -9,23 +9,20 @@ const NativeSecureStoreAdapter = {
   getItem: async (key: string): Promise<string | null> => {
     try {
       return await SecureStore.getItemAsync(key);
-    } catch (err) {
-      console.error('[SecureStore] getItem failed:', err);
+    } catch {
       return null;
     }
   },
   setItem: async (key: string, value: string): Promise<void> => {
     try {
       await SecureStore.setItemAsync(key, value);
-    } catch (err) {
-      console.error('[SecureStore] setItem failed:', err);
+    } catch {
     }
   },
   removeItem: async (key: string): Promise<void> => {
     try {
       await SecureStore.deleteItemAsync(key);
-    } catch (err) {
-      console.error('[SecureStore] removeItem failed:', err);
+    } catch {
     }
   },
 };
