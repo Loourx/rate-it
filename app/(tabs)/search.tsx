@@ -131,15 +131,14 @@ export default function SearchScreen() {
                         </View>
                     )}
 
-                    {activeFolder && (
-                        <SearchBar
-                            ref={searchBarRef}
-                            value={query}
-                            onChangeText={setQuery}
-                            placeholder={`Buscar en ${folderLabel}...`}
-                            debounceMs={420}
-                        />
-                    )}
+                    <SearchBar
+                        ref={searchBarRef}
+                        value={query}
+                        onChangeText={setQuery}
+                        placeholder={`Buscar en ${folderLabel}...`}
+                        debounceMs={420}
+                        hidden={activeFolder === null}
+                    />
 
                     {/* Music sub-toggle */}
                     {activeFolder === 'music' && (

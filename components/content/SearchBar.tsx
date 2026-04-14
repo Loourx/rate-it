@@ -41,7 +41,7 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
         }, [debounceMs, localValue, onChangeText, value]);
 
         return (
-            <View className="px-4 py-2" style={hidden ? S.hidden : undefined} pointerEvents={hidden ? 'none' : 'auto'}>
+            <View style={[S.container, hidden && S.hidden]} pointerEvents={hidden ? 'none' : 'auto'}>
                 <View className="flex-row items-center bg-surface rounded-xl px-3 h-12 border border-divider">
                     <Ionicons name="search" size={20} color={COLORS.textTertiary} />
                     <TextInput
@@ -79,9 +79,14 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
 );
 
 const S = StyleSheet.create({
+    container: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+    },
     hidden: {
         opacity: 0,
-        pointerEvents: 'none',
         position: 'absolute',
+        left: 0,
+        right: 0,
     },
 });
