@@ -1,5 +1,5 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { TextInput, View, Pressable } from 'react-native';
+import { TextInput, View, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/lib/utils/constants';
 
@@ -12,11 +12,11 @@ interface SearchBarProps {
     onChangeText: (text: string) => void;
     placeholder?: string;
     debounceMs?: number;
-    autoFocus?: boolean;
+    hidden?: boolean;
 }
 
 export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
-    function SearchBar({ value, onChangeText, placeholder = 'Buscar...', debounceMs = 500, autoFocus }, ref) {
+    function SearchBar({ value, onChangeText, placeholder = 'Buscar...', debounceMs = 500, hidden = false }, ref) {
         const inputRef = useRef<TextInput>(null);
         // We keep local state for the input to allow immediate feedback while debouncing the prop call if needed.
         const [localValue, setLocalValue] = useState(value);
@@ -41,13 +41,12 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
         }, [debounceMs, localValue, onChangeText, value]);
 
         return (
-            <View className="px-4 py-2">
+            <View className="px-4 py-2" style={hidden ? S.hidden : undefined} pointerEvents={hidden ? 'none' : 'auto'}>
                 <View className="flex-row items-center bg-surface rounded-xl px-3 h-12 border border-divider">
                     <Ionicons name="search" size={20} color={COLORS.textTertiary} />
                     <TextInput
                         ref={inputRef}
                         className="flex-1 ml-2 text-base text-primary font-medium"
-                        autoFocus={autoFocus ?? false}
                         value={localValue}
                         onChangeText={setLocalValue}
                         placeholder={placeholder}
@@ -78,3 +77,11 @@ export const SearchBar = forwardRef<SearchBarHandle, SearchBarProps>(
         );
     },
 );
+
+const S = StyleSheet.create({
+    hidden: {
+        opacity: 0,
+        pointerEvents: 'none',
+        position: 'absolute',
+    },
+});

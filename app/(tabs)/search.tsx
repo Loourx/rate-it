@@ -68,6 +68,7 @@ export default function SearchScreen() {
     const handleOpenFolder = (category: ContentType) => {
         setActiveFolder(category);
         setQuery('');
+        searchBarRef.current?.focus();
     };
 
     const handleCloseFolder = () => {
@@ -96,43 +97,9 @@ export default function SearchScreen() {
     /* MVP_DISABLED: const showCreateAnythingButton = activeFolder === 'anything' && query.length >= 3 && (!data || data.length === 0); */
     const showCreateAnythingButton = false;
 
-    // ── Landing view (no folder selected) ──
-    if (!activeFolder) {
-        return (
-            <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-                <TouchableWithoutFeedback onPress={dismissKeyboard}>
-                    <View style={S.screen}>
-                        <View style={S.gridHeader}>
-                            <Text style={S.gridTitle}>Buscar</Text>
-                            <TouchableOpacity
-                                onPress={() => router.push('/users/search')}
-                                style={S.peopleButton}
-                                activeOpacity={0.7}
-                            >
-                                <Ionicons name="people-outline" size={22} color={COLORS.textSecondary} />
-                            </TouchableOpacity>
-                        </View>
-
-                        <Text style={S.gridSubtitle}>Encuentra por categoría</Text>
-
-                        <SearchBar
-                            value={query}
-                            onChangeText={setQuery}
-                            placeholder="Buscar carpeta..."
-                            debounceMs={180}
-                        />
-
-                        <FolderNavigation onSelectCategory={handleOpenFolder} query={query} />
-                    </View>
-                </TouchableWithoutFeedback>
-            </SafeAreaView>
-        );
-    }
-
-    // ── Inside a folder ──
-    const folderColor = getCategoryColor(activeFolder);
-    const folderLabel = CATEGORY_LABELS[activeFolder];
-    const darkForeground = usesDarkForeground(activeFolder);
+    const folderColor = activeFolder ? getCategoryColor(activeFolder) : COLORS.surfaceElevated;
+    const folderLabel = activeFolder ? CATEGORY_LABELS[activeFolder] : '';
+    const darkForeground = activeFolder ? usesDarkForeground(activeFolder) : false;
     const folderTextColor = darkForeground ? COLORS.background : COLORS.textPrimary;
 
     return (
@@ -150,23 +117,27 @@ export default function SearchScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    <View style={S.activeFolderWrap}>
-                        <View style={[S.activeFolderTab, { backgroundColor: folderColor }]} />
-                        <View style={[S.activeFolderHeader, { backgroundColor: folderColor }]}>
-                            <Pressable onPress={handleCloseFolder} style={S.backButton} hitSlop={12}>
-                                <Ionicons name="arrow-back" size={22} color={folderTextColor} />
-                            </Pressable>
-                            <Text style={[S.activeFolderName, { color: folderTextColor }]}>{folderLabel}</Text>
+                    {!activeFolder && <Text style={S.gridSubtitle}>Encuentra por categoría</Text>}
+
+                    {activeFolder && (
+                        <View style={S.activeFolderWrap}>
+                            <View style={[S.activeFolderTab, { backgroundColor: folderColor }]} />
+                            <View style={[S.activeFolderHeader, { backgroundColor: folderColor }]}>
+                                <Pressable onPress={handleCloseFolder} style={S.backButton} hitSlop={12}>
+                                    <Ionicons name="arrow-back" size={22} color={folderTextColor} />
+                                </Pressable>
+                                <Text style={[S.activeFolderName, { color: folderTextColor }]}>{folderLabel}</Text>
+                            </View>
                         </View>
-                    </View>
+                    )}
 
                     <SearchBar
                         ref={searchBarRef}
                         value={query}
                         onChangeText={setQuery}
-                        placeholder={`Buscar en ${folderLabel}...`}
-                        debounceMs={420}
-                        autoFocus={true}
+                        placeholder={activeFolder ? `Buscar en ${folderLabel}...` : 'Buscar carpeta...'}
+                        debounceMs={activeFolder ? 420 : 180}
+                        hidden={activeFolder === null}
                     />
 
                     {/* Music sub-toggle */}
@@ -197,30 +168,33 @@ export default function SearchScreen() {
                         </View>
                     )}
 
-                    {/* Results */}
-                    <View className="flex-1 bg-background mt-1">
-                        <ContentList
-                            data={data}
-                            isLoading={isLoading && query.length >= 3}
-                            isError={isError}
-                            onItemPress={handleItemPress}
-                            emptyIcon={
-                                query.length < 3 ? 'sparkles-outline' : 'search-outline'
-                            }
-                            emptyTitle={
-                                query.length < 3
-                                    ? '¿Qué has visto últimamente?'
-                                    : 'Sin resultados para esa búsqueda'
-                            }
-                            emptyMessage={
-                                query.length < 3
-                                    ? 'Busca películas, series, libros, juegos o música.'
-                                    : 'Prueba con otro título o revisa la ortografía.'
-                            }
-                            emptyActionLabel={showCreateAnythingButton ? 'Crear Anything' : undefined}
-                            onEmptyAction={showCreateAnythingButton ? handleCreateAnything : undefined}
-                        />
-                    </View>
+                    {!activeFolder && <FolderNavigation onSelectCategory={handleOpenFolder} query={query} />}
+
+                    {activeFolder && (
+                        <View className="flex-1 bg-background mt-1">
+                            <ContentList
+                                data={data}
+                                isLoading={isLoading && query.length >= 3}
+                                isError={isError}
+                                onItemPress={handleItemPress}
+                                emptyIcon={
+                                    query.length < 3 ? 'sparkles-outline' : 'search-outline'
+                                }
+                                emptyTitle={
+                                    query.length < 3
+                                        ? '¿Qué has visto últimamente?'
+                                        : 'Sin resultados para esa búsqueda'
+                                }
+                                emptyMessage={
+                                    query.length < 3
+                                        ? 'Busca películas, series, libros, juegos o música.'
+                                        : 'Prueba con otro título o revisa la ortografía.'
+                                }
+                                emptyActionLabel={showCreateAnythingButton ? 'Crear Anything' : undefined}
+                                onEmptyAction={showCreateAnythingButton ? handleCreateAnything : undefined}
+                            />
+                        </View>
+                    )}
                 </View>
             </TouchableWithoutFeedback>
             </SafeAreaView>
